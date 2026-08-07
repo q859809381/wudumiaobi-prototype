@@ -2890,6 +2890,9 @@
             <div class="anchor-label">基准收益率（%）</div>
             <div class="anchor-value"><span class="dim-val">8</span></div></div>
           <div class="anchor-row">
+            <div class="anchor-label">行业基准</div>
+            <div class="anchor-value"><span class="dim-val" data-options="制造业、软件业、建筑业、批发零售、交通运输、服务业、其他">软件业</span></div></div>
+          <div class="anchor-row">
             <div class="anchor-label">期望投资回收期</div>
             <div class="anchor-value"><span class="dim-val">6年</span></div></div>
         </div>
@@ -3984,6 +3987,44 @@
     function fmtNum(n) {
       return n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     }
+    function fmtAmount4(n) {
+      return n.toLocaleString('zh-CN', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+    }
+    function fmtPercent2(n) {
+      return n.toFixed(2);
+    }
+    /* 金额相关数字保留四位小数，百分比相关数字保留两位小数 */
+    function formatConfirmNumbers() {
+      const modal = document.getElementById('confirmModal');
+      if (!modal) return;
+      modal.querySelectorAll('.dim-val').forEach(function (dv) {
+        if (dv.querySelector('input') || dv.querySelector('select')) return; // 编辑中跳过
+        if (dv.hasAttribute('data-options')) return; // 下拉选项值保持原样
+        const row = dv.closest('.anchor-row');
+        const label = row && row.querySelector('.anchor-label') ? row.querySelector('.anchor-label').textContent.trim() : '';
+        const raw = dv.textContent.replace('✎', '').trim();
+        // 金额 + 比例复合：40,955.61（60%）→ 40,955.6100（60.00%）
+        const m1 = raw.match(/^([\d,]+(?:\.\d+)?)\s*[（(]([\d.]+)%[)）]$/);
+        if (m1) {
+          dv.textContent = fmtAmount4(parseFloat(m1[1].replace(/,/g, ''))) + '（' + fmtPercent2(parseFloat(m1[2])) + '%）';
+          return;
+        }
+        // 纯数字单元格
+        const m2 = raw.match(/^[\d,]+(?:\.\d+)?$/);
+        if (m2) {
+          const n = parseFloat(raw.replace(/,/g, ''));
+          const isPct = label.indexOf('%') >= 0 || label.indexOf('率') >= 0;
+          dv.textContent = isPct ? fmtPercent2(n) : fmtAmount4(n);
+          return;
+        }
+        // 文本中内嵌百分比：30% → 30.00%
+        if (raw.indexOf('%') >= 0) {
+          dv.textContent = raw.replace(/(\d+(?:\.\d+)?)%/g, function (_, num) {
+            return fmtPercent2(parseFloat(num)) + '%';
+          });
+        }
+      });
+    }
     /* 资金来源金额项：按金额 ÷ 总投资自动计算并展示占比 */
     function refreshFundingPercents(total) {
       const modal = document.getElementById('confirmModal');
@@ -3992,7 +4033,7 @@
         if (dv.querySelector('input') || dv.querySelector('select')) return; // 正在编辑时跳过，避免打断输入
         const amt = parseFloat(dv.getAttribute('data-amount')) || 0;
         const pct = total > 0 ? amt / total * 100 : 0;
-        dv.textContent = fmtNum(amt) + '（' + pct.toFixed(2) + '%）';
+        dv.textContent = fmtAmount4(amt) + '（' + fmtPercent2(pct) + '%）';
       });
     }
     function recalcConfirmBalances() {
@@ -4032,12 +4073,13 @@
         const diff = sum - total;
         const equal = Math.abs(diff) < 0.005;
         val.textContent = equal
-          ? '0.00 万元（' + note + ' = 总投资' + fmtNum(total) + '万元）'
-          : fmtNum(Math.abs(diff)) + ' 万元（' + note + '与总投资不一致，请核对）';
+          ? '0.0000 万元（' + note + ' = 总投资' + fmtAmount4(total) + '万元）'
+          : fmtAmount4(Math.abs(diff)) + ' 万元（' + note + '与总投资不一致，请核对）';
         row.classList.toggle('warn', !equal);
       }
       renderSummary('investSummaryRow', investSum, total, '各构成项之和');
       renderSummary('fundSummaryRow', fundSum, total, '各来源之和');
+      formatConfirmNumbers();
       attachConfirmEditIcons(); // 刷新占比后恢复编辑图标
     }
 
