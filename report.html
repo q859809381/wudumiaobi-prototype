@@ -722,6 +722,24 @@
       line-height: 1.4;
       padding: 0 8px;
     }
+    .word-count-select {
+      height: 26px;
+      font-size: 12px;
+      cursor: pointer;
+      padding: 0 8px;
+    }
+    .word-count-custom {
+      display: none;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: #666;
+    }
+    .word-count-input {
+      width: 110px;
+      height: 26px;
+      padding: 0 8px;
+    }
     .chapter-settings-panel {
       flex: 1;
       background: #fff;
@@ -1586,7 +1604,8 @@
     .outline-tpl-panel {
       display: none;
       position: absolute;
-      bottom: calc(100% + 4px);
+      top: calc(100% + 4px);
+      bottom: auto;
       left: 0;
       min-width: 180px;
       background: #fff;
@@ -2775,12 +2794,18 @@
         <div class="stage-foot">
           <div class="stage-foot-left">
             <button class="btn btn-sm" onclick="addChapter()">＋ 添加章节</button>
-            <div class="outline-tpl-select">
-              <button class="btn btn-sm btn-outline" onclick="toggleOutlineTpl(event)"><span id="outlineTplName">系统生成大纲</span> <span style="font-size:10px;">▾</span></button>
-              <div class="outline-tpl-panel" id="outlineTplPanel"></div>
-            </div>
             <button class="btn btn-sm btn-outline" id="outlineCheckBtn" onclick="toggleCheckAll()">取消全选</button>
             <button class="btn btn-sm btn-outline" id="outlineDescBtn" onclick="toggleOutlineDesc()">隐藏描述</button>
+            <select class="btn btn-sm btn-outline word-count-select" id="wordCountSelect" onchange="onWordCountSelect(this)">
+              <option value="2-3">2-3万字报告</option>
+              <option value="3-5" selected>3-5万字报告</option>
+              <option value="6-10">6-10万字报告</option>
+              <option value="custom">自定义报告字数</option>
+            </select>
+            <span class="word-count-custom" id="wordCountCustom" style="display:none;">
+              <input class="input word-count-input" id="wordCountInput" type="number" min="1" max="100000" step="1" placeholder="输入字数" oninput="onWordCountInput(this)" onchange="onWordCountInput(this)">
+              <span>字</span>
+            </span>
           </div>
           <div class="stage-foot-right">
             <button class="btn btn-outline" id="stagePrevBtn" onclick="prevStage()" style="display:none;">上一步</button>
@@ -3005,9 +3030,12 @@
 
       <div class="outline-layout">
         <!-- 大纲树（含版本管理） -->
-        <div class="outline-left-col">
+          <div class="outline-left-col">
           <div class="outline-version-bar">
-            <span class="outline-version-label">版本</span>
+            <div class="outline-tpl-select">
+              <button class="btn btn-sm btn-outline" onclick="toggleOutlineTpl(event)"><span id="outlineTplName">系统生成大纲</span> <span style="font-size:10px;">▾</span></button>
+              <div class="outline-tpl-panel" id="outlineTplPanel"></div>
+            </div>
             <select class="input outline-version-select" id="outlineVersionSelect" onchange="switchOutlineVersion(this.value)"></select>
             <button class="btn btn-sm btn-outline" onclick="saveOutlineVersion()">保存版本</button>
           </div>
@@ -4710,6 +4738,23 @@
     });
     applyOutlineDescState();
     updateCheckBtnLabel();
+    /* ==================== 报告字数选择 ==================== */
+    function onWordCountSelect(sel) {
+      const custom = document.getElementById('wordCountCustom');
+      if (custom) custom.style.display = sel.value === 'custom' ? 'inline-flex' : 'none';
+      if (sel.value === 'custom') {
+        const input = document.getElementById('wordCountInput');
+        if (input) input.focus();
+      }
+    }
+    function onWordCountInput(input) {
+      let v = String(input.value).replace(/[^\d]/g, '');
+      if (v === '') { input.value = ''; return; }
+      let n = parseInt(v, 10);
+      if (n < 1) n = 1;
+      if (n > 100000) n = 100000;
+      input.value = String(n);
+    }
     /* ==================== 大纲模板选择 ==================== */
     const OUTLINE_TEMPLATES = {
       '系统生成大纲': [
@@ -4878,7 +4923,7 @@
     const activeVersionByTpl = {};
     function ensureTplVersions(name) {
       if (!outlineVersionsByTpl[name]) {
-        outlineVersionsByTpl[name] = [{ id: 1, name: 'v1', html: null }];
+        outlineVersionsByTpl[name] = [{ id: 1, name: 'v1', html: null, wordCount: '3-5', wordCountCustom: '' }];
         activeVersionByTpl[name] = 1;
       }
     }
@@ -4909,7 +4954,15 @@
       ensureTplVersions(currentOutlineTpl);
       const list = outlineVersionsByTpl[currentOutlineTpl];
       const id = list.length + 1;
-      list.push({ id: id, name: 'v' + id, html: panel.innerHTML });
+      const wcSel = document.getElementById('wordCountSelect');
+      const wcInput = document.getElementById('wordCountInput');
+      list.push({
+        id: id,
+        name: 'v' + id,
+        html: panel.innerHTML,
+        wordCount: wcSel ? wcSel.value : '3-5',
+        wordCountCustom: wcInput ? wcInput.value : ''
+      });
       activeVersionByTpl[currentOutlineTpl] = id;
       outlineTreeCache[currentOutlineTpl] = panel.innerHTML;
       renderOutlineVersionSelect();
@@ -4929,6 +4982,14 @@
         reinitOutlineTree(panel);
         outlineTreeCache[currentOutlineTpl] = panel.innerHTML;
       }
+      // 恢复该版本保存时的报告字数设置
+      const wcSel = document.getElementById('wordCountSelect');
+      if (wcSel) {
+        wcSel.value = ver.wordCount || '3-5';
+        onWordCountSelect(wcSel);
+      }
+      const wcInput = document.getElementById('wordCountInput');
+      if (wcInput && ver.wordCountCustom) wcInput.value = ver.wordCountCustom;
       renderOutlineVersionSelect();
       showTaskToast();
     }
