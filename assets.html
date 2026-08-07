@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>报告资产 - 五度妙笔</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .page-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    .search-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .search-bar .input { max-width: 360px; }
+    .action-link {
+      font-size: 13px;
+      color: #4a6fa5;
+      cursor: pointer;
+      margin-right: 12px;
+    }
+    .action-link:hover { text-decoration: underline; }
+    .action-link.danger { color: #c0392b; }
+    /* 表头筛选下拉（报告类型） */
+    .th-filter {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .th-filter:hover { color: #4a6fa5; }
+    .th-filter .caret {
+      font-size: 10px;
+      color: #999;
+    }
+    .type-menu {
+      display: none;
+      position: fixed;
+      z-index: 3000;
+      min-width: 168px;
+      max-height: 320px;
+      overflow-y: auto;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      padding: 4px 0;
+    }
+    .type-item {
+      display: block;
+      padding: 8px 14px;
+      font-size: 13px;
+      color: #555;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .type-item:hover { background: #f5f5f5; color: #333; }
+    .type-item.active { color: #4a6fa5; font-weight: 500; background: #eef2f8; }
+    .report-name {
+      display: inline-block;
+      max-width: 420px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+    /* 报告名称前的 Word 图标 */
+    .word-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      background: #e8eef6;
+      color: #2b579a;
+      font-size: 12px;
+      font-weight: 700;
+      margin-right: 8px;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+    /* 表格数据单行展示，不折行 */
+    #reportTable td {
+      white-space: nowrap;
+    }
+    #reportTable td:first-child {
+      max-width: 400px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand" title="返回首页" onclick="window.location.href='home.html'">
+      <div class="sidebar-brand-logo">5</div>
+      <div class="sidebar-brand-name">5度易链<small>5 DEGREE EASY CHAIN</small></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-item" onclick="window.location.href='report.html'">
+        <div class="sidebar-icon">✎</div>
+        <span>生成报告</span>
+      </div>
+      <div class="sidebar-item active">
+        <div class="sidebar-icon">▤</div>
+        <span>报告资产</span>
+      </div>
+      <div class="sidebar-item" onclick="window.location.href='knowledge.html'">
+        <div class="sidebar-icon">○</div>
+        <span>知识库</span>
+      </div>
+    </div>
+    <div class="divider" style="margin:4px 12px;"></div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">任务列表</div>
+      <div class="sidebar-task-item" onclick="window.location.href='report.html?task=1'">
+        <span class="sidebar-task-text">海关总署2025年数据治理咨询及实施服务项目实施方案</span>
+        <span class="task-status-icon running" title="进行中"></span>
+        <span class="task-actions">
+          <button class="task-act" title="编辑任务名称" onclick="event.stopPropagation();showToast()">✎</button>
+          <button class="task-act danger" title="删除任务" onclick="event.stopPropagation();showToast()">✕</button>
+        </span>
+      </div>
+      <div class="sidebar-task-item" onclick="window.location.href='report.html?task=2'">
+        <span class="sidebar-task-text">海关总署2025年数据治理咨询项目</span>
+        <span class="task-status-icon done" title="已完成"></span>
+        <span class="task-actions">
+          <button class="task-act" title="编辑任务名称" onclick="event.stopPropagation();showToast()">✎</button>
+          <button class="task-act danger" title="删除任务" onclick="event.stopPropagation();showToast()">✕</button>
+        </span>
+      </div>
+    </div>
+
+    <!-- 侧栏底部：用户信息一行 -->
+    <div class="sidebar-footer">
+      <div class="sidebar-user" onclick="openUserMenu(event)">
+        <span class="user-avatar">5</span>
+        <span class="user-name">度小满</span>
+        <span class="user-bell" title="消息" onclick="event.stopPropagation();closeUserMenu();showToast()">🔔<span class="footer-dot"></span></span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main-content">
+    <div class="content-head">
+      <div class="page-title">报告资产</div>
+    </div>
+
+    <!-- 查询 -->
+    <div class="search-bar">
+      <input class="input" type="text" placeholder="输入报告名称查询" id="searchInput" oninput="filterTable()">
+      <button class="btn btn-outline" onclick="filterTable()">🔍 搜索</button>
+    </div>
+
+    <!-- 报告汇总表格 -->
+    <div style="border:1px solid #e8e8e8;border-radius:8px;overflow:hidden;background:#fff;">
+      <table class="table" id="reportTable">
+        <thead>
+          <tr>
+            <th>报告名称</th>
+            <th style="width:170px;"><span class="th-filter" onclick="openTypeMenu(event)"><span id="thTypeLabel">报告类型</span> <span class="caret">▾</span></span></th>
+            <th style="width:150px;"><span class="sortable" data-key="time" onclick="toggleSort('time')">生成时间 <span class="sort-ind">⇅</span></span></th>
+            <th style="width:90px;"><span class="sortable" data-key="words" onclick="toggleSort('words')">字数 <span class="sort-ind">⇅</span></span></th>
+            <th style="width:170px;">操作</th>
+          </tr>
+        </thead>
+        <tbody id="reportList">
+          <tr data-type="可行性研究报告">
+            <td><span class="word-icon">W</span><span class="report-name" title="企查查商业大数据人工智能研发建设项目·可行性研究报告">企查查商业大数据人工智能研发建设项目·可行性研究报告</span></td>
+            <td><span class="tag">可行性研究报告</span></td>
+            <td data-sort="2026-07-22 16:24">2026-07-22 16:24</td>
+            <td data-sort="4.2">4.2万字</td>
+            <td>
+              <span class="action-link" onclick="showToast()">查看</span>
+              <span class="action-link" onclick="showToast()">下载</span>
+              <span class="action-link danger" onclick="showToast()">删除</span>
+            </td>
+          </tr>
+          <tr data-type="生物医药产业分析报告">
+            <td><span class="word-icon">W</span><span class="report-name" title="华康生物医药产业园产业分析报告">华康生物医药产业园产业分析报告</span></td>
+            <td><span class="tag">生物医药产业分析报告</span></td>
+            <td data-sort="2026-07-21 09:35">2026-07-21 09:35</td>
+            <td data-sort="3.8">3.8万字</td>
+            <td>
+              <span class="action-link" onclick="showToast()">查看</span>
+              <span class="action-link" onclick="showToast()">下载</span>
+              <span class="action-link danger" onclick="showToast()">删除</span>
+            </td>
+          </tr>
+          <tr data-type="企业全景分析报告">
+            <td><span class="word-icon">W</span><span class="report-name" title="苏州工业园区智能制造企业全景分析报告">苏州工业园区智能制造企业全景分析报告</span></td>
+            <td><span class="tag">企业全景分析报告</span></td>
+            <td data-sort="2026-07-19 14:22">2026-07-19 14:22</td>
+            <td data-sort="2.6">2.6万字</td>
+            <td>
+              <span class="action-link" onclick="showToast()">查看</span>
+              <span class="action-link" onclick="showToast()">下载</span>
+              <span class="action-link danger" onclick="showToast()">删除</span>
+            </td>
+          </tr>
+          <tr data-type="招商策略分析报告">
+            <td><span class="word-icon">W</span><span class="report-name" title="长三角新能源产业招商策略分析报告">长三角新能源产业招商策略分析报告</span></td>
+            <td><span class="tag">招商策略分析报告</span></td>
+            <td data-sort="2026-07-18 11:08">2026-07-18 11:08</td>
+            <td data-sort="3.1">3.1万字</td>
+            <td>
+              <span class="action-link" onclick="showToast()">查看</span>
+              <span class="action-link" onclick="showToast()">下载</span>
+              <span class="action-link danger" onclick="showToast()">删除</span>
+            </td>
+          </tr>
+          <tr data-type="项目立项报告">
+            <td><span class="word-icon">W</span><span class="report-name" title="智能仓储物流系统建设项目·项目立项报告">智能仓储物流系统建设项目·项目立项报告</span></td>
+            <td><span class="tag">项目立项报告</span></td>
+            <td data-sort="2026-07-15 10:45">2026-07-15 10:45</td>
+            <td data-sort="1.9">1.9万字</td>
+            <td>
+              <span class="action-link" onclick="showToast()">查看</span>
+              <span class="action-link" onclick="showToast()">下载</span>
+              <span class="action-link danger" onclick="showToast()">删除</span>
+            </td>
+          </tr>
+          <tr data-type="项目资金申请报告">
+            <td><span class="word-icon">W</span><span class="report-name" title="高端装备制造数字化转型项目·项目资金申请报告">高端装备制造数字化转型项目·项目资金申请报告</span></td>
+            <td><span class="tag">项目资金申请报告</span></td>
+            <td data-sort="2026-07-12 16:02">2026-07-12 16:02</td>
+            <td data-sort="2.8">2.8万字</td>
+            <td>
+              <span class="action-link" onclick="showToast()">查看</span>
+              <span class="action-link" onclick="showToast()">下载</span>
+              <span class="action-link danger" onclick="showToast()">删除</span>
+            </td>
+          </tr>
+          <tr data-type="投前咨询分析报告">
+            <td><span class="word-icon">W</span><span class="report-name" title="某智能硬件企业·投前咨询分析报告">某智能硬件企业·投前咨询分析报告</span></td>
+            <td><span class="tag">投前咨询分析报告</span></td>
+            <td data-sort="2026-07-05 15:30">2026-07-05 15:30</td>
+            <td data-sort="2.4">2.4万字</td>
+            <td>
+              <span class="action-link" onclick="showToast()">查看</span>
+              <span class="action-link" onclick="showToast()">下载</span>
+              <span class="action-link danger" onclick="showToast()">删除</span>
+            </td>
+          </tr>
+          <tr data-type="全产业分析报告">
+            <td><span class="word-icon">W</span><span class="report-name" title="人工智能产业·全产业分析报告">人工智能产业·全产业分析报告</span></td>
+            <td><span class="tag">全产业分析报告</span></td>
+            <td data-sort="2026-07-02 09:12">2026-07-02 09:12</td>
+            <td data-sort="5.0">5.0万字</td>
+            <td>
+              <span class="action-link" onclick="showToast()">查看</span>
+              <span class="action-link" onclick="showToast()">下载</span>
+              <span class="action-link danger" onclick="showToast()">删除</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+
+  <!-- 用户二级悬浮窗 -->
+  <div class="ctx-menu user-menu" id="userMenu">
+    <div class="user-menu-head">👤 度小满</div>
+    <div class="user-menu-item" onclick="footerAction()">¥ 余额：998<span class="sub">充值 ›</span></div>
+    <div class="user-menu-item" onclick="footerAction()">💬 客服微信</div>
+    <div class="user-menu-divider"></div>
+    <div class="user-menu-title">更多操作</div>
+    <div class="user-menu-item" onclick="footerAction()">帮助中心</div>
+    <div class="user-menu-item" onclick="footerAction()">设置</div>
+    <div class="user-menu-item danger" onclick="footerAction()">退出登录</div>
+  </div>
+
+  <!-- 报告类型筛选下拉 -->
+  <div class="type-menu" id="typeMenu"></div>
+
+  <!-- Toast -->
+  <div class="task-toast" id="actionToast">
+    <span class="task-toast-close" onclick="closeToast()">×</span>
+    <div class="task-toast-title">提示</div>
+    <div class="task-toast-desc">操作已触发（原型演示）</div>
+  </div>
+
+  <script>
+    function filterTable() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      document.querySelectorAll('#reportList tr').forEach(row => {
+        const name = row.querySelector('.report-name')?.textContent?.toLowerCase() || '';
+        const okType = activeType === '全部' || row.dataset.type === activeType;
+        row.style.display = (okType && name.includes(q)) ? '' : 'none';
+      });
+    }
+
+    /* 表头排序：生成时间 / 字数 */
+    const assetSort = { key: null, dir: 1 };
+    const assetDefaultRows = Array.from(document.getElementById('reportList').rows);
+    function toggleSort(key) {
+      if (assetSort.key === key) {
+        // 正序 → 倒序 → 默认（恢复原始顺序）
+        if (assetSort.dir === 1) assetSort.dir = -1;
+        else { assetSort.key = null; assetSort.dir = 1; }
+      } else {
+        assetSort.key = key;
+        assetSort.dir = 1;
+      }
+      applyAssetSort();
+    }
+    function applyAssetSort() {
+      document.querySelectorAll('#reportTable .sortable').forEach(h => {
+        const active = h.dataset.key === assetSort.key;
+        h.classList.toggle('sorted', active);
+        h.querySelector('.sort-ind').textContent = active ? (assetSort.dir === 1 ? '▲' : '▼') : '⇅';
+      });
+      const tbody = document.getElementById('reportList');
+      let rows;
+      if (assetSort.key) {
+        rows = Array.from(tbody.querySelectorAll('tr'));
+        const col = assetSort.key === 'time' ? 2 : 3;
+        rows.sort((a, b) => {
+          const va = a.cells[col].dataset.sort;
+          const vb = b.cells[col].dataset.sort;
+          const isNum = s => /^-?\d+(\.\d+)?$/.test(String(s).trim());
+          const na = parseFloat(va), nb = parseFloat(vb);
+          let r;
+          if (isNum(va) && isNum(vb)) r = na - nb;
+          else r = String(va).localeCompare(String(vb));
+          return r * assetSort.dir;
+        });
+      } else {
+        rows = assetDefaultRows.slice();
+      }
+      rows.forEach(r => tbody.appendChild(r));
+    }
+
+    /* 报告类型表头下拉筛选 */
+    const REPORT_TYPES = ['全部', '可行性研究报告', '企业全景分析报告', '投前咨询分析报告', '招商策略分析报告', '项目立项报告', '项目资金申请报告', '生物医药产业分析报告', '全产业分析报告'];
+    let activeType = '全部';
+
+    function openTypeMenu(e) {
+      e.stopPropagation();
+      const menu = document.getElementById('typeMenu');
+      menu.innerHTML = REPORT_TYPES.map(t =>
+        '<span class="type-item' + (t === activeType ? ' active' : '') + '" data-type="' + t + '">' + t + '</span>'
+      ).join('');
+      const rect = e.currentTarget.getBoundingClientRect();
+      menu.style.display = 'block';
+      menu.style.left = Math.max(8, rect.left) + 'px';
+      menu.style.top = (rect.bottom + 4) + 'px';
+      const menuH = menu.offsetHeight;
+      if (window.innerHeight - rect.bottom - 4 < menuH) {
+        menu.style.top = Math.max(8, rect.top - menuH - 4) + 'px';
+      }
+      menu.querySelectorAll('.type-item').forEach(item => {
+        item.onclick = function () {
+          activeType = item.dataset.type;
+          closeTypeMenu();
+          document.getElementById('thTypeLabel').textContent = activeType === '全部' ? '报告类型' : '报告类型：' + activeType;
+          filterTable();
+        };
+      });
+    }
+    function closeTypeMenu() {
+      document.getElementById('typeMenu').style.display = 'none';
+    }
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('#typeMenu') && !e.target.closest('.th-filter')) closeTypeMenu();
+    });
+    window.addEventListener('scroll', closeTypeMenu, true);
+
+    function showToast() {
+      document.getElementById('actionToast').classList.add('active');
+      setTimeout(() => {
+        document.getElementById('actionToast').classList.remove('active');
+      }, 2000);
+    }
+    function closeToast() {
+      document.getElementById('actionToast').classList.remove('active');
+    }
+
+    /* 侧栏底部：用户二级悬浮窗 */
+    function openUserMenu(e) {
+      e.stopPropagation();
+      const m = document.getElementById('userMenu');
+      const rect = e.currentTarget.getBoundingClientRect();
+      m.style.display = 'block';
+      m.style.left = Math.max(8, rect.left) + 'px';
+      const menuH = m.offsetHeight;
+      if (window.innerHeight - rect.bottom - 4 < menuH) {
+        m.style.top = Math.max(8, rect.top - menuH - 4) + 'px';
+      } else {
+        m.style.top = (rect.bottom + 4) + 'px';
+      }
+    }
+    function closeUserMenu() {
+      document.getElementById('userMenu').style.display = 'none';
+    }
+    function footerAction() {
+      closeUserMenu();
+      showToast();
+    }
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('#userMenu') && !e.target.closest('.sidebar-user')) closeUserMenu();
+    });
+
+    /* 任务名称悬浮气泡：仅当名称被截断时显示完整名称 */
+    (function initTaskTip() {
+      const tip = document.createElement('div');
+      tip.className = 'task-tip';
+      document.body.appendChild(tip);
+      document.querySelectorAll('.sidebar-task-text').forEach(el => {
+        const full = el.textContent.trim();
+        el.addEventListener('mouseenter', function () {
+          if (el.scrollWidth > el.clientWidth + 1) {
+            tip.textContent = full;
+            tip.style.display = 'block';
+          }
+        });
+        el.addEventListener('mousemove', function (e) {
+          if (tip.style.display === 'block') {
+            tip.style.left = Math.min(e.clientX + 12, window.innerWidth - 280) + 'px';
+            tip.style.top = (e.clientY + 12) + 'px';
+          }
+        });
+        el.addEventListener('mouseleave', function () { tip.style.display = 'none'; });
+      });
+    })();
+  </script>
+</body>
+</html>

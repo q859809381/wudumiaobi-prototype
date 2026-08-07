@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>五度妙笔 - 赋能万象 智启未来</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* =========================================
+       主页（0720改版）- 严格按Axure原型模块顺序
+       画布: 1920px 宽, 页面总高约4051px
+       ========================================= */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #f5f5f5;
+      overflow-x: auto;
+    }
+    .home-wrapper {
+      width: 1920px;
+      min-width: 1920px;
+      margin: 0 auto;
+      background: #fff;
+      font-family: 'Inter', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      color: #333;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; font-family: inherit; border: none; background: none; }
+
+    /* ============ 顶部导航 (fixed) ============ */
+    .ax-topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      width: 1920px;
+      height: 60px;
+      background: #fff;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      align-items: center;
+      padding: 0 40px;
+      z-index: 100;
+      margin: 0 auto;
+    }
+    .ax-topbar-left { display: flex; align-items: center; gap: 10px; }
+    .ax-topbar-logo {
+      width: 30px; height: 30px;
+      border: 2px solid #999;
+      border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: #666;
+    }
+    .ax-topbar-brand { font-size: 16px; font-weight: 600; }
+    .ax-topbar-brand small {
+      display: block;
+      font-size: 9px; font-weight: 400; color: #bbb;
+      letter-spacing: 0.5px;
+    }
+    .ax-topbar-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+    .ax-topbar-right a { font-size: 13px; color: #666; }
+    .ax-topbar-right a:hover { color: #333; }
+    .ax-btn-login {
+      padding: 6px 22px;
+      border: 1px solid #666;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #333;
+      background: #fff;
+    }
+    .ax-btn-login:hover { background: #f5f5f5; }
+
+    /* ============ Hero区 ============ */
+    .ax-hero {
+      width: 1920px;
+      height: 320px;
+      background: #f7f7f7;
+      display: flex;
+      align-items: center;
+      padding: 0 320px;
+      gap: 60px;
+      margin-top: 60px;
+    }
+    .ax-hero-left { flex: 1; }
+    .ax-hero-brand {
+      font-size: 44px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+    .ax-hero-brand em { font-style: normal; color: #4a6fa5; }
+    .ax-hero-desc {
+      font-size: 15px;
+      color: #888;
+      line-height: 1.6;
+    }
+    .ax-hero-right {
+      width: 360px; height: 210px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #f0f0f0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; color: #ccc;
+      flex-shrink: 0;
+    }
+
+    /* ============ 卖点卡（3个） ============ */
+    .ax-hero-points {
+      width: 1920px;
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      padding: 28px 320px 36px;
+      background: #f7f7f7;
+    }
+    .ax-point-card {
+      flex: 1;
+      max-width: 400px;
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-size: 13px;
+      color: #666;
+      line-height: 1.7;
+    }
+    .ax-point-card strong { color: #333; font-weight: 600; }
+
+    /* ============ 报告类型标签导航（默认隐藏，滚动后吸顶出现） ============ */
+    .ax-type-nav {
+      width: 1920px;
+      display: none;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 320px;
+      background: #fff;
+      flex-wrap: wrap;
+    }
+    .ax-type-nav.fixed {
+      display: flex;
+      position: fixed;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      margin: 0;
+      z-index: 99;
+      border-bottom: 1px solid #f0f0f0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+    .ax-type-tag {
+      padding: 8px 18px;
+      border: 1px solid #e0e0e0;
+      border-radius: 20px;
+      font-size: 13px;
+      color: #666;
+      background: #fff;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .ax-type-tag:hover {
+      border-color: #999;
+      color: #333;
+      background: #f8f8f8;
+    }
+
+    /* ============ 产品服务卡片网格 ============ */
+    .ax-products {
+      width: 1920px;
+      padding: 44px 320px 50px;
+      background: #fff;
+    }
+    .ax-products-title {
+      text-align: center;
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .ax-products-sub {
+      text-align: center;
+      font-size: 14px;
+      color: #999;
+      margin-bottom: 30px;
+    }
+    .ax-products-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 20px;
+    }
+    .ax-product-card {
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      padding: 20px;
+      background: #fff;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .ax-product-card:hover {
+      border-color: #ccc;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+    }
+    .ax-pc-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .ax-pc-icon {
+      width: 40px; height: 40px;
+      border: 1.5px solid #ddd;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; color: #bbb;
+    }
+    .ax-pc-users { font-size: 12px; color: #bbb; }
+    .ax-pc-name { font-size: 16px; font-weight: 600; margin-bottom: 2px; }
+    .ax-pc-price { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .ax-pc-price small { font-size: 13px; font-weight: 400; color: #999; }
+    .ax-pc-sub { font-size: 13px; color: #888; margin-bottom: 10px; line-height: 1.4; }
+    .ax-pc-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .ax-pc-tag {
+      padding: 2px 10px;
+      font-size: 11px;
+      border: 1px solid #e8e8e8;
+      border-radius: 3px;
+      color: #888;
+      background: #f9f9f9;
+    }
+    .ax-pc-output {
+      font-size: 12px; color: #bbb;
+      line-height: 1.5; margin-bottom: 14px; flex: 1;
+    }
+    .ax-pc-footer { display: flex; align-items: center; justify-content: space-between; }
+    .ax-pc-btn {
+      padding: 8px 22px;
+      font-size: 13px;
+      border: 1px solid #666;
+      border-radius: 4px;
+      background: #333;
+      color: #fff;
+    }
+    .ax-pc-btn:hover { background: #555; }
+    .ax-pc-free { font-size: 11px; color: #b8860b; font-weight: 500; }
+    .ax-pc-btn-disabled {
+      padding: 8px 22px;
+      font-size: 13px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: #f5f5f5;
+      color: #bbb;
+      cursor: default;
+    }
+    .ax-pc-price-na { font-size: 16px; font-weight: 600; color: #bbb; margin-bottom: 6px; }
+
+    /* 定制化服务卡片 */
+    .ax-custom-card {
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      padding: 20px;
+      background: #fafafa;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+    }
+    .ax-custom-card:hover { border-color: #ccc; background: #f7f7f7; }
+    .ax-custom-icon {
+      width: 48px; height: 48px;
+      border: 2px solid #bbb;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; color: #888;
+      margin-bottom: 12px;
+    }
+    .ax-custom-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+    .ax-custom-desc { font-size: 12px; color: #888; line-height: 1.5; margin-bottom: 14px; }
+    .ax-custom-btn {
+      padding: 8px 22px;
+      font-size: 13px;
+      border: 1px solid #666;
+      border-radius: 4px;
+      background: #fff;
+      color: #333;
+    }
+    .ax-custom-btn:hover { background: #f5f5f5; }
+
+    /* ============ AI+专家人工咨询服务 ============ */
+    .ax-service {
+      width: 1920px;
+      background: #f8f8f8;
+      padding: 50px 320px 50px;
+      display: flex;
+      align-items: center;
+      gap: 60px;
+    }
+    .ax-service-left { flex: 1.4; }
+    .ax-service-title { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+    .ax-service-sub { font-size: 14px; color: #999; margin-bottom: 28px; }
+    .ax-service-steps { display: flex; align-items: center; }
+    .ax-service-step {
+      display: flex; flex-direction: column; align-items: center;
+      width: 130px;
+    }
+    .ax-service-step-num {
+      width: 48px; height: 48px;
+      border: 2px solid #bbb;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 600; color: #999;
+      background: #fff;
+      margin-bottom: 8px;
+    }
+    .ax-service-step-label { font-size: 14px; color: #666; }
+    .ax-service-arrow {
+      width: 48px; text-align: center;
+      font-size: 18px; color: #ccc;
+      padding-top: 14px;
+    }
+    .ax-service-right {
+      flex: 1;
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      background: #fff;
+      padding: 24px 28px;
+      text-align: center;
+    }
+    .ax-service-price { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+    .ax-service-price small {
+      display: block;
+      font-size: 13px; font-weight: 400; color: #999;
+      margin-bottom: 16px;
+    }
+    .ax-service-btn {
+      padding: 10px 32px;
+      font-size: 14px;
+      border: 1px solid #666;
+      border-radius: 4px;
+      background: #333;
+      color: #fff;
+    }
+    .ax-service-btn:hover { background: #555; }
+
+    /* ============ 核心价值区 ============ */
+    .ax-core {
+      width: 1920px;
+      padding: 50px 320px 20px;
+      background: #fff;
+      text-align: center;
+    }
+    .ax-core-title { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+    .ax-core-sub { font-size: 14px; color: #999; margin-bottom: 30px; }
+
+    /* ============ 功能亮点区（4个） ============ */
+    .ax-features {
+      width: 1920px;
+      padding: 20px 320px 60px;
+      background: #fff;
+    }
+    .ax-features-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 24px;
+    }
+    .ax-feature-card {
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      padding: 24px 20px;
+      text-align: center;
+      background: #fff;
+    }
+    .ax-feature-icon {
+      width: 52px; height: 52px;
+      border: 2px solid #ddd;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 14px;
+      font-size: 18px; color: #888;
+    }
+    .ax-feature-name { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+    .ax-feature-desc { font-size: 13px; color: #888; line-height: 1.6; }
+
+    /* ============ 对比区（通用AI vs 五度妙笔） ============ */
+    .ax-compare {
+      width: 1920px;
+      padding: 50px 320px 40px;
+      background: #f8f8f8;
+    }
+    .ax-compare-title {
+      text-align: center;
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .ax-compare-sub {
+      text-align: center;
+      font-size: 14px;
+      color: #999;
+      margin-bottom: 30px;
+    }
+    .ax-compare-row { display: flex; gap: 32px; }
+    .ax-compare-col {
+      flex: 1;
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      padding: 24px 26px;
+      background: #fff;
+    }
+    .ax-compare-col-title {
+      font-size: 18px;
+      font-weight: 700;
+      text-align: center;
+      padding-bottom: 14px;
+      margin-bottom: 10px;
+      border-bottom: 2px solid #eee;
+    }
+    .ax-compare-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px dashed #f0f0f0;
+    }
+    .ax-compare-item:last-child { border-bottom: none; }
+    .ax-compare-badge {
+      flex-shrink: 0;
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600;
+      margin-top: 1px;
+    }
+    .ax-compare-badge.bad { background: #f2f2f2; color: #999; }
+    .ax-compare-badge.good { background: #e8eef6; color: #4a6fa5; }
+    .ax-compare-item-title { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
+    .ax-compare-item-text { font-size: 13px; color: #888; line-height: 1.5; }
+
+    /* ============ 核心标语区 ============ */
+    .ax-slogan {
+      width: 1920px;
+      padding: 40px 320px 50px;
+      background: #f8f8f8;
+      text-align: center;
+    }
+    .ax-slogan-text {
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+    .ax-slogan-btn {
+      padding: 12px 40px;
+      font-size: 15px;
+      border: 1px solid #666;
+      border-radius: 4px;
+      background: #333;
+      color: #fff;
+    }
+    .ax-slogan-btn:hover { background: #555; }
+
+    /* ============ FAQ ============ */
+    .ax-faq {
+      width: 1920px;
+      padding: 50px 320px 60px;
+      background: #fff;
+    }
+    .ax-faq-title {
+      text-align: center;
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .ax-faq-sub {
+      text-align: center;
+      font-size: 14px;
+      color: #999;
+      margin-bottom: 28px;
+    }
+    .ax-faq-item {
+      border: 1px solid #e8e8e8;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      background: #fff;
+      overflow: hidden;
+    }
+    .ax-faq-q {
+      padding: 16px 22px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+    .ax-faq-q:hover { background: #fafafa; }
+    .ax-faq-q-arrow { font-size: 12px; color: #bbb; transition: transform 0.2s; }
+    .ax-faq-q.open .ax-faq-q-arrow { transform: rotate(180deg); }
+    .ax-faq-a {
+      padding: 0 22px 16px;
+      font-size: 13px;
+      color: #888;
+      line-height: 1.7;
+      display: none;
+    }
+    .ax-faq-a.open { display: block; }
+
+    /* ============ 合作伙伴 ============ */
+    .ax-partners {
+      width: 1920px;
+      padding: 50px 320px 60px;
+      background: #f8f8f8;
+      text-align: center;
+    }
+    .ax-partners-title { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+    .ax-partners-sub { font-size: 14px; color: #999; margin-bottom: 30px; }
+    .ax-partners-logos {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .ax-partner-logo {
+      width: 110px; height: 52px;
+      border: 1px solid #e5e5e5;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; color: #ccc;
+      background: #fff;
+    }
+
+    /* ============ 页脚 ============ */
+    .ax-footer {
+      width: 1920px;
+      padding: 40px 320px 24px;
+      background: #fff;
+      border-top: 1px solid #eee;
+    }
+    .ax-footer-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 40px;
+    }
+    .ax-footer-col h4 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+    .ax-footer-col p, .ax-footer-col a {
+      font-size: 13px;
+      color: #888;
+      line-height: 2;
+      display: block;
+    }
+    .ax-footer-col a:hover { color: #555; }
+    .ax-footer-qr {
+      width: 96px; height: 96px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: #ccc;
+      background: #fafafa;
+      margin-bottom: 6px;
+    }
+    .ax-footer-qr-label { font-size: 11px; color: #999; }
+    .ax-footer-qrs { display: flex; gap: 16px; }
+    .ax-footer-bottom {
+      border-top: 1px solid #eee;
+      margin-top: 24px;
+      padding-top: 16px;
+      font-size: 12px;
+      color: #bbb;
+      text-align: center;
+    }
+
+  </style>
+</head>
+<body>
+<div class="home-wrapper">
+
+  <!-- ========== 顶部导航（固定） ========== -->
+  <header class="ax-topbar">
+    <div class="ax-topbar-left">
+      <div class="ax-topbar-logo">5</div>
+      <div class="ax-topbar-brand">5度易链<small>5 DEGREE EASY CHAIN</small></div>
+    </div>
+    <div class="ax-topbar-right">
+      <a href="#">产品介绍</a>
+      <button class="ax-btn-login" onclick="window.location.href='index.html'">登录注册</button>
+    </div>
+  </header>
+
+  <!-- ========== Hero区 ========== -->
+  <section class="ax-hero">
+    <div class="ax-hero-left">
+      <div class="ax-hero-brand"><em>五度妙笔</em> 赋能万象 智启未来</div>
+      <div class="ax-hero-desc">一个爱深度思考的AI智能体，助您轻松搞定专业级高标准报告</div>
+    </div>
+    <div class="ax-hero-right">形象/LOGO配图</div>
+  </section>
+
+  <!-- ========== 3个卖点卡 ========== -->
+  <section class="ax-hero-points">
+    <div class="ax-point-card"><strong>海量数据支撑</strong><br>十亿级工商、知识产权、司法等基础数据+海量私有知识库+专业分析框架</div>
+    <div class="ax-point-card"><strong>专业报告生成</strong><br>不套模板、不翻旧项目——基于实时数据与多智能体编排，生成逻辑严谨的专业报告</div>
+    <div class="ax-point-card"><strong>长文本一致性</strong><br>国内商业产品中率先系统性缓解长文本上下文遗忘和不一致问题的专业报告写作产品</div>
+  </section>
+
+  <!-- ========== 报告类型标签导航（默认隐藏，产品区滚出后吸顶） ========== -->
+  <nav class="ax-type-nav" id="typeNav">
+    <a class="ax-type-tag" target="_blank" href="report.html?type=可行性研究报告">可行性研究报告</a>
+    <a class="ax-type-tag" target="_blank" href="report.html?type=企业全景分析报告">企业全景分析报告</a>
+    <a class="ax-type-tag" target="_blank" href="report.html?type=投前咨询分析报告">投前咨询分析报告</a>
+    <a class="ax-type-tag" target="_blank" href="report.html?type=招商策略分析报告">招商策略分析报告</a>
+    <a class="ax-type-tag" target="_blank" href="report.html?type=项目立项报告">项目立项报告</a>
+    <a class="ax-type-tag" target="_blank" href="report.html?type=项目资金申请报告">项目资金申请报告</a>
+    <a class="ax-type-tag" target="_blank" href="report.html?type=生物医药产业分析报告">生物医药产业分析报告</a>
+    <a class="ax-type-tag" target="_blank" href="report.html?type=全产业分析报告">全产业分析报告</a>
+  </nav>
+
+  <!-- ========== 产品服务卡片网格（4x2） ========== -->
+  <section class="ax-products">
+    <div class="ax-products-grid">
+
+      <!-- 第1行第1列：可行性研究报告 -->
+      <div class="ax-product-card" onclick="window.open('report.html?type=可行性研究报告','_blank')">
+        <div class="ax-pc-header">
+          <div class="ax-pc-icon">ICON</div>
+          <span class="ax-pc-users">5213人在用</span>
+        </div>
+        <div class="ax-pc-name">可行性研究报告</div>
+        <div class="ax-pc-price">¥ 888 <small>/份</small></div>
+        <div class="ax-pc-sub">项目全维度可信性论证与方案评估</div>
+        <div class="ax-pc-tags">
+          <span class="ax-pc-tag">生产制造</span><span class="ax-pc-tag">基础设施</span>
+          <span class="ax-pc-tag">系统集成</span><span class="ax-pc-tag">技术改造</span>
+        </div>
+        <div class="ax-pc-output">产出:4万字+深度可研报告，为项目立项、银行贷款市场、技术、财务全维度论证</div>
+        <div class="ax-pc-footer">
+          <button class="ax-pc-btn" onclick="event.stopPropagation();window.open('report.html?type=可行性研究报告','_blank')">开始使用</button>
+          <span class="ax-pc-free">新用户限时免费1次</span>
+        </div>
+      </div>
+
+      <!-- 第1行第2列：企业全景分析报告 -->
+      <div class="ax-product-card" onclick="window.open('report.html?type=企业全景分析报告','_blank')">
+        <div class="ax-pc-header">
+          <div class="ax-pc-icon">ICON</div>
+          <span class="ax-pc-users">5213人在用</span>
+        </div>
+        <div class="ax-pc-name">企业全景分析报告</div>
+        <div class="ax-pc-price">¥ 888 <small>/份</small></div>
+        <div class="ax-pc-sub">跨产业宏观趋势与战略指引</div>
+        <div class="ax-pc-tags">
+          <span class="ax-pc-tag">全面透视</span><span class="ax-pc-tag">供应商考察</span>
+          <span class="ax-pc-tag">竞争分析</span><span class="ax-pc-tag">投资评估</span>
+        </div>
+        <div class="ax-pc-output">产出:多维数据深度透视，按需匹配分析场景，洞察企业全貌，赋能商业决策</div>
+        <div class="ax-pc-footer">
+          <button class="ax-pc-btn" onclick="event.stopPropagation();window.open('report.html?type=企业全景分析报告','_blank')">开始使用</button>
+          <span class="ax-pc-free">免费体验</span>
+        </div>
+      </div>
+
+      <!-- 第1行第3列：投前咨询分析报告 -->
+      <div class="ax-product-card" onclick="window.open('report.html?type=投前咨询分析报告','_blank')">
+        <div class="ax-pc-header">
+          <div class="ax-pc-icon">ICON</div>
+          <span class="ax-pc-users">5213人在用</span>
+        </div>
+        <div class="ax-pc-name">投前咨询分析报告</div>
+        <div class="ax-pc-price">¥ 888 <small>/份</small></div>
+        <div class="ax-pc-sub">目标企业穿透分析与投资风险扫描</div>
+        <div class="ax-pc-tags">
+          <span class="ax-pc-tag">工商穿透</span><span class="ax-pc-tag">财税核查</span>
+          <span class="ax-pc-tag">司法风险</span><span class="ax-pc-tag">舆情监测</span>
+        </div>
+        <div class="ax-pc-output">产出:多维数据深度透视，按需匹配分析场景，洞察企业全貌，赋能商业决策</div>
+        <div class="ax-pc-footer">
+          <button class="ax-pc-btn" onclick="event.stopPropagation();window.open('report.html?type=投前咨询分析报告','_blank')">开始使用</button>
+          <span class="ax-pc-free">限时免费</span>
+        </div>
+      </div>
+
+      <!-- 第1行第4列：招商策略分析报告 -->
+      <div class="ax-product-card" onclick="window.open('report.html?type=招商策略分析报告','_blank')">
+        <div class="ax-pc-header">
+          <div class="ax-pc-icon">ICON</div>
+          <span class="ax-pc-users">5213人在用</span>
+        </div>
+        <div class="ax-pc-name">招商策略分析报告</div>
+        <div class="ax-pc-price">¥ 888 <small>/份</small></div>
+        <div class="ax-pc-sub">精准招商与产业导入策略</div>
+        <div class="ax-pc-tags">
+          <span class="ax-pc-tag">企业诉求挖掘</span><span class="ax-pc-tag">招商切入分析</span>
+          <span class="ax-pc-tag">潜在接触策略</span><span class="ax-pc-tag">地方资源匹配</span>
+        </div>
+        <div class="ax-pc-output">产出:快速完成企业画像、产业协同价值评估与招商策略分析，让招商决策有据可依</div>
+        <div class="ax-pc-footer">
+          <button class="ax-pc-btn" onclick="event.stopPropagation();window.open('report.html?type=招商策略分析报告','_blank')">开始使用</button>
+          <span class="ax-pc-free">限时免费</span>
+        </div>
+      </div>
+
+      <!-- 第2行第1列：项目立项报告 -->
+      <div class="ax-product-card" onclick="window.open('report.html?type=项目立项报告','_blank')">
+        <div class="ax-pc-header">
+          <div class="ax-pc-icon">ICON</div>
+          <span class="ax-pc-users">5213人在用</span>
+        </div>
+        <div class="ax-pc-name">项目立项报告</div>
+        <div class="ax-pc-price">¥ 888 <small>/份</small></div>
+        <div class="ax-pc-sub">新业务探索·投资机会识别·可行性预判</div>
+        <div class="ax-pc-tags">
+          <span class="ax-pc-tag">基础论证</span><span class="ax-pc-tag">方案搭建</span>
+          <span class="ax-pc-tag">风险评估</span><span class="ax-pc-tag">实施建议</span>
+        </div>
+        <div class="ax-pc-output">产出:快速构建包含背景、方案、投资估算与效益预测的立项初稿，完成项目早期论证</div>
+        <div class="ax-pc-footer">
+          <button class="ax-pc-btn" onclick="event.stopPropagation();window.open('report.html?type=项目立项报告','_blank')">开始使用</button>
+          <span class="ax-pc-free">新用户限时免费1次</span>
+        </div>
+      </div>
+
+      <!-- 第2行第2列：项目资金申请报告 -->
+      <div class="ax-product-card" onclick="window.open('report.html?type=项目资金申请报告','_blank')">
+        <div class="ax-pc-header">
+          <div class="ax-pc-icon">ICON</div>
+          <span class="ax-pc-users">5213人在用</span>
+        </div>
+        <div class="ax-pc-name">项目资金申请报告</div>
+        <div class="ax-pc-price">¥ 888 <small>/份</small></div>
+        <div class="ax-pc-sub">专项资金申报全流程支持</div>
+        <div class="ax-pc-tags">
+          <span class="ax-pc-tag">企业亮点展示</span><span class="ax-pc-tag">政策匹配分析</span>
+          <span class="ax-pc-tag">技术优势提炼</span><span class="ax-pc-tag">攻关方案论证</span>
+        </div>
+        <div class="ax-pc-output">产出:匹配政策依据，生成符合专项资金申报规范的完整材料，提升申报效率</div>
+        <div class="ax-pc-footer">
+          <button class="ax-pc-btn" onclick="event.stopPropagation();window.open('report.html?type=项目资金申请报告','_blank')">开始使用</button>
+          <span class="ax-pc-free">新用户限时免费1次</span>
+        </div>
+      </div>
+
+      <!-- 第2行第3列：全产业分析报告（即将上线） -->
+      <div class="ax-product-card">
+        <div class="ax-pc-header">
+          <div class="ax-pc-icon">ICON</div>
+          <span class="ax-pc-users">5213人在用</span>
+        </div>
+        <div class="ax-pc-name">全产业分析报告</div>
+        <div class="ax-pc-price-na">敬请期待</div>
+        <div class="ax-pc-sub">跨产业宏观趋势与战略指引</div>
+        <div class="ax-pc-tags">
+          <span class="ax-pc-tag">十亿级基础数据</span><span class="ax-pc-tag">专业分析引擎</span>
+          <span class="ax-pc-tag">可自定义大纲</span><span class="ax-pc-tag">在线工作台</span>
+        </div>
+        <div class="ax-pc-output">产出:覆盖宏观趋势，技术演进与竞争格局，为战略决策提供数据支撑的产业深度分析</div>
+        <div class="ax-pc-footer">
+          <span class="ax-pc-btn-disabled">即将上线</span>
+        </div>
+      </div>
+
+      <!-- 第2行第4列：定制化服务 -->
+      <div class="ax-custom-card">
+        <div class="ax-custom-icon">✎</div>
+        <div class="ax-custom-title">没有找到合适的报告？</div>
+        <div class="ax-custom-desc">告诉我们你的需求，我们为你定制专属报告方案</div>
+        <button class="ax-custom-btn">联系定制</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========== AI+专家人工咨询服务 ========== -->
+  <section class="ax-service">
+    <div class="ax-service-left">
+      <div class="ax-service-title">AI+专家人工报告咨询服务</div>
+      <div class="ax-service-sub">提供专业报告咨询与人工核验服务，为您交付高质量、可直接使用的报告</div>
+      <div class="ax-service-steps">
+        <div class="ax-service-step">
+          <div class="ax-service-step-num">1</div>
+          <span class="ax-service-step-label">需求对接</span>
+        </div>
+        <div class="ax-service-arrow">→</div>
+        <div class="ax-service-step">
+          <div class="ax-service-step-num">2</div>
+          <span class="ax-service-step-label">AI生成</span>
+        </div>
+        <div class="ax-service-arrow">→</div>
+        <div class="ax-service-step">
+          <div class="ax-service-step-num">3</div>
+          <span class="ax-service-step-label">专家核验</span>
+        </div>
+        <div class="ax-service-arrow">→</div>
+        <div class="ax-service-step">
+          <div class="ax-service-step-num">4</div>
+          <span class="ax-service-step-label">优化完善</span>
+        </div>
+        <div class="ax-service-arrow">→</div>
+        <div class="ax-service-step">
+          <div class="ax-service-step-num">5</div>
+          <span class="ax-service-step-label">交付使用</span>
+        </div>
+      </div>
+    </div>
+    <div class="ax-service-right">
+      <div class="ax-service-price">千元起步，即享专家级报告交付</div>
+      <button class="ax-service-btn">联系客服一键咨询</button>
+    </div>
+  </section>
+
+  <!-- ========== 核心价值区 ========== -->
+  <section class="ax-core">
+    <div class="ax-core-title">五度妙笔 — 专注垂直领域长文本报告写作</div>
+    <div class="ax-core-sub">不止于"会写"，更注重"专业"</div>
+  </section>
+
+  <!-- ========== 功能亮点区（4个） ========== -->
+  <section class="ax-features">
+    <div class="ax-features-grid">
+      <div class="ax-feature-card">
+        <div class="ax-feature-icon">◆</div>
+        <div class="ax-feature-name">行业逻辑建模</div>
+        <div class="ax-feature-desc">将资深专家经验与行业规范转化为可计算的逻辑模型，复刻专家分析思路，输出具备专业深度的高标准报告。</div>
+      </div>
+      <div class="ax-feature-card">
+        <div class="ax-feature-icon">◈</div>
+        <div class="ax-feature-name">亿量私域数据</div>
+        <div class="ax-feature-desc">接入亿量级垂直领域私有数据库和私有知识库，实现私域库与公网数据的多源检索融合，数据引用真实可追溯。</div>
+      </div>
+      <div class="ax-feature-card">
+        <div class="ax-feature-icon">◉</div>
+        <div class="ax-feature-name">分钟级生成</div>
+        <div class="ax-feature-desc">七大智能体协作，分工完成检索、分析、撰写、审核，实现从数据抓取到质量校验的完整闭环，分钟级生成报告。</div>
+      </div>
+      <div class="ax-feature-card">
+        <div class="ax-feature-icon">⊞</div>
+        <div class="ax-feature-name">支持按需定制及私有化部署服务</div>
+        <div class="ax-feature-desc">可接入私域数据并实现项目数据全程本地留存不外流，依托成熟产品底座，最快2-4周部署交付。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 对比区（通用AI vs 五度妙笔） ========== -->
+  <section class="ax-compare">
+    <div class="ax-compare-title">通用AI和五度妙笔之间，差的不是一个提示词</div>
+    <div class="ax-compare-sub">是一整套专业报告生成能力</div>
+    <div class="ax-compare-row">
+      <div class="ax-compare-col">
+        <div class="ax-compare-col-title">——你正在经历的</div>
+        <div class="ax-compare-item">
+          <span class="ax-compare-badge bad">✕</span>
+          <div>
+            <div class="ax-compare-item-title">耗时</div>
+            <div class="ax-compare-item-text">费尽口舌写提示词，产出的内容还是泛泛而谈、隔靴搔痒</div>
+          </div>
+        </div>
+        <div class="ax-compare-item">
+          <span class="ax-compare-badge bad">✕</span>
+          <div>
+            <div class="ax-compare-item-title">不可信</div>
+            <div class="ax-compare-item-text">数据来源不明，甚至编造案例，根本不敢直接用</div>
+          </div>
+        </div>
+        <div class="ax-compare-item">
+          <span class="ax-compare-badge bad">✕</span>
+          <div>
+            <div class="ax-compare-item-title">低效</div>
+            <div class="ax-compare-item-text">输出零散碎片，需要自己花大量时间拼凑整理</div>
+          </div>
+        </div>
+        <div class="ax-compare-item">
+          <span class="ax-compare-badge bad">✕</span>
+          <div>
+            <div class="ax-compare-item-title">重复</div>
+            <div class="ax-compare-item-text">换个报告类型就要重新摸索，每次从零开始</div>
+          </div>
+        </div>
+        <div class="ax-compare-item">
+          <span class="ax-compare-badge bad">✕</span>
+          <div>
+            <div class="ax-compare-item-title">浅薄</div>
+            <div class="ax-compare-item-text">没有专业框架支撑，写出来的报告缺乏逻辑深度</div>
+          </div>
+        </div>
+      </div>
+      <div class="ax-compare-col">
+        <div class="ax-compare-col-title">——你真正需要的</div>
+        <div class="ax-compare-item">
+          <span class="ax-compare-badge good">✓</span>
+          <div>
+            <div class="ax-compare-item-title">即用</div>
+            <div class="ax-compare-item-text">内置行业分析框架，无需提示词工程，直接产出专业报告</div>
+          </div>
+        </div>
+        <div class="ax-compare-item">
+          <span class="ax-compare-badge good">✓</span>
+          <div>
+            <div class="ax-compare-item-title">可信</div>
+            <div class="ax-compare-item-text">海量私有知识库+政策库支撑，数据可追溯、可核验</div>
+          </div>
+        </div>
+        <div class="ax-compare-item">
+          <span class="ax-compare-badge good">✓</span>
+          <div>
+            <div class="ax-compare-item-title">高效</div>
+            <div class="ax-compare-item-text">分钟级生成结构化完整报告，拿来即用</div>
+          </div>
+        </div>
+        <div class="ax-compare-item">
+          <span class="ax-compare-badge good">✓</span>
+          <div>
+            <div class="ax-compare-item-title">省心</div>
+            <div class="ax-compare-item-text">7大场景智能体覆盖不同业务，开箱即用，无需重复摸索</div>
+          </div>
+        </div>
+        <div class="ax-compare-item">
+          <span class="ax-compare-badge good">✓</span>
+          <div>
+            <div class="ax-compare-item-title">专心</div>
+            <div class="ax-compare-item-text">内置专业分析框架，逻辑严谨、深度到位，可直接上会</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 核心标语区 ========== -->
+  <section class="ax-slogan">
+    <div class="ax-slogan-text">用通用AI写报告，你是在帮AI打工；用五度妙笔写报告，是AI在帮你打工。</div>
+    <button class="ax-slogan-btn">选对工具，事半功倍</button>
+  </section>
+
+  <!-- ========== FAQ常见问题 ========== -->
+  <section class="ax-faq">
+    <div class="ax-faq-title">常见问题</div>
+    <div class="ax-faq-sub">您可能关心的几个问题，我们来解答</div>
+    <div class="ax-faq-item">
+      <div class="ax-faq-q" onclick="toggleFAQ(this)">
+        <span>报告的数据来源是什么？是否可信？</span>
+        <span class="ax-faq-q-arrow">▼</span>
+      </div>
+      <div class="ax-faq-a">报告基于十亿级工商、知识产权、司法、财税等基础数据，结合海量私有知识库与权威政策库生成。所有数据均来自可追溯的公开渠道与授权数据源，并经过多源交叉验证，确保真实可靠。</div>
+    </div>
+    <div class="ax-faq-item">
+      <div class="ax-faq-q" onclick="toggleFAQ(this)">
+        <span>生成的报告可以直接使用吗？还需要我做什么？</span>
+        <span class="ax-faq-q-arrow">▼</span>
+      </div>
+      <div class="ax-faq-a">报告生成后即可下载使用。我们建议您根据具体场景对报告内容进行适当调整和优化，以确保完全符合您的需求。</div>
+    </div>
+    <div class="ax-faq-item">
+      <div class="ax-faq-q" onclick="toggleFAQ(this)">
+        <span>积分如何使用？免费体验有次数限制吗？</span>
+        <span class="ax-faq-q-arrow">▼</span>
+      </div>
+      <div class="ax-faq-a">新用户注册即赠送1次免费体验机会。积分可用于支付报告生成费用，1积分=1元，充值后即可使用。</div>
+    </div>
+    <div class="ax-faq-item">
+      <div class="ax-faq-q" onclick="toggleFAQ(this)">
+        <span>AI+人工咨询服务与自助生成有什么区别？</span>
+        <span class="ax-faq-q-arrow">▼</span>
+      </div>
+      <div class="ax-faq-a">自助生成由AI全自动完成，适合快速产出初稿。AI+人工咨询在AI生成基础上增加专家核验与优化环节，交付质量更高，适合重要场景使用。</div>
+    </div>
+    <div class="ax-faq-item">
+      <div class="ax-faq-q" onclick="toggleFAQ(this)">
+        <span>数据安全和隐私如何保障？</span>
+        <span class="ax-faq-q-arrow">▼</span>
+      </div>
+      <div class="ax-faq-a">我们采用行业标准的数据加密传输与存储方案，所有数据严格保密。支持私有化部署，实现项目数据全程本地留存不外流。</div>
+    </div>
+  </section>
+
+  <!-- ========== 合作伙伴 ========== -->
+  <section class="ax-partners">
+    <div class="ax-partners-title">合作伙伴 · 聚力同行</div>
+    <div class="ax-partners-sub">汇聚产业资源，共推行业进步，赋能生态发展</div>
+    <div class="ax-partners-logos">
+      <div class="ax-partner-logo">LOGO</div>
+      <div class="ax-partner-logo">LOGO</div>
+      <div class="ax-partner-logo">LOGO</div>
+      <div class="ax-partner-logo">LOGO</div>
+      <div class="ax-partner-logo">LOGO</div>
+      <div class="ax-partner-logo">LOGO</div>
+      <div class="ax-partner-logo">LOGO</div>
+      <div class="ax-partner-logo">LOGO</div>
+      <div class="ax-partner-logo">LOGO</div>
+      <div class="ax-partner-logo">LOGO</div>
+      <div class="ax-partner-logo">LOGO</div>
+      <div class="ax-partner-logo">LOGO</div>
+    </div>
+  </section>
+
+  <!-- ========== 页脚 ========== -->
+  <footer class="ax-footer">
+    <div class="ax-footer-grid">
+      <div class="ax-footer-col">
+        <h4>咨询服务热线</h4>
+        <p style="font-size:16px;font-weight:600;color:#333;">010-68321050</p>
+        <p>(工作日09:00~18:00)</p>
+        <p>公司地址：北京市丰台区广安路9号国投财富广场1号楼12层</p>
+        <p>市场合作：<a href="mailto:info@datadowell.com">info@datadowell.com</a></p>
+        <a href="#" style="display:inline-block;margin-top:6px;padding:6px 18px;border:1px solid #ccc;border-radius:4px;font-size:13px;color:#555;">商务咨询</a>
+      </div>
+      <div class="ax-footer-col">
+        <h4>智能写作场景</h4>
+        <a target="_blank" href="report.html?type=可行性研究报告">可行性研究报告</a>
+        <a target="_blank" href="report.html?type=企业全景分析报告">企业全景分析报告</a>
+        <a target="_blank" href="report.html?type=投前咨询分析报告">投前咨询分析报告</a>
+        <a target="_blank" href="report.html?type=招商策略分析报告">招商策略分析报告</a>
+        <a target="_blank" href="report.html?type=项目立项报告">项目立项报告</a>
+        <a target="_blank" href="report.html?type=项目资金申请报告">项目资金申请报告</a>
+        <a target="_blank" href="report.html?type=生物医药产业分析报告">生物医药产业分析报告</a>
+        <a target="_blank" href="report.html?type=全产业分析报告">全产业分析报告</a>
+      </div>
+      <div class="ax-footer-col">
+        <h4>关注我们</h4>
+        <div class="ax-footer-qrs">
+          <div>
+            <div class="ax-footer-qr">二维码</div>
+            <div class="ax-footer-qr-label">专属客服号</div>
+          </div>
+          <div>
+            <div class="ax-footer-qr">二维码</div>
+            <div class="ax-footer-qr-label">微信订阅号</div>
+          </div>
+        </div>
+      </div>
+      <div class="ax-footer-col">
+        <h4>&nbsp;</h4>
+        <p style="line-height:2;">扫码添加专属客服<br>获取更多产品资讯</p>
+      </div>
+    </div>
+    <div class="ax-footer-bottom">
+      Copyright © 北京笃威尔数字技术有限公司 | 五度易链　京ICP备2021019355号-2　京公网安备11010602103306
+    </div>
+  </footer>
+
+</div><!-- /home-wrapper -->
+
+<script>
+  function toggleFAQ(el) {
+    el.classList.toggle('open');
+    el.nextElementSibling.classList.toggle('open');
+  }
+
+  /* ============ 报告类型标签：滚动吸顶逻辑 ============
+     产品服务区域完全滚出视口顶部 → 标签导航吸顶显示
+     产品服务区域回到视口内 → 标签导航隐藏 */
+  const typeNav = document.getElementById('typeNav');
+  const productsSection = document.querySelector('.ax-products');
+
+  function toggleTypeNav() {
+    const rect = productsSection.getBoundingClientRect();
+    if (rect.bottom <= 0) {
+      typeNav.classList.add('fixed');
+    } else {
+      typeNav.classList.remove('fixed');
+    }
+  }
+  window.addEventListener('scroll', toggleTypeNav, { passive: true });
+  // IntersectionObserver 兜底：覆盖不触发 scroll 事件的滚动场景
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (entries) {
+      entries.forEach(toggleTypeNav);
+    }, { root: null, threshold: 0 }).observe(productsSection);
+  }
+  toggleTypeNav();
+</script>
+</body>
+</html>

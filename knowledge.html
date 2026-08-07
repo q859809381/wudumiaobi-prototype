@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>知识库 - 五度妙笔</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .page-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    .upload-zone { margin-bottom: 20px; }
+    .search-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .search-bar .input { max-width: 360px; }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+    }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .status-dot.parsing { background: #f0ad4e; }
+    .status-dot.ready { background: #4a6fa5; }
+    .action-link {
+      font-size: 13px;
+      color: #4a6fa5;
+      cursor: pointer;
+      margin-right: 12px;
+    }
+    .action-link:hover { text-decoration: underline; }
+    .action-link.danger { color: #c0392b; }
+    .file-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px; height: 28px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+    .file-icon.docx { background: #e8eef6; color: #4a6fa5; }
+    .file-icon.xlsx { background: #e8f6ed; color: #27804a; }
+    .file-icon.pdf { background: #f6e8e8; color: #c0392b; }
+    .file-icon.folder { background: #fdf6e3; color: #b8860b; }
+    .file-name-cell {
+      display: flex;
+      align-items: center;
+    }
+    /* 列表数据单行展示，不折行 */
+    #fileTable td {
+      white-space: nowrap;
+    }
+    #fileTable td:first-child {
+      max-width: 420px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #fileTable .file-name-cell span:last-child {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .kb-empty {
+      padding: 40px;
+      text-align: center;
+      color: #bbb;
+      font-size: 13px;
+    }
+    /* 标题行 + 上传按钮 */
+    .page-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .page-head .page-title { margin-bottom: 0; }
+    .page-actions {
+      display: flex;
+      gap: 10px;
+    }
+    /* 文件夹路径导航 */
+    .kb-breadcrumb {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 13px;
+      margin-bottom: 12px;
+      color: #888;
+    }
+    .bc-item { cursor: pointer; color: #4a6fa5; }
+    .bc-item:hover { text-decoration: underline; }
+    .bc-item.current { color: #333; font-weight: 500; cursor: default; text-decoration: none; }
+    .bc-sep { color: #ccc; }
+    /* 上传说明弹窗 */
+    .upload-guide p {
+      font-size: 13px;
+      color: #555;
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+    .upload-guide li {
+      font-size: 13px;
+      color: #555;
+      line-height: 1.9;
+      padding-left: 14px;
+      position: relative;
+    }
+    .upload-guide li::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: #4a6fa5;
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    /* 上传任务面板（右下角） */
+    .upload-panel {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: 320px;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+      z-index: 600;
+      display: none;
+    }
+    .upload-panel.active { display: block; }
+    .upload-panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+    .upload-panel-close {
+      cursor: pointer;
+      color: #999;
+      font-size: 16px;
+      line-height: 1;
+    }
+    .upload-panel-close:hover { color: #333; }
+    .upload-panel-body {
+      padding: 8px 0;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+    .upload-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+    }
+    .upload-item + .upload-item { border-top: 1px dashed #f0f0f0; }
+    .upload-item-info { flex: 1; min-width: 0; }
+    .upload-item-name {
+      font-size: 13px;
+      color: #333;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .upload-item-size { font-size: 11px; color: #bbb; margin-top: 2px; }
+    .upload-item-status {
+      flex-shrink: 0;
+      font-size: 12px;
+      color: #666;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .upload-item-status .spin {
+      width: 10px;
+      height: 10px;
+      border: 1.5px solid #d0d0d0;
+      border-top-color: #4a6fa5;
+      border-radius: 50%;
+      animation: upSpin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+    .upload-item-status.done { color: #27804a; }
+    @keyframes upSpin { to { transform: rotate(360deg); } }
+    .upload-item-del {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      padding: 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: #fff;
+      color: #999;
+      font-size: 12px;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .upload-item-del:hover { border-color: #c0392b; color: #c0392b; }
+    /* 文件夹名称行内编辑 */
+    .folder-name-input {
+      width: 100%;
+      padding: 4px 10px;
+      font-size: 13px;
+      border: 1px solid #4a6fa5;
+      border-radius: 4px;
+      outline: none;
+      color: #333;
+    }
+    /* 行操作图标按钮 */
+    .row-act {
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: #fff;
+      color: #666;
+      font-size: 12px;
+      line-height: 1;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    .row-act:hover { border-color: #4a6fa5; color: #4a6fa5; }
+    /* 列表底部上传入口 */
+    .upload-here {
+      padding: 14px;
+      text-align: center;
+      font-size: 13px;
+      color: #4a6fa5;
+      cursor: pointer;
+      border-top: 1px dashed #e0e0e0;
+      background: #fcfdff;
+    }
+    .upload-here:hover { background: #f0f5fb; }
+    /* 上传到文件夹选择 */
+    .upload-target { margin-bottom: 14px; }
+    .upload-target label {
+      display: block;
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 6px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand" title="返回首页" onclick="window.location.href='home.html'">
+      <div class="sidebar-brand-logo">5</div>
+      <div class="sidebar-brand-name">5度易链<small>5 DEGREE EASY CHAIN</small></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-item" onclick="window.location.href='report.html'">
+        <div class="sidebar-icon">✎</div>
+        <span>生成报告</span>
+      </div>
+      <div class="sidebar-item" onclick="window.location.href='assets.html'">
+        <div class="sidebar-icon">▤</div>
+        <span>报告资产</span>
+      </div>
+      <div class="sidebar-item active">
+        <div class="sidebar-icon">○</div>
+        <span>知识库</span>
+      </div>
+    </div>
+    <div class="divider" style="margin:4px 12px;"></div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">任务列表</div>
+      <div class="sidebar-task-item" onclick="window.location.href='report.html?task=1'">
+        <span class="sidebar-task-text">海关总署2025年数据治理咨询及实施服务项目实施方案</span>
+        <span class="task-status-icon running" title="进行中"></span>
+        <span class="task-actions">
+          <button class="task-act" title="编辑任务名称" onclick="event.stopPropagation();showToast()">✎</button>
+          <button class="task-act danger" title="删除任务" onclick="event.stopPropagation();showToast()">✕</button>
+        </span>
+      </div>
+      <div class="sidebar-task-item" onclick="window.location.href='report.html?task=2'">
+        <span class="sidebar-task-text">海关总署2025年数据治理咨询项目</span>
+        <span class="task-status-icon done" title="已完成"></span>
+        <span class="task-actions">
+          <button class="task-act" title="编辑任务名称" onclick="event.stopPropagation();showToast()">✎</button>
+          <button class="task-act danger" title="删除任务" onclick="event.stopPropagation();showToast()">✕</button>
+        </span>
+      </div>
+    </div>
+
+    <!-- 侧栏底部：用户信息一行 -->
+    <div class="sidebar-footer">
+      <div class="sidebar-user" onclick="openUserMenu(event)">
+        <span class="user-avatar">5</span>
+        <span class="user-name">度小满</span>
+        <span class="user-bell" title="消息" onclick="event.stopPropagation();closeUserMenu();showToast()">🔔<span class="footer-dot"></span></span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main-content">
+    <div class="content-head">
+      <div class="page-title">知识库</div>
+      <div class="page-actions">
+        <button class="btn btn-outline" onclick="createFolder()">＋ 新建文件夹</button>
+        <button class="btn btn-primary" onclick="openUploadGuide()">＋ 上传文件</button>
+        <input type="file" id="fileInput" style="display:none" multiple onchange="onFileUploaded()">
+      </div>
+    </div>
+
+    <!-- 文件夹路径导航 -->
+    <div class="kb-breadcrumb" id="kbBreadcrumb"></div>
+
+    <!-- Search -->
+    <div class="search-bar">
+      <input class="input" type="text" placeholder="输入文件或文件夹名称查询" id="searchInput" oninput="renderList()">
+      <button class="btn btn-outline" onclick="renderList()">🔍 搜索</button>
+    </div>
+
+    <!-- 文件/文件夹表格 -->
+    <div style="border:1px solid #e8e8e8;border-radius:8px;overflow:hidden;background:#fff;">
+      <table class="table" id="fileTable">
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th style="width:100px;"><span class="sortable" data-key="size" onclick="toggleKbSort('size')">文件大小 <span class="sort-ind">⇅</span></span></th>
+            <th style="width:160px;"><span class="sortable" data-key="created" onclick="toggleKbSort('created')">创建时间 <span class="sort-ind">⇅</span></span></th>
+            <th style="width:160px;"><span class="sortable" data-key="updated" onclick="toggleKbSort('updated')">更新时间 <span class="sort-ind">⇅</span></span></th>
+            <th style="width:110px;">操作</th>
+          </tr>
+        </thead>
+        <tbody id="fileList"></tbody>
+      </table>
+      <div class="kb-empty" id="kbEmpty" style="display:none;">当前文件夹为空，可新建文件夹或上传文件</div>
+      <div class="upload-here" onclick="openUploadGuide()">＋ 上传文件</div>
+    </div>
+
+  </main>
+
+  <!-- 更多操作浮窗（固定定位，避免被表格遮挡） -->
+  <div class="ctx-menu" id="ctxMenu">
+    <span class="ctx-item link-rename">✎ 重命名</span>
+    <span class="ctx-item danger link-del">✕ 删除</span>
+  </div>
+
+  <!-- 用户二级悬浮窗 -->
+  <div class="ctx-menu user-menu" id="userMenu">
+    <div class="user-menu-head">👤 度小满</div>
+    <div class="user-menu-item" onclick="footerAction()">¥ 余额：998<span class="sub">充值 ›</span></div>
+    <div class="user-menu-item" onclick="footerAction()">💬 客服微信</div>
+    <div class="user-menu-divider"></div>
+    <div class="user-menu-title">更多操作</div>
+    <div class="user-menu-item" onclick="footerAction()">帮助中心</div>
+    <div class="user-menu-item" onclick="footerAction()">设置</div>
+    <div class="user-menu-item danger" onclick="footerAction()">退出登录</div>
+  </div>
+
+  <!-- 上传任务面板（右下角） -->
+  <div class="upload-panel" id="uploadPanel">
+    <div class="upload-panel-head">
+      <span>上传任务</span>
+      <span class="upload-panel-close" onclick="closeUploadPanel()">×</span>
+    </div>
+    <div class="upload-panel-body" id="uploadPanelBody"></div>
+  </div>
+
+  <!-- 上传说明弹窗 -->
+  <div class="modal-overlay" id="uploadGuideModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title">文件上传说明</span>
+        <span class="modal-close" onclick="closeUploadGuide()">×</span>
+      </div>
+      <div class="modal-body">
+        <div class="upload-target">
+          <label>上传到文件夹</label>
+          <select class="input" id="uploadTargetSelect"></select>
+        </div>
+        <div class="upload-guide">
+          <p>将行业报告、企业数据、政策文件等资料上传至知识库后，可被报告生成过程引用，作为写作的数据依据。</p>
+          <ul>
+            <li>支持文件类型：docx、doc、xlsx、xls、pdf</li>
+            <li>不支持扫描版 PDF（无文字内容，无法解析引用）</li>
+            <li>单份文件大小上限 100MB，可一次选择多个文件</li>
+            <li>上传后文件进入解析队列，解析完成后状态变为"可引用"</li>
+          </ul>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeUploadGuide()">取消</button>
+          <button class="btn btn-primary" onclick="chooseFile()">选择文件上传</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="task-toast" id="actionToast">
+    <span class="task-toast-close" onclick="closeToast()">×</span>
+    <div class="task-toast-title">提示</div>
+    <div class="task-toast-desc">操作已触发（原型演示）</div>
+  </div>
+
+  <script>
+    function openUploadGuide() {
+      const sel = document.getElementById('uploadTargetSelect');
+      const folders = [];
+      collectFolders(KB_ROOT, '', folders);
+      const cur = currentFolder();
+      const curIdx = folders.findIndex(f => f.folder === cur);
+      sel.innerHTML = '<option value="root">全部文件（根目录）</option>'
+        + folders.map((f, i) => '<option value="' + i + '">' + f.label + '</option>').join('');
+      sel.value = curIdx === -1 ? 'root' : String(curIdx);
+      uploadTarget = curIdx === -1 ? KB_ROOT : folders[curIdx].folder;
+      sel.onchange = function () {
+        uploadTarget = this.value === 'root' ? KB_ROOT : folders[Number(this.value)].folder;
+      };
+      document.getElementById('uploadGuideModal').classList.add('active');
+    }
+    function closeUploadGuide() {
+      document.getElementById('uploadGuideModal').classList.remove('active');
+    }
+    function chooseFile() {
+      document.getElementById('fileInput').click();
+    }
+
+    /* ==================== 知识库：文件夹 + 文件（开放式管理） ==================== */
+    const KB_ROOT = {
+      name: '全部文件',
+      time: '—',
+      updateTime: '—',
+      children: [
+        { type: 'folder', name: '行业报告', time: '2026-07-18 10:00', updateTime: '2026-07-22 16:24', children: [
+          { type: 'file', name: '海关总署2025年数据治理咨询及实施服务项目实施方案.docx', size: '2.30M', time: '2026-07-22 16:24', updateTime: '2026-07-22 16:24', icon: 'docx', iconLetter: 'D', ext: 'DOCX' },
+          { type: 'file', name: '行业研究报告_通用模板.docx', size: '1.20M', time: '2026-07-18 10:20', updateTime: '2026-07-20 09:12', icon: 'docx', iconLetter: 'D', ext: 'DOCX' }
+        ]},
+        { type: 'folder', name: '企业数据', time: '2026-07-18 10:05', updateTime: '2026-07-22 16:10', children: [
+          { type: 'file', name: '企业数据汇总_2025Q2.xlsx', size: '157.78KB', time: '2026-07-22 16:10', updateTime: '2026-07-22 16:10', icon: 'xlsx', iconLetter: 'X', ext: 'XLSX' },
+          { type: 'file', name: '财务模型_IRR计算模板_v3.xlsx', size: '890.5KB', time: '2026-07-19 11:08', updateTime: '2026-07-21 15:30', icon: 'xlsx', iconLetter: 'X', ext: 'XLSX' }
+        ]},
+        { type: 'folder', name: '政策文件', time: '2026-07-18 10:08', updateTime: '2026-07-21 09:35', children: [
+          { type: 'file', name: '生物医药产业政策汇编_2025.pdf', size: '5.42M', time: '2026-07-21 09:35', updateTime: '2026-07-21 09:35', icon: 'pdf', iconLetter: 'P', ext: 'PDF' }
+        ]},
+        { type: 'folder', name: '技术文档', time: '2026-07-18 10:12', updateTime: '2026-07-20 14:22', children: [
+          { type: 'file', name: '智慧城市数据中台技术方案.docx', size: '3.15M', time: '2026-07-20 14:22', updateTime: '2026-07-20 14:22', icon: 'docx', iconLetter: 'D', ext: 'DOCX' }
+        ]},
+        { type: 'file', name: '公司资质与认证材料.pdf', size: '2.85M', time: '2026-07-16 15:40', updateTime: '2026-07-16 15:40', icon: 'pdf', iconLetter: 'P', ext: 'PDF' }
+      ]
+    };
+    let kbPath = [KB_ROOT];
+    let kbFolderSeq = 1;
+    let uploadTarget = KB_ROOT;
+    /* 表头排序状态：文件大小 / 创建时间 / 更新时间 */
+    const kbSort = { key: null, dir: 1 };
+    function parseBytes(str) {
+      const m = String(str || '').match(/^([\d.]+)\s*(KB|MB|GB|K|M)$/i);
+      if (!m) return -1;
+      const n = parseFloat(m[1]);
+      const u = m[2].toUpperCase();
+      if (u === 'GB') return n * 1024 * 1024 * 1024;
+      if (u === 'MB' || u === 'M') return n * 1024 * 1024;
+      return n * 1024;
+    }
+    function sortValue(it, key) {
+      if (key === 'size') return it.type === 'folder' ? -1 : parseBytes(it.size);
+      if (key === 'created') return it.time;
+      if (key === 'updated') return it.updateTime || it.time;
+      return '';
+    }
+    function toggleKbSort(key) {
+      if (kbSort.key === key) {
+        // 正序 → 倒序 → 默认（恢复原始顺序）
+        if (kbSort.dir === 1) kbSort.dir = -1;
+        else { kbSort.key = null; kbSort.dir = 1; }
+      } else {
+        kbSort.key = key;
+        kbSort.dir = 1;
+      }
+      renderList();
+    }
+
+    function currentFolder() { return kbPath[kbPath.length - 1]; }
+    function nowText() { return new Date().toISOString().replace('T', ' ').slice(0, 16); }
+    function collectFolders(node, prefix, out) {
+      node.children.filter(c => c.type === 'folder').forEach(f => {
+        out.push({ folder: f, label: prefix + f.name });
+        collectFolders(f, prefix + f.name + '/', out);
+      });
+      return out;
+    }
+    function escHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function renderList() {
+      // 面包屑
+      const bc = document.getElementById('kbBreadcrumb');
+      bc.innerHTML = '';
+      const crumbs = kbPath.slice(1);
+      if (!crumbs.length) {
+        bc.style.display = 'none';
+      } else {
+        bc.style.display = 'flex';
+        crumbs.forEach((f, i) => {
+          const item = document.createElement('span');
+          item.className = 'bc-item' + (i === crumbs.length - 1 ? ' current' : '');
+          item.textContent = f.name;
+          item.onclick = () => { kbPath = kbPath.slice(0, i + 2); renderList(); };
+          bc.appendChild(item);
+          if (i < crumbs.length - 1) {
+            const sep = document.createElement('span');
+            sep.className = 'bc-sep';
+            sep.textContent = '/';
+            bc.appendChild(sep);
+          }
+        });
+      }
+      // 列表
+      const q = document.getElementById('searchInput').value.trim().toLowerCase();
+      const tbody = document.getElementById('fileList');
+      tbody.innerHTML = '';
+      let items = currentFolder().children.filter(it => !q || it.name.toLowerCase().includes(q));
+      if (kbSort.key) {
+        items = items.slice().sort((a, b) => {
+          const va = sortValue(a, kbSort.key), vb = sortValue(b, kbSort.key);
+          let r;
+          if (typeof va === 'number' && typeof vb === 'number') r = va - vb;
+          else r = String(va).localeCompare(String(vb));
+          return r * kbSort.dir;
+        });
+      }
+      document.querySelectorAll('#fileTable .sortable').forEach(h => {
+        const active = h.dataset.key === kbSort.key;
+        h.classList.toggle('sorted', active);
+        h.querySelector('.sort-ind').textContent = active ? (kbSort.dir === 1 ? '▲' : '▼') : '⇅';
+      });
+      document.getElementById('kbEmpty').style.display = items.length ? 'none' : 'block';
+      items.forEach(it => {
+        const tr = document.createElement('tr');
+        const icon = it.type === 'folder'
+          ? '<span class="file-icon folder">📁</span>'
+          : '<span class="file-icon ' + it.icon + '">' + it.iconLetter + '</span>';
+        const size = it.type === 'folder' ? (it.children.length + ' 项') : it.size;
+        const primaryLabel = it.type === 'folder' ? '打开' : '下载';
+        const primaryIcon = it.type === 'folder' ? '📂' : '⬇';
+        const ops = '<button class="row-act link-primary" title="' + primaryLabel + '">' + primaryIcon + '</button>'
+          + '<button class="row-act more-btn" title="更多操作">⋯</button>';
+        tr.innerHTML = '<td><span class="file-name-cell">' + icon + '<span>' + escHtml(it.name) + '</span></span></td>'
+          + '<td>' + size + '</td>'
+          + '<td>' + it.time + '</td>'
+          + '<td>' + (it.updateTime || it.time) + '</td>'
+          + '<td>' + ops + '</td>';
+        const nameCell = tr.querySelector('.file-name-cell');
+        nameCell.style.cursor = it.type === 'folder' ? 'pointer' : 'default';
+        nameCell.title = it.name;
+        nameCell.onclick = it.type === 'folder' ? () => openFolder(it) : () => showToast();
+        const primary = tr.querySelector('.link-primary');
+        primary.onclick = it.type === 'folder' ? () => openFolder(it) : () => downloadItem(it);
+        const moreBtn = tr.querySelector('.more-btn');
+        moreBtn.onclick = function (e) {
+          e.stopPropagation();
+          openMoreMenu(moreBtn, it, tr);
+        };
+        tbody.appendChild(tr);
+      });
+    }
+
+    const ctxMenu = document.getElementById('ctxMenu');
+    function openMoreMenu(btn, it, tr) {
+      ctxMenu.style.display = 'block';
+      const rect = btn.getBoundingClientRect();
+      ctxMenu.style.left = Math.max(8, rect.right - ctxMenu.offsetWidth) + 'px';
+      const menuH = ctxMenu.offsetHeight;
+      const spaceAbove = rect.top;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      if (spaceAbove >= menuH + 8 || spaceAbove > spaceBelow) {
+        ctxMenu.style.top = Math.max(8, rect.top - menuH - 4) + 'px';
+      } else {
+        ctxMenu.style.top = (rect.bottom + 4) + 'px';
+      }
+      ctxMenu.querySelector('.link-rename').onclick = function () { closeMoreMenu(); startInlineRename(it, tr, false); };
+      ctxMenu.querySelector('.link-del').onclick = function () { closeMoreMenu(); deleteItem(it); };
+    }
+    function closeMoreMenu() {
+      ctxMenu.style.display = 'none';
+    }
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.ctx-menu') && !e.target.closest('.more-btn')) closeMoreMenu();
+    });
+    window.addEventListener('scroll', closeMoreMenu, true);
+
+    function openFolder(folder) {
+      kbPath.push(folder);
+      renderList();
+    }
+
+    function createFolder() {
+      const folder = {
+        type: 'folder',
+        name: '新建文件夹' + (kbFolderSeq++),
+        time: nowText(),
+        updateTime: nowText(),
+        children: []
+      };
+      currentFolder().children.unshift(folder);
+      renderList();
+      // 新建后立即进入名称编辑状态
+      const row = document.querySelector('#fileList tr');
+      if (row) startInlineRename(folder, row, true);
+    }
+
+    function startInlineRename(item, row, creationMode) {
+      const nameCell = row.querySelector('.file-name-cell');
+      const nameSpan = nameCell.querySelector('span:last-child');
+      const input = document.createElement('input');
+      input.className = 'folder-name-input';
+      input.value = item.name;
+      nameCell.replaceChild(input, nameSpan);
+      input.focus();
+      input.select();
+      // 编辑期间点击名称单元格不触发打开文件夹
+      nameCell.onclick = function (e) { e.stopPropagation(); };
+      let done = false;
+      function finish(save) {
+        if (done) return;
+        done = true;
+        const val = input.value.trim();
+        if (save && val) {
+          item.name = val;
+          item.updateTime = nowText();
+          const parent = currentFolder();
+          if (parent !== KB_ROOT) parent.updateTime = nowText();
+          renderList();
+          showToast();
+          return;
+        }
+        if (creationMode) {
+          // 新建时取消/名称为空：移除该文件夹
+          const list = currentFolder().children;
+          const i = list.indexOf(item);
+          if (i > -1) list.splice(i, 1);
+        }
+        renderList();
+      }
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+        else if (e.key === 'Escape') { finish(false); }
+        e.stopPropagation();
+      });
+      input.addEventListener('blur', function () { finish(true); });
+    }
+
+    function deleteItem(item) {
+      const list = currentFolder().children;
+      const i = list.indexOf(item);
+      if (i > -1) list.splice(i, 1);
+      if (currentFolder() !== KB_ROOT) currentFolder().updateTime = nowText();
+      renderList();
+      showToast();
+    }
+
+    function downloadItem(item) {
+      // 原型演示：生成一个以文件名命名的文本文件触发真实下载
+      const content = '五度妙笔原型演示文件\n名称：' + item.name + '\n大小：' + item.size + '\n创建时间：' + item.time;
+      const blob = new Blob([content], { type: 'application/octet-stream' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = item.name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast();
+    }
+
+    function onFileUploaded() {
+      const fileInput = document.getElementById('fileInput');
+      const files = Array.from(fileInput.files || []);
+      files.forEach(file => {
+        const ext = (file.name.split('.').pop() || '').toLowerCase();
+        let icon = 'docx', letter = 'D', extLabel = 'DOCX';
+        if (ext === 'xlsx' || ext === 'xls') { icon = 'xlsx'; letter = 'X'; extLabel = 'XLSX'; }
+        else if (ext === 'pdf') { icon = 'pdf'; letter = 'P'; extLabel = 'PDF'; }
+        const kbitem = {
+          type: 'file',
+          name: file.name,
+          size: formatSize(file.size),
+          time: nowText(),
+          updateTime: nowText(),
+          icon: icon,
+          iconLetter: letter,
+          ext: extLabel
+        };
+        if (uploadTarget !== KB_ROOT) uploadTarget.updateTime = nowText();
+        uploadTarget.children.unshift(kbitem);
+        addUploadItem(file, kbitem, uploadTarget);
+      });
+      renderList();
+      fileInput.value = '';
+      closeUploadGuide();
+    }
+
+    /* ==================== 上传任务面板（右下角） ==================== */
+    const uploadItems = [];
+    function formatSize(bytes) {
+      if (bytes >= 1048576) return (bytes / 1048576).toFixed(2) + 'MB';
+      return (bytes / 1024).toFixed(1) + 'KB';
+    }
+    function closeUploadPanel() {
+      document.getElementById('uploadPanel').classList.remove('active');
+    }
+    function addUploadItem(file, kbitem, folder) {
+      const panel = document.getElementById('uploadPanel');
+      const body = document.getElementById('uploadPanelBody');
+      panel.classList.add('active');
+      const item = document.createElement('div');
+      item.className = 'upload-item';
+      item.innerHTML =
+        '<div class="upload-item-info">'
+        + '<div class="upload-item-name">' + escHtml(file.name) + '</div>'
+        + '<div class="upload-item-size">' + formatSize(file.size) + '</div>'
+        + '</div>'
+        + '<span class="upload-item-status"><span class="spin"></span>上传中…</span>'
+        + '<button class="upload-item-del" title="删除">✕</button>';
+      const statusEl = item.querySelector('.upload-item-status');
+      const delBtn = item.querySelector('.upload-item-del');
+      const entry = { item: item, statusEl: statusEl, kbitem: kbitem, folder: folder, done: false, timer: null };
+      delBtn.onclick = function () {
+        clearTimeout(entry.timer);
+        item.remove();
+        uploadItems.splice(uploadItems.indexOf(entry), 1);
+        if (!entry.done) {
+          // 上传未完成时删除：同时从知识库列表移除该文件
+          const list = entry.folder.children;
+          const i = list.indexOf(kbitem);
+          if (i > -1) list.splice(i, 1);
+          renderList();
+        }
+        if (!uploadItems.length) panel.classList.remove('active');
+        showToast();
+      };
+      body.appendChild(item);
+      uploadItems.push(entry);
+      // 模拟上传流程：上传中 → 上传完成 → 解析中 → 已完成
+      entry.timer = setTimeout(function () {
+        statusEl.innerHTML = '上传完成';
+        entry.timer = setTimeout(function () {
+          statusEl.innerHTML = '<span class="spin"></span>解析中…';
+          entry.timer = setTimeout(function () {
+            statusEl.innerHTML = '✓ 已完成';
+            statusEl.classList.add('done');
+            entry.done = true;
+          }, 1200);
+        }, 900);
+      }, 1200);
+    }
+
+    renderList();
+    function showToast() {
+      document.getElementById('actionToast').classList.add('active');
+      setTimeout(() => {
+        document.getElementById('actionToast').classList.remove('active');
+      }, 2000);
+    }
+    function closeToast() {
+      document.getElementById('actionToast').classList.remove('active');
+    }
+
+    /* 侧栏底部：用户二级悬浮窗 */
+    function openUserMenu(e) {
+      e.stopPropagation();
+      const m = document.getElementById('userMenu');
+      const rect = e.currentTarget.getBoundingClientRect();
+      m.style.display = 'block';
+      m.style.left = Math.max(8, rect.left) + 'px';
+      const menuH = m.offsetHeight;
+      if (window.innerHeight - rect.bottom - 4 < menuH) {
+        m.style.top = Math.max(8, rect.top - menuH - 4) + 'px';
+      } else {
+        m.style.top = (rect.bottom + 4) + 'px';
+      }
+    }
+    function closeUserMenu() {
+      document.getElementById('userMenu').style.display = 'none';
+    }
+    function footerAction() {
+      closeUserMenu();
+      showToast();
+    }
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('#userMenu') && !e.target.closest('.sidebar-user')) closeUserMenu();
+    });
+
+    /* 任务名称悬浮气泡：仅当名称被截断时显示完整名称 */
+    (function initTaskTip() {
+      const tip = document.createElement('div');
+      tip.className = 'task-tip';
+      document.body.appendChild(tip);
+      document.querySelectorAll('.sidebar-task-text').forEach(el => {
+        const full = el.textContent.trim();
+        el.addEventListener('mouseenter', function () {
+          if (el.scrollWidth > el.clientWidth + 1) {
+            tip.textContent = full;
+            tip.style.display = 'block';
+          }
+        });
+        el.addEventListener('mousemove', function (e) {
+          if (tip.style.display === 'block') {
+            tip.style.left = Math.min(e.clientX + 12, window.innerWidth - 280) + 'px';
+            tip.style.top = (e.clientY + 12) + 'px';
+          }
+        });
+        el.addEventListener('mouseleave', function () { tip.style.display = 'none'; });
+      });
+    })();
+  </script>
+</body>
+</html>

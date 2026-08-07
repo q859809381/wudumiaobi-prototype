@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文件预览 - 五度妙笔</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: #f6f7f9;
+      color: #333;
+      padding: 32px 20px;
+    }
+    .preview-page {
+      max-width: 860px;
+      margin: 0 auto;
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 12px;
+      padding: 28px 32px;
+    }
+    .preview-head {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+    }
+    .file-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .file-badge.doc { background: #e8eef6; color: #2b579a; }
+    .file-badge.pdf { background: #f6e8e8; color: #c0392b; }
+    .file-badge.xlsx { background: #e8f6ed; color: #27804a; }
+    .file-name { font-size: 18px; font-weight: 700; color: #333; line-height: 1.4; }
+    .file-meta { font-size: 13px; color: #999; margin-top: 6px; }
+    .file-content {
+      border: 1px dashed #ddd;
+      border-radius: 8px;
+      padding: 48px 24px;
+      text-align: center;
+      color: #aaa;
+      font-size: 13px;
+      line-height: 1.8;
+      background: #fafafa;
+    }
+    .file-content .icon { font-size: 32px; display: block; margin-bottom: 12px; }
+    .back {
+      display: inline-block;
+      margin-top: 16px;
+      font-size: 13px;
+      color: #4a6fa5;
+      cursor: pointer;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="preview-page">
+    <div class="preview-head">
+      <span class="file-badge doc" id="fileBadge">DOC</span>
+      <div>
+        <div class="file-name" id="fileName">文件预览</div>
+        <div class="file-meta" id="fileMeta"></div>
+      </div>
+    </div>
+    <div class="file-content">
+      <span class="icon" id="fileIcon">📄</span>
+      文件内容预览（原型演示）<br>
+      此处展示所选知识库文件的正文内容。
+    </div>
+    <a class="back" href="javascript:history.back()">‹ 返回</a>
+  </div>
+
+  <script>
+    const p = new URLSearchParams(location.search);
+    const name = p.get('name') || '未命名文件';
+    const size = p.get('size') || '—';
+    const time = p.get('time') || '—';
+    const type = p.get('type') || 'docx';
+    document.getElementById('fileName').textContent = name;
+    document.getElementById('fileMeta').textContent = '大小：' + size + '　上传时间：' + time;
+    const badge = document.getElementById('fileBadge');
+    const icon = document.getElementById('fileIcon');
+    if (type === 'pdf') {
+      badge.className = 'file-badge pdf';
+      badge.textContent = 'PDF';
+      icon.textContent = '📕';
+    } else if (type === 'xlsx') {
+      badge.className = 'file-badge xlsx';
+      badge.textContent = 'XLSX';
+      icon.textContent = '📊';
+    } else {
+      badge.className = 'file-badge doc';
+      badge.textContent = 'DOC';
+      icon.textContent = '📄';
+    }
+    document.title = name + ' - 文件预览';
+  </script>
+</body>
+</html>
