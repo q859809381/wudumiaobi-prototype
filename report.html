@@ -1337,6 +1337,40 @@
       color: #888;
     }
     .source-card-chapters b { color: #555; font-weight: 600; }
+    /* 关键事实卡片 */
+    .fact-group-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #999;
+      margin: 14px 0 8px;
+    }
+    .fact-group-title:first-child { margin-top: 0; }
+    .fact-card {
+      border: 1px solid #f0f0f0;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      background: #fff;
+    }
+    .fact-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    .fact-value {
+      font-size: 12px;
+      color: #4a6fa5;
+      font-weight: 500;
+      line-height: 1.5;
+      word-break: break-all;
+      margin-bottom: 4px;
+    }
+    .fact-chapters {
+      font-size: 11px;
+      color: #999;
+    }
+    .fact-chapters b { color: #666; font-weight: 600; }
     .src-type {
       display: inline-block;
       font-size: 10px;
@@ -3327,18 +3361,7 @@
           </div>
           <div class="review-body" id="reviewFacts" style="display:none;">
             <div class="review-group-title">关键事实</div>
-            <div class="review-item">
-              <div class="review-item-title">🔗 企业名称</div>
-              <div class="review-item-desc">企查查科技股份有限公司 — 已核实（工商登记信息一致）</div>
-            </div>
-            <div class="review-item">
-              <div class="review-item-title">🔗 项目总投资</div>
-              <div class="review-item-desc">68,259.35万元 — 来自用户输入，待与资金来源勾稽</div>
-            </div>
-            <div class="review-item">
-              <div class="review-item-title">🔗 建设地点</div>
-              <div class="review-item-desc">江苏省苏州市工业园区 — 已核实</div>
-            </div>
+            <div id="factCardList"></div>
           </div>
           <div class="review-body" id="reviewSources" style="display:none;">
             <div class="review-group-title">来源汇总</div>
@@ -3784,6 +3807,89 @@
       });
     }
     renderSources();
+    /* ==================== 关键事实：读取信息确认与锚定的核定数据 ==================== */
+    const KEY_FACT_GROUPS = [
+      {
+        title: '项目概况',
+        items: [
+          { label: '项目总投资（万元）', chapters: [1, 7, 8] },
+          { label: '产业方向', chapters: [3] },
+          { label: '建设性质', chapters: [1, 4] },
+          { label: '运营期', chapters: [6, 7] },
+          { label: '建设周期', chapters: [1, 4] },
+          { label: '建筑面积（㎡）', chapters: [4] },
+          { label: '用地面积（㎡）', chapters: [4] }
+        ]
+      },
+      {
+        title: '财务测算',
+        items: [
+          { label: '产品/服务名称', chapters: [3] },
+          { label: '单价', chapters: [3, 7] },
+          { label: '增值税率', chapters: [7] },
+          { label: '达产年产能', chapters: [3] },
+          { label: '直接成本占比（不含人工、折旧、利息）', chapters: [7] },
+          { label: '爬坡计划', chapters: [3, 6] },
+          { label: '基准收益率（%）', chapters: [7] },
+          { label: '行业基准', chapters: [7] },
+          { label: '期望投资回收期', chapters: [7] }
+        ]
+      },
+      {
+        title: '投资与资金',
+        items: [
+          { label: '设备购置费（万元）', chapters: [4, 7] },
+          { label: '软件购置费（万元）', chapters: [4, 7] },
+          { label: '研发费用（万元）', chapters: [4, 7] },
+          { label: '建筑工程费（万元）', chapters: [4, 7] },
+          { label: '安装工程费（万元）', chapters: [4, 7] },
+          { label: '工程建设其他费用（万元）', chapters: [4, 7] },
+          { label: '土地使用费（万元）', chapters: [4] },
+          { label: '预备费（万元）', chapters: [4, 7] },
+          { label: '建设期利息（万元）', chapters: [7] },
+          { label: '铺底流动资金（万元）', chapters: [6, 7] },
+          { label: '贷款利率', chapters: [7] },
+          { label: '企业自筹及比例（万元）', chapters: [7] },
+          { label: '贷款及比例（万元）', chapters: [7] },
+          { label: '政府补助（万元）', chapters: [7] }
+        ]
+      }
+    ];
+    function factValueOf(label) {
+      const modal = document.getElementById('confirmModal');
+      if (!modal) return '';
+      const rows = modal.querySelectorAll('.anchor-row');
+      for (let i = 0; i < rows.length; i++) {
+        const l = rows[i].querySelector('.anchor-label');
+        if (l && l.textContent.trim().indexOf(label) === 0) {
+          const dv = rows[i].querySelector('.dim-val');
+          if (dv) return dv.textContent.replace('✎', '').trim();
+        }
+      }
+      return '';
+    }
+    function renderFacts() {
+      const list = document.getElementById('factCardList');
+      if (!list) return;
+      list.innerHTML = '';
+      KEY_FACT_GROUPS.forEach(function (group) {
+        const title = document.createElement('div');
+        title.className = 'fact-group-title';
+        title.textContent = group.title;
+        list.appendChild(title);
+        group.items.forEach(function (it) {
+          const raw = factValueOf(it.label);
+          if (!raw) return;
+          const card = document.createElement('div');
+          card.className = 'fact-card';
+          card.innerHTML = '<div class="fact-name">' + it.label + '</div>'
+            + '<div class="fact-value">' + formatNumberText(it.label, raw) + '</div>'
+            + '<div class="fact-chapters">影响章节：<b>' + it.chapters.join('、') + '</b></div>';
+          list.appendChild(card);
+        });
+      });
+    }
+    renderFacts();
     document.addEventListener('click', function (e) {
       const tag = e.target.closest('.src-tag');
       if (tag) showSourcePopup(tag);
@@ -4013,6 +4119,28 @@
     function fmtPercent2(n) {
       return n.toFixed(2);
     }
+    /* 单个数据值格式化：金额四位小数、百分比两位小数 */
+    function formatNumberText(label, raw) {
+      // 金额 + 比例复合：40,955.61（60%）→ 40,955.6100（60.00%）
+      const m1 = raw.match(/^([\d,]+(?:\.\d+)?)\s*[（(]([\d.]+)%[)）]$/);
+      if (m1) {
+        return fmtAmount4(parseFloat(m1[1].replace(/,/g, ''))) + '（' + fmtPercent2(parseFloat(m1[2])) + '%）';
+      }
+      // 纯数字单元格
+      const m2 = raw.match(/^[\d,]+(?:\.\d+)?$/);
+      if (m2) {
+        const n = parseFloat(raw.replace(/,/g, ''));
+        const isPct = label.indexOf('%') >= 0 || label.indexOf('率') >= 0;
+        return isPct ? fmtPercent2(n) : fmtAmount4(n);
+      }
+      // 文本中内嵌百分比：30% → 30.00%
+      if (raw.indexOf('%') >= 0) {
+        return raw.replace(/(\d+(?:\.\d+)?)%/g, function (_, num) {
+          return fmtPercent2(parseFloat(num)) + '%';
+        });
+      }
+      return raw;
+    }
     /* 金额相关数字保留四位小数，百分比相关数字保留两位小数 */
     function formatConfirmNumbers() {
       const modal = document.getElementById('confirmModal');
@@ -4023,26 +4151,7 @@
         const row = dv.closest('.anchor-row');
         const label = row && row.querySelector('.anchor-label') ? row.querySelector('.anchor-label').textContent.trim() : '';
         const raw = dv.textContent.replace('✎', '').trim();
-        // 金额 + 比例复合：40,955.61（60%）→ 40,955.6100（60.00%）
-        const m1 = raw.match(/^([\d,]+(?:\.\d+)?)\s*[（(]([\d.]+)%[)）]$/);
-        if (m1) {
-          dv.textContent = fmtAmount4(parseFloat(m1[1].replace(/,/g, ''))) + '（' + fmtPercent2(parseFloat(m1[2])) + '%）';
-          return;
-        }
-        // 纯数字单元格
-        const m2 = raw.match(/^[\d,]+(?:\.\d+)?$/);
-        if (m2) {
-          const n = parseFloat(raw.replace(/,/g, ''));
-          const isPct = label.indexOf('%') >= 0 || label.indexOf('率') >= 0;
-          dv.textContent = isPct ? fmtPercent2(n) : fmtAmount4(n);
-          return;
-        }
-        // 文本中内嵌百分比：30% → 30.00%
-        if (raw.indexOf('%') >= 0) {
-          dv.textContent = raw.replace(/(\d+(?:\.\d+)?)%/g, function (_, num) {
-            return fmtPercent2(parseFloat(num)) + '%';
-          });
-        }
+        dv.textContent = formatNumberText(label, raw);
       });
     }
     /* 资金来源金额项：按金额 ÷ 总投资自动计算并展示占比 */
@@ -4138,6 +4247,7 @@
       document.querySelectorAll('.input-step').forEach(s => s.classList.remove('active'));
       document.getElementById('step4').classList.add('active');
       renderPaperByStatus();
+      renderFacts();
       showTaskToast();
     }
     function openWizard(stageToShow) {

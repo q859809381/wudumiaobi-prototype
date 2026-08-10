@@ -323,7 +323,7 @@
     <div class="content-head">
       <div class="page-title">知识库</div>
       <div class="page-actions">
-        <button class="btn btn-outline" onclick="createFolder()">＋ 新建文件夹</button>
+        <button class="btn btn-outline" id="createFolderBtn" onclick="createFolder()">＋ 新建文件夹</button>
         <button class="btn btn-primary" onclick="openUploadGuide()">＋ 上传文件</button>
         <input type="file" id="fileInput" style="display:none" multiple onchange="onFileUploaded()">
       </div>
@@ -519,6 +519,16 @@
         bc.style.display = 'none';
       } else {
         bc.style.display = 'flex';
+        // 默认列表（根目录）入口：可从任意文件夹层级返回初始列表
+        const home = document.createElement('span');
+        home.className = 'bc-item';
+        home.textContent = '默认列表';
+        home.onclick = () => { kbPath = [kbPath[0]]; renderList(); };
+        bc.appendChild(home);
+        const sep0 = document.createElement('span');
+        sep0.className = 'bc-sep';
+        sep0.textContent = '/';
+        bc.appendChild(sep0);
         crumbs.forEach((f, i) => {
           const item = document.createElement('span');
           item.className = 'bc-item' + (i === crumbs.length - 1 ? ' current' : '');
@@ -533,6 +543,9 @@
           }
         });
       }
+      // 新建文件夹仅允许在默认列表（根目录）创建，进入文件夹后隐藏按钮
+      const createBtn = document.getElementById('createFolderBtn');
+      if (createBtn) createBtn.style.display = kbPath.length > 1 ? 'none' : '';
       // 列表
       const q = document.getElementById('searchInput').value.trim().toLowerCase();
       const tbody = document.getElementById('fileList');
