@@ -353,6 +353,11 @@ body.sidebar-collapsed .sidebar-expand-btn { display: inline-flex; }
   padding: 0 12px;
   margin-bottom: 12px;
 }
+/* 四个导航模块之间上下间距统一 */
+.sidebar-new-sec,
+.sidebar-tasks-sec,
+.sidebar-bottom-nav { margin-bottom: 6px; }
+.sidebar-bottom-nav .sidebar-item + .sidebar-item { margin-top: 6px; }
 .sidebar-label {
   font-size: 11px;
   font-weight: 600;

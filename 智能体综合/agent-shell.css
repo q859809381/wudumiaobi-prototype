@@ -61,6 +61,7 @@ body.agent-shelled #base .agent-shell-card {
   z-index: 90;
   display: flex;
   flex-direction: column;
+  transition: transform 0.22s ease;
 }
 
 .agent-shell-sidebar .sidebar-brand {
@@ -152,11 +153,74 @@ body.agent-shelled #base .agent-shell-card {
   background: #f0f5fb;
   border-color: #4a6fa5;
 }
-body.sidebar-collapsed .agent-shell-sidebar { display: none; }
+/* 收起态：侧栏滑出屏幕外，抽屉打开时滑回覆盖内容区 */
+body.sidebar-collapsed .agent-shell-sidebar {
+  transform: translateX(-100%);
+  visibility: hidden;
+}
+body.sidebar-collapsed.drawer-open .agent-shell-sidebar {
+  transform: translateX(0);
+  visibility: visible;
+  z-index: 3200;
+  box-shadow: 4px 0 18px rgba(0, 0, 0, 0.18);
+}
 body.sidebar-collapsed .agent-shell-header,
 body.sidebar-collapsed .agent-shell-content,
 body.sidebar-collapsed .agent-shell-foot { left: 0; }
 body.sidebar-collapsed .sidebar-expand-btn { display: inline-flex; }
+
+/* 抽屉遮罩蒙版 */
+.agent-shell-drawer-mask {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 3100;
+}
+body.drawer-open .agent-shell-drawer-mask { display: block; }
+
+/* 抽屉右上角关闭按钮 */
+.agent-shell-drawer-close {
+  display: none;
+  position: fixed;
+  top: 16px;
+  left: 228px;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #d9e3ef;
+  border-radius: 50%;
+  background: #fff;
+  color: #666;
+  font-size: 16px;
+  line-height: 1;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 3300;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+.agent-shell-drawer-close:hover { border-color: #4a6fa5; color: #4a6fa5; }
+body.drawer-open .agent-shell-drawer-close { display: inline-flex; }
+
+/* 悬浮展开按钮：收起后突出展示，点击弹出抽屉 */
+.agent-shell-expand-fab {
+  display: none;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: #333;
+  color: #fff;
+  font-size: 16px;
+  line-height: 1;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.28);
+}
+.agent-shell-expand-fab:hover { background: #555; }
+body.sidebar-collapsed .agent-shell-expand-fab { display: inline-flex; }
 
 .agent-shell-sidebar .sidebar-brand + .sidebar-section {
   padding-top: 12px;
@@ -166,6 +230,11 @@ body.sidebar-collapsed .sidebar-expand-btn { display: inline-flex; }
   padding: 0 12px;
   margin-bottom: 12px;
 }
+/* 四个导航模块之间上下间距统一 */
+.agent-shell-sidebar .sidebar-new-sec,
+.agent-shell-sidebar .sidebar-tasks-sec,
+.agent-shell-sidebar .sidebar-bottom-nav { margin-bottom: 6px; }
+.agent-shell-sidebar .sidebar-bottom-nav .sidebar-item + .sidebar-item { margin-top: 6px; }
 
 .agent-shell-sidebar .sidebar-label {
   font-size: 11px;
@@ -485,7 +554,7 @@ body.sidebar-collapsed .sidebar-expand-btn { display: inline-flex; }
 
 .agent-shell-sidebar .sidebar-agent-drop.collapsed { display: none; }
 
-.agent-shell-sidebar .sidebar-tasks-sec { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.agent-shell-sidebar .sidebar-tasks-sec { flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; }
 
 .agent-shell-sidebar .sidebar-task-scroll { flex: 1; min-height: 0; overflow-y: auto; }
 
@@ -562,26 +631,41 @@ body.sidebar-collapsed .sidebar-expand-btn { display: inline-flex; }
       text-overflow: ellipsis;
     }
 
-.agent-shell-sidebar .sidebar-label-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 6px;
-      padding: 8px 12px 4px;
-    }
-
-.agent-shell-sidebar .sidebar-label-row .sidebar-label { padding: 0; }
-
-.agent-shell-sidebar .sidebar-task-filter {
+.agent-shell-sidebar .sidebar-tasks-toggle { margin-bottom: 2px; padding: 10px 12px; }
+.agent-shell-sidebar .sidebar-tasks-toggle .sidebar-icon { border-color: #b9cfe8; color: #4a6fa5; }
+.agent-shell-sidebar .sidebar-tasks-arrow {
+  margin-left: auto;
+  width: 22px;
   height: 22px;
-  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #b9cfe8;
+  border-radius: 50%;
+  background: #fff;
+  color: #4a6fa5;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  transition: transform 0.15s;
+}
+.agent-shell-sidebar .sidebar-task-filter-row { padding: 0 12px 6px; }
+.agent-shell-sidebar .sidebar-task-filter {
+  width: 100%;
+  height: 26px;
+  font-size: 12px;
   border: 1px solid #d8e2f0;
   border-radius: 4px;
   color: #555;
-  background: transparent;
-  max-width: 112px;
+  background: #fff;
   cursor: pointer;
 }
+/* 任务列表收起：隐藏筛选与任务，下方导航上移 */
+body.tasks-collapsed .agent-shell-sidebar .sidebar-task-scroll,
+body.tasks-collapsed .agent-shell-sidebar .sidebar-task-filter-row { display: none; }
+body.tasks-collapsed .agent-shell-sidebar .sidebar-tasks-toggle { margin-bottom: 0; }
+body.tasks-collapsed .agent-shell-sidebar .sidebar-tasks-arrow { transform: rotate(-90deg); }
+body.tasks-collapsed .agent-shell-sidebar .sidebar-tasks-sec { flex: 0 0 auto; }
 
 .agent-shell-sidebar .sidebar-task-more {
       padding: 6px 12px;
@@ -596,7 +680,7 @@ body.sidebar-collapsed .sidebar-expand-btn { display: inline-flex; }
       text-align: center;
       font-size: 11px;
       color: #999;
-      padding: 8px 0;
+      padding: 2px 0 4px;
     }
 
 .agent-shell-sidebar .task-status-icon {

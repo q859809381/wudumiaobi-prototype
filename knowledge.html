@@ -309,17 +309,40 @@
     .sidebar-quick-item:hover { background: #dfe9f4; color: #333; }
     .sidebar-quick-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .sidebar-task-text { color: #222; font-weight: 500; }
-    .sidebar-tasks-sec { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    .sidebar-tasks-sec { flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; }
     .sidebar-task-scroll { flex: 1; min-height: 0; overflow-y: auto; }
     .sidebar-task-item { position: relative; flex-wrap: wrap; row-gap: 2px; padding: 7px 48px 7px 14px; }
     .sidebar-task-item:hover .task-status-icon { display: inline-flex; }
     .task-actions { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: #dfe9f4; border-radius: 4px; padding: 1px; }
     .sidebar-task-meta { flex-basis: 100%; font-size: 11px; color: #999; padding-left: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .sidebar-label-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 8px 12px 4px; }
-    .sidebar-label-row .sidebar-label { padding: 0; }
-    .sidebar-task-filter { height: 22px; font-size: 11px; border: 1px solid #d8e2f0; border-radius: 4px; color: #555; background: transparent; max-width: 112px; cursor: pointer; }
+    .sidebar-tasks-toggle { margin-bottom: 2px; padding: 10px 12px; }
+    .sidebar-tasks-toggle .sidebar-icon { border-color: #b9cfe8; color: #4a6fa5; }
+    .sidebar-tasks-arrow {
+      margin-left: auto;
+      width: 22px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #b9cfe8;
+      border-radius: 50%;
+      background: #fff;
+      color: #4a6fa5;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1;
+      transition: transform 0.15s;
+    }
+    .sidebar-task-filter-row { padding: 0 12px 6px; }
+    .sidebar-task-filter { width: 100%; height: 26px; font-size: 12px; border: 1px solid #d8e2f0; border-radius: 4px; color: #555; background: #fff; cursor: pointer; }
+    /* 任务列表收起：隐藏筛选与任务，下方导航上移 */
+    body.tasks-collapsed .sidebar-task-scroll,
+    body.tasks-collapsed .sidebar-task-filter-row { display: none; }
+    body.tasks-collapsed .sidebar-tasks-toggle { margin-bottom: 0; }
+    body.tasks-collapsed .sidebar-tasks-arrow { transform: rotate(-90deg); }
+    body.tasks-collapsed .sidebar-tasks-sec { flex: 0 0 auto; }
     .sidebar-bottom-nav { flex-shrink: 0; }
-    .sidebar-task-loading { text-align: center; font-size: 11px; color: #999; padding: 8px 0; }
+    .sidebar-task-loading { text-align: center; font-size: 11px; color: #999; padding: 2px 0 4px; }
     .task-status-icon { width: 6px; height: 6px; flex-shrink: 0; border-radius: 50%; border: none; animation: none; background: #bbb; }
     .task-status-icon.running { border: none; animation: none; background: #d9822b; }
     .task-status-icon.writing { background: #f0ad4e; }
@@ -385,7 +408,6 @@
     <div class="sidebar-brand" title="返回首页" onclick="window.location.href='home.html'">
       <div class="sidebar-brand-logo">5</div>
       <div class="sidebar-brand-name">5度易链<small>5 DEGREE EASY CHAIN</small></div>
-      <button class="sidebar-collapse-btn" title="收起导航" onclick="event.stopPropagation();toggleSidebar()">‹</button>
     </div>
     <div class="sidebar-section sidebar-new-sec">
       <div class="sidebar-item sidebar-new-report" onclick="window.location.href='report.html'">
@@ -393,10 +415,13 @@
         <span>新建报告</span>
       </div>
     </div>
-    <div class="divider" style="margin:4px 12px;"></div>
     <div class="sidebar-section sidebar-tasks-sec">
-      <div class="sidebar-label-row">
-        <div class="sidebar-label">任务列表</div>
+      <div class="sidebar-item sidebar-tasks-toggle" title="展开/收起任务列表" onclick="toggleTasksCollapse()">
+        <div class="sidebar-icon">☰</div>
+        <span>任务列表</span>
+        <span class="sidebar-tasks-arrow" id="tasksArrow">▾</span>
+      </div>
+      <div class="sidebar-task-filter-row" id="taskFilterRow">
         <select class="sidebar-task-filter" id="taskFilter" onchange="filterSidebarTasks(this)">
           <option value="all">全部智能体</option>
           <option value="可研专业版">可研专业版</option>
@@ -405,7 +430,6 @@
       </div>
       <div class="sidebar-task-scroll" id="sidebarTaskScroll"></div>
     </div>
-    <div class="divider" style="margin:4px 12px;"></div>
     <div class="sidebar-section sidebar-bottom-nav">
       <div class="sidebar-item" onclick="window.location.href='assets.html'">
         <div class="sidebar-icon">▤</div>
@@ -567,7 +591,17 @@
       try { localStorage.setItem('wbdmSidebarCollapsed', document.body.classList.contains('sidebar-collapsed') ? '1' : '0'); } catch (e) {}
     }
     (function initSidebarCollapse() {
-      try { if (localStorage.getItem('wbdmSidebarCollapsed') === '1') document.body.classList.add('sidebar-collapsed'); } catch (e) {}
+      // 知识库页面：侧栏固定展开在左侧
+      document.body.classList.remove('sidebar-collapsed');
+    })();
+
+    /* ==================== 任务列表展开/收起 ==================== */
+    function toggleTasksCollapse() {
+      document.body.classList.toggle('tasks-collapsed');
+      try { localStorage.setItem('wbdmTasksCollapsed', document.body.classList.contains('tasks-collapsed') ? '1' : '0'); } catch (e) {}
+    }
+    (function initTasksCollapse() {
+      try { if (localStorage.getItem('wbdmTasksCollapsed') === '1') document.body.classList.add('tasks-collapsed'); } catch (e) {}
     })();
 
     function openUploadGuide() {

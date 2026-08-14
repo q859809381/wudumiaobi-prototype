@@ -8,8 +8,26 @@
     try { localStorage.setItem('wbdmSidebarCollapsed', document.body.classList.contains('sidebar-collapsed') ? '1' : '0'); } catch (e) {}
   };
   (function initSidebarCollapse() {
-    try { if (localStorage.getItem('wbdmSidebarCollapsed') === '1') document.body.classList.add('sidebar-collapsed'); } catch (e) {}
+    // 智能体详情页：左侧模块始终收起，通过悬浮按钮以抽屉展示
+    document.body.classList.add('sidebar-collapsed');
   })();
+
+  /* 任务列表展开/收起（与工作台一致，状态跨页面记忆） */
+  window.toggleTasksCollapse = function () {
+    document.body.classList.toggle('tasks-collapsed');
+    try { localStorage.setItem('wbdmTasksCollapsed', document.body.classList.contains('tasks-collapsed') ? '1' : '0'); } catch (e) {}
+  };
+  (function initTasksCollapse() {
+    try { if (localStorage.getItem('wbdmTasksCollapsed') === '1') document.body.classList.add('tasks-collapsed'); } catch (e) {}
+  })();
+
+  /* 悬浮抽屉：展开按钮点击后，侧栏以抽屉形式滑出，页面加遮罩 */
+  window.openShellDrawer = function () {
+    document.body.classList.add('drawer-open');
+  };
+  window.closeShellDrawer = function () {
+    document.body.classList.remove('drawer-open');
+  };
 
   /* 简单提示 */
   function shellToast(msg) {
@@ -393,17 +411,18 @@
       + '<div class="sidebar-brand" title="返回首页" onclick="window.location.href=\'../home.html\'">'
       +   '<div class="sidebar-brand-logo">5</div>'
       +   '<div class="sidebar-brand-name">5度易链<small>5 DEGREE EASY CHAIN</small></div>'
-      +   '<button class="sidebar-collapse-btn" title="收起导航" onclick="event.stopPropagation();window.toggleSidebar()">‹</button>'
       + '</div>'
       + '<div class="sidebar-section sidebar-new-sec">'
       +   '<div class="sidebar-item sidebar-new-report" title="新建报告" onclick="window.location.href=\'../report.html\'">'
       +     '<div class="sidebar-icon">✎</div><span>新建报告</span>'
       +   '</div>'
       + '</div>'
-      + '<div class="divider"></div>'
       + '<div class="sidebar-section sidebar-tasks-sec">'
-      +   '<div class="sidebar-label-row">'
-      +     '<div class="sidebar-label">任务列表</div>'
+      +   '<div class="sidebar-item sidebar-tasks-toggle" title="展开/收起任务列表" onclick="window.toggleTasksCollapse()">'
+      +     '<div class="sidebar-icon">☰</div><span>任务列表</span>'
+      +     '<span class="sidebar-tasks-arrow" id="shellTasksArrow">▾</span>'
+      +   '</div>'
+      +   '<div class="sidebar-task-filter-row" id="shellTaskFilterRow">'
       +     '<select class="sidebar-task-filter" id="shellTaskFilter" onchange="window.filterShellTasks&&filterShellTasks(this)">'
       +       '<option value="all">全部智能体</option>'
       +       '<option value="可研专业版">可研专业版</option>'
@@ -415,7 +434,6 @@
       +   '</div>'
       +   '<div class="sidebar-task-scroll" id="shellTaskScroll"></div>'
       + '</div>'
-      + '<div class="divider"></div>'
       + '<div class="sidebar-section sidebar-bottom-nav">'
       +   '<div class="sidebar-item" onclick="window.location.href=\'../assets.html\'">'
       +     '<div class="sidebar-icon">▤</div><span>报告资产</span>'
@@ -432,10 +450,10 @@
       +   '</div>'
       + '</div>'
       + '</aside>'
+      + '<button class="agent-shell-drawer-close" title="关闭" onclick="window.closeShellDrawer()">✕</button>'
       + '<header class="agent-shell-header">'
       +   '<div class="agent-shell-head-row">'
-      +     '<button class="sidebar-expand-btn" title="展开导航" onclick="window.toggleSidebar()">›</button>'
-      +     '<button class="agent-shell-back" title="返回智能体首页" onclick="window.location.href=\'../report.html\'">←</button>'
+      +     '<button class="agent-shell-expand-fab" id="shellExpandFab" title="展开导航" onclick="window.openShellDrawer()">☰</button>'
       +     '<div class="agent-shell-title">' + reportName + '</div>'
       +   '</div>'
       +   '<div class="agent-shell-steps" id="agentShellSteps">'
@@ -448,7 +466,8 @@
       + '<footer class="agent-shell-foot">'
       +   '<button class="agent-shell-secondary-btn" id="agentShellSecondaryBtn" style="display:none;">保存内容</button>'
       +   '<button class="agent-shell-primary-btn" id="agentShellPrimaryBtn" style="display:none;">下一步</button>'
-      + '</footer>';
+      + '</footer>'
+      + '<div class="agent-shell-drawer-mask" id="shellDrawerMask" onclick="window.closeShellDrawer()"></div>';
 
     /* 内容区独立滚动容器：位于标题栏与底部操作栏之间 */
     var contentWrap = document.createElement('div');

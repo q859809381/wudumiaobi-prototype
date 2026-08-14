@@ -2313,14 +2313,92 @@
       pointer-events: none;
       user-select: none;
     }
-    /* 正文编辑页展示时：隐藏左侧功能选择栏目 */
-    body.editor-mode .sidebar { display: none; }
+    /* 正文编辑页：左侧模块收起，通过悬浮按钮抽屉展开 */
     body.editor-mode .main-content { margin-left: 0; }
+    body.editor-mode.sidebar-collapsed .sidebar {
+      display: flex;
+      transform: translateX(-100%);
+      visibility: hidden;
+      transition: transform 0.22s ease;
+    }
+    body.editor-mode.sidebar-collapsed.drawer-open .sidebar {
+      transform: translateX(0);
+      visibility: visible;
+      z-index: 3200;
+      box-shadow: 4px 0 18px rgba(0, 0, 0, 0.18);
+    }
+    /* 编辑页头部展开按钮：悬浮突出样式 */
+    body.editor-mode.sidebar-collapsed .report-editor-header .sidebar-expand-btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 50%;
+      background: #333;
+      color: #fff;
+      font-size: 16px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.28);
+    }
+    body.editor-mode.sidebar-collapsed .report-editor-header .sidebar-expand-btn:hover { background: #555; }
     /* 编辑页：隐藏顶部智能体名称栏与提示，整页充满一屏 */
     body.editor-mode .content-head { display: none; }
     body.editor-mode .main-content { padding: 16px 24px; overflow: hidden; }
     /* 侧栏收起时：整页生成流程同步左移 */
     body.sidebar-collapsed .stage-mask.active { left: 0; }
+    /* 专业版生成流程（详情页）：侧栏收起后以悬浮抽屉展开 */
+    body.wizard-active.sidebar-collapsed .sidebar {
+      display: flex;
+      transform: translateX(-100%);
+      visibility: hidden;
+      transition: transform 0.22s ease;
+    }
+    body.wizard-active.sidebar-collapsed.drawer-open .sidebar {
+      transform: translateX(0);
+      visibility: visible;
+      z-index: 3200;
+      box-shadow: 4px 0 18px rgba(0, 0, 0, 0.18);
+    }
+    .wizard-drawer-mask {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      z-index: 3100;
+    }
+    body.drawer-open .wizard-drawer-mask { display: block; }
+    /* 抽屉右上角关闭按钮 */
+    .wizard-drawer-close {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 228px;
+      width: 36px;
+      height: 36px;
+      border: 1px solid #d9e3ef;
+      border-radius: 50%;
+      background: #fff;
+      color: #666;
+      font-size: 16px;
+      line-height: 1;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 3300;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    }
+    .wizard-drawer-close:hover { border-color: #4a6fa5; color: #4a6fa5; }
+    body.drawer-open .wizard-drawer-close { display: inline-flex; }
+    /* 流程头部展开按钮：悬浮突出样式 */
+    body.wizard-active.sidebar-collapsed .stage-head .sidebar-expand-btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 50%;
+      background: #333;
+      color: #fff;
+      font-size: 16px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.28);
+    }
+    body.wizard-active.sidebar-collapsed .stage-head .sidebar-expand-btn:hover { background: #555; }
     body.editor-mode #step4.active {
       display: flex;
       flex-direction: column;
@@ -2372,7 +2450,7 @@
     .sidebar-new-report.active { background: #eef2f8; color: #333; font-weight: 500; }
     .sidebar { overflow: hidden; }
     .sidebar-new-sec { flex-shrink: 0; }
-    .sidebar-tasks-sec { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    .sidebar-tasks-sec { flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; }
     .sidebar-task-scroll { flex: 1; min-height: 0; overflow-y: auto; }
     .sidebar-bottom-nav { flex-shrink: 0; }
     .sidebar-quick-item {
@@ -2436,24 +2514,41 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .sidebar-label-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 6px;
-      padding: 8px 12px 4px;
-    }
-    .sidebar-label-row .sidebar-label { padding: 0; }
-    .sidebar-task-filter {
+    .sidebar-tasks-toggle { margin-bottom: 2px; padding: 10px 12px; }
+    .sidebar-tasks-toggle .sidebar-icon { border-color: #b9cfe8; color: #4a6fa5; }
+    .sidebar-tasks-arrow {
+      margin-left: auto;
+      width: 22px;
       height: 22px;
-      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #b9cfe8;
+      border-radius: 50%;
+      background: #fff;
+      color: #4a6fa5;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1;
+      transition: transform 0.15s;
+    }
+    .sidebar-task-filter-row { padding: 0 12px 6px; }
+    .sidebar-task-filter {
+      width: 100%;
+      height: 26px;
+      font-size: 12px;
       border: 1px solid #d8e2f0;
       border-radius: 4px;
       color: #555;
-      background: transparent;
-      max-width: 112px;
+      background: #fff;
       cursor: pointer;
     }
+    /* 任务列表收起：隐藏筛选与任务，下方导航上移 */
+    body.tasks-collapsed .sidebar-task-scroll,
+    body.tasks-collapsed .sidebar-task-filter-row { display: none; }
+    body.tasks-collapsed .sidebar-tasks-toggle { margin-bottom: 0; }
+    body.tasks-collapsed .sidebar-tasks-arrow { transform: rotate(-90deg); }
+    body.tasks-collapsed .sidebar-tasks-sec { flex: 0 0 auto; }
     .sidebar-task-more {
       padding: 6px 12px;
       font-size: 12px;
@@ -2465,7 +2560,7 @@
       text-align: center;
       font-size: 11px;
       color: #999;
-      padding: 8px 0;
+      padding: 2px 0 4px;
     }
     .task-status-icon {
       width: 6px;
@@ -3235,7 +3330,6 @@
     <div class="sidebar-brand" title="返回首页" onclick="window.location.href='home.html'">
       <div class="sidebar-brand-logo">5</div>
       <div class="sidebar-brand-name">5度易链<small>5 DEGREE EASY CHAIN</small></div>
-      <button class="sidebar-collapse-btn" title="收起导航" onclick="event.stopPropagation();toggleSidebar()">‹</button>
     </div>
     <div class="sidebar-section sidebar-new-sec">
       <div class="sidebar-item active sidebar-new-report" onclick="selectNewReport()">
@@ -3243,10 +3337,13 @@
         <span>新建报告</span>
       </div>
     </div>
-    <div class="divider" style="margin:4px 12px;"></div>
     <div class="sidebar-section sidebar-tasks-sec">
-      <div class="sidebar-label-row">
-        <div class="sidebar-label">任务列表</div>
+      <div class="sidebar-item sidebar-tasks-toggle" title="展开/收起任务列表" onclick="toggleTasksCollapse()">
+        <div class="sidebar-icon">☰</div>
+        <span>任务列表</span>
+        <span class="sidebar-tasks-arrow" id="tasksArrow">▾</span>
+      </div>
+      <div class="sidebar-task-filter-row" id="taskFilterRow">
         <select class="sidebar-task-filter" id="taskFilter" onchange="filterSidebarTasks(this)">
           <option value="all">全部智能体</option>
           <option value="可研专业版">可研专业版</option>
@@ -3255,7 +3352,6 @@
       </div>
       <div class="sidebar-task-scroll" id="sidebarTaskScroll"></div>
     </div>
-    <div class="divider" style="margin:4px 12px;"></div>
     <div class="sidebar-section sidebar-bottom-nav">
       <div class="sidebar-item" onclick="window.location.href='assets.html'">
         <div class="sidebar-icon">▤</div>
@@ -3276,6 +3372,7 @@
       </div>
     </div>
   </aside>
+  <button class="wizard-drawer-close" title="关闭" onclick="closeWizardDrawer()">✕</button>
 
   <!-- ==================== 主内容区 ==================== -->
 <main class="main-content">
@@ -3453,8 +3550,7 @@
       <div class="stage-box">
         <div class="stage-head">
           <div class="stage-head-row">
-            <button class="sidebar-expand-btn" title="展开导航" onclick="toggleSidebar()">›</button>
-            <button class="stage-back" title="返回智能体首页" onclick="showAgentSelect()">←</button>
+            <button class="sidebar-expand-btn" title="展开导航" onclick="openWizardDrawer()">☰</button>
             <div class="stage-title" id="stageTitle">生成报告</div>
           </div>
           <div class="stage-steps">
@@ -3702,6 +3798,9 @@
         </div>
       </div>
     </div>
+
+    <!-- 专业版生成流程：抽屉遮罩 -->
+    <div class="wizard-drawer-mask" id="wizardDrawerMask" onclick="closeWizardDrawer()"></div>
 
     <!-- 正在生成大纲（过渡弹窗） -->
     <div class="gen-mask" id="genMask">
@@ -3970,6 +4069,7 @@
     <!-- ============ 步骤4：报告编辑 ============ -->
     <div class="input-step" id="step4">
       <div class="report-editor-header">
+        <button class="sidebar-expand-btn" title="展开导航" onclick="openWizardDrawer()">☰</button>
         <button class="back-home-icon" title="返回首页" onclick="window.location.href='report.html'">⌂</button>
         <div class="report-title">企查查商业大数据人工智能研发建设项目·可行性研究报告</div>
         <div class="editor-actions">
@@ -4166,8 +4266,26 @@
       try { localStorage.setItem('wbdmSidebarCollapsed', document.body.classList.contains('sidebar-collapsed') ? '1' : '0'); } catch (e) {}
     }
     (function initSidebarCollapse() {
-      try { if (localStorage.getItem('wbdmSidebarCollapsed') === '1') document.body.classList.add('sidebar-collapsed'); } catch (e) {}
+      // 新建报告页面：侧栏固定展开在左侧
+      document.body.classList.remove('sidebar-collapsed');
     })();
+
+    /* ==================== 任务列表展开/收起 ==================== */
+    function toggleTasksCollapse() {
+      document.body.classList.toggle('tasks-collapsed');
+      try { localStorage.setItem('wbdmTasksCollapsed', document.body.classList.contains('tasks-collapsed') ? '1' : '0'); } catch (e) {}
+    }
+    (function initTasksCollapse() {
+      try { if (localStorage.getItem('wbdmTasksCollapsed') === '1') document.body.classList.add('tasks-collapsed'); } catch (e) {}
+    })();
+
+    /* ==================== 专业版生成流程：悬浮抽屉 ==================== */
+    function openWizardDrawer() {
+      document.body.classList.add('drawer-open');
+    }
+    function closeWizardDrawer() {
+      document.body.classList.remove('drawer-open');
+    }
 
     let flowStage = 1;
     let aiPanelParagraph = null;
@@ -5026,6 +5144,7 @@
       document.getElementById('agentSelectView').classList.remove('hidden');
       document.getElementById('stageMask').classList.remove('active');
       document.body.classList.remove('modal-blurred', 'editor-mode', 'wizard-active');
+      document.body.classList.remove('sidebar-collapsed', 'drawer-open');
       document.body.classList.add('agent-select');
       // 回到新建报告选择页时恢复选中态
       const nr = document.querySelector('.sidebar-new-report');
@@ -5178,6 +5297,9 @@
         document.body.classList.remove('agent-select', 'modal-blurred');
         document.body.classList.remove('editor-mode');
         document.body.classList.add('wizard-active');
+        // 专业版生成流程等同智能体详情页：左侧模块收起，通过悬浮按钮抽屉展开
+        document.body.classList.add('sidebar-collapsed');
+        document.body.classList.remove('drawer-open');
         // 进入智能体操作流程后，侧栏“新建报告”取消选中态
         const nr = document.querySelector('.sidebar-new-report');
         if (nr) nr.classList.remove('active');
@@ -5204,6 +5326,9 @@
       document.getElementById('stageMask').classList.remove('active');
       document.body.classList.remove('modal-blurred');
       document.body.classList.add('editor-mode');
+      // 正文编辑页：左侧模块收起，通过悬浮按钮抽屉展开
+      document.body.classList.add('sidebar-collapsed');
+      document.body.classList.remove('drawer-open');
       resetExportedState();
       document.title = reportType + ' - 五度妙笔';
       renderPaperByStatus();
@@ -5496,6 +5621,9 @@
         mask.classList.remove('active', 'leaving');
         document.body.classList.remove('modal-blurred', 'wizard-active');
         document.body.classList.add('editor-mode');
+        // 正文编辑页：左侧模块收起
+        document.body.classList.add('sidebar-collapsed');
+        document.body.classList.remove('drawer-open');
         // 完成最后一步后才展示正文编辑页
         document.getElementById('agentSelectView').classList.add('hidden');
         document.querySelectorAll('.input-step').forEach(s => s.classList.remove('active'));
