@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>企业全景分析报告</title>
+  <link rel="stylesheet" href="agent-shell.css">
+  <link rel="stylesheet" href="agent-flow.css">
+</head>
+<body>
+<div id="agentShellRoot"></div>
+<script>
+window.AGENT_CONFIG = {
+  name: '企业全景分析报告',
+  steps: ['编辑基本信息', '生成中', '完整报告输出'],
+  flow: [{ key: 'form', primary: '生成报告' }],
+  genMinutes: 10,
+  form: {
+    title: '企业基本信息',
+    fields: [
+      { label: '目标公司名称', required: true, max: 50, placeholder: '请输入完整的企业名称', hint: '企业名称会用于数据检索匹配' },
+      { label: '委托目的与分析重点', required: true, type: 'select', options: ['请选择调查目的', '供应商考察', '行业竞争分析', '投资评估', '其他'] }
+    ]
+  },
+  dims: [
+    { title: '多源数据覆盖', desc: '整合工商、司法、招聘、专利、招投标等官方与公开数据源' },
+    { title: '供应链依赖推断', desc: '通过招聘、行业常识识别核心供应商及替代可能性' },
+    { title: '技术壁垒分析', desc: '区分发明专利与实用新型，深度解读核心技术护城河' },
+    { title: '团队背景挖掘', desc: '深挖创始人履历、人脉与行业声誉，评估资源网络' },
+    { title: '疑点自动识别', desc: '交叉验证宣称与事实，标记信息矛盾与数据异常' },
+    { title: '宏观机遇研判', desc: '识别下游驱动力，解读趋势对委托方的具体影响' }
+  ],
+  reportName: '某某公司全景分析报告'
+};
+</script>
+<script src="agent-shell.js"></script>
+<script src="agent-flow.js"></script>
+</body>
+</html>

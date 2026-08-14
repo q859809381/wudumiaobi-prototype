@@ -1,0 +1,774 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* =====================================================
+   智能体二级页面外壳 - 复用智能体工作台左侧导航样式
+   覆盖 Axure 页面自带的左侧导航与顶部栏
+   ===================================================== */
+body.agent-shelled {
+  background: #f6f7f9;
+  width: 100% !important;
+  overflow: hidden !important;
+}
+/* 内容文字规范与专业版保持一致（Inter 字体） */
+body.agent-shelled #base,
+body.agent-shelled #base * {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+/* 中间内容框成卡片（与专业版一致） */
+body.agent-shelled #base .agent-shell-card {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+/* 内容区独立滚动容器 */
+.agent-shell-content {
+  position: fixed;
+  left: 220px;
+  right: 0;
+  bottom: 64px;
+  overflow-y: auto;
+  z-index: 100;
+  background: #f6f7f9;
+}
+/* 正文内容的位置/缩放由 agent-shell.js 按视口自适应计算 */
+
+#agentShellRoot {
+  width: 0;
+  height: 0;
+}
+#agentShellRoot,
+#agentShellRoot * {
+  box-sizing: border-box;
+}
+
+/* 轻量滚动条（与工作台一致） */
+.agent-shell-sidebar ::-webkit-scrollbar { width: 6px; }
+.agent-shell-sidebar ::-webkit-scrollbar-track { background: transparent; }
+.agent-shell-sidebar ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+.agent-shell-sidebar ::-webkit-scrollbar-thumb:hover { background: #bbb; }
+
+/* ===== 宸ヤ綔鍙颁晶鏍忓師濮嬫牱寮忥紙鑷姩鎻愬彇 + 浣滅敤鍩熷寲锛屽嬁鎵嬫敼锛?===== */
+.agent-shell-sidebar.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 220px;
+  background: #e9f0f8;
+  border-right: 1px solid #d9e3ef;
+  padding: 0 0 16px;
+  overflow-y: auto;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+}
+
+.agent-shell-sidebar .sidebar-brand {
+  height: 56px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 20px;
+  background: #e9f0f8;
+  cursor: pointer;
+}
+
+.agent-shell-sidebar .sidebar-brand:hover { background: #dfe9f4; }
+
+.agent-shell-sidebar .sidebar-brand-logo {
+  width: 28px;
+  height: 28px;
+  border: 1.5px solid #999;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #666;
+  background: #fff;
+}
+
+.agent-shell-sidebar .sidebar-brand-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.agent-shell-sidebar .sidebar-brand-name small {
+  display: block;
+  font-size: 9px;
+  font-weight: 400;
+  color: #bbb;
+  letter-spacing: 0.5px;
+}
+
+.agent-shell-sidebar .sidebar-brand + .sidebar-section {
+  padding-top: 12px;
+}
+
+.agent-shell-sidebar .sidebar-section {
+  padding: 0 12px;
+  margin-bottom: 12px;
+}
+
+.agent-shell-sidebar .sidebar-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #999;
+  letter-spacing: 0.5px;
+  padding: 8px 12px 4px;
+}
+
+.agent-shell-sidebar .sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.agent-shell-sidebar .sidebar-item:hover {
+  background: #dfe9f4;
+  color: #333;
+}
+
+.agent-shell-sidebar .sidebar-item.active {
+  background: #d4e2f2;
+  color: #333;
+  font-weight: 500;
+  border: 1px solid #b9cfe8;
+}
+
+.agent-shell-sidebar .sidebar-icon {
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid #aaa;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.agent-shell-sidebar .sidebar-task-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.agent-shell-sidebar .sidebar-task-item:hover {
+  background: #dfe9f4;
+}
+
+.agent-shell-sidebar .sidebar-task-text {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.agent-shell-sidebar .task-status-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.agent-shell-sidebar .task-status-icon.done {
+  background: #e8f6ed;
+  color: #27804a;
+  border: 1px solid #bfe3cd;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.agent-shell-sidebar .task-status-icon.done::before { content: '✓'; }
+
+.agent-shell-sidebar .task-status-icon.running {
+  border: 2px solid #e8d9c2;
+  border-top-color: #c77a1e;
+  animation: taskSpin 0.8s linear infinite;
+}
+
+@keyframes taskSpin { to { transform: rotate(360deg); } }
+
+.agent-shell-sidebar .task-actions {
+  display: none;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.agent-shell-sidebar .sidebar-task-item:hover .task-status-icon { display: none; }
+
+.agent-shell-sidebar .sidebar-task-item:hover .task-actions { display: inline-flex; }
+
+.agent-shell-sidebar .task-act {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+  color: #666;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.agent-shell-sidebar .task-act:hover { border-color: #4a6fa5; color: #4a6fa5; }
+
+.agent-shell-sidebar .task-act.danger:hover { border-color: #c0392b; color: #c0392b; }
+
+.agent-shell-sidebar .task-tip {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  max-width: 260px;
+  background: #333;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 6px 10px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+  word-break: break-all;
+}
+
+.agent-shell-sidebar .ctx-menu {
+  display: none;
+  position: fixed;
+  z-index: 3000;
+  min-width: 116px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  padding: 4px 0;
+}
+
+.agent-shell-sidebar .ctx-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: #555;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.agent-shell-sidebar .ctx-item:hover { background: #f5f5f5; }
+
+.agent-shell-sidebar .ctx-item.danger { color: #c0392b; }
+
+.agent-shell-sidebar .sidebar-footer {
+  margin-top: auto;
+  border-top: 1px solid #d9e3ef;
+  padding: 8px 12px;
+  flex-shrink: 0;
+}
+
+.agent-shell-sidebar .sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.agent-shell-sidebar .sidebar-user:hover { background: #dfe9f4; }
+
+.agent-shell-sidebar .user-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #4a6fa5;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.agent-shell-sidebar .user-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agent-shell-sidebar .user-bell {
+  position: relative;
+  font-size: 15px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 3px;
+  border-radius: 4px;
+}
+
+.agent-shell-sidebar .user-bell:hover { background: #fff; }
+
+.agent-shell-sidebar .user-bell .footer-dot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #c0392b;
+  border: 1px solid #fff;
+}
+
+.agent-shell-sidebar .user-menu { min-width: 200px; padding: 6px 0; }
+
+.agent-shell-sidebar .user-menu-head {
+  padding: 8px 16px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 4px;
+}
+
+.agent-shell-sidebar .user-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  color: #555;
+  cursor: pointer;
+}
+
+.agent-shell-sidebar .user-menu-item:hover { background: #f5f5f5; }
+
+.agent-shell-sidebar .user-menu-item .sub {
+  margin-left: auto;
+  color: #4a6fa5;
+  font-size: 12px;
+}
+
+.agent-shell-sidebar .user-menu-item.danger { color: #c0392b; }
+
+.agent-shell-sidebar .user-menu-divider {
+  height: 1px;
+  background: #f0f0f0;
+  margin: 4px 0;
+}
+
+.agent-shell-sidebar .user-menu-title {
+  padding: 6px 16px 2px;
+  font-size: 11px;
+  color: #999;
+  font-weight: 600;
+}
+
+.agent-shell-sidebar .sidebar-new-report {
+      width: auto;
+      margin-bottom: 0;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: #555;
+      font-size: 14px;
+      font-weight: 400;
+    }
+
+.agent-shell-sidebar .sidebar-new-report:hover { background: #dfe9f4; color: #333; }
+
+.agent-shell-sidebar .sidebar-new-report.active { background: #eef2f8; color: #333; font-weight: 500; }
+
+.agent-shell-sidebar .sidebar-new-toggle {
+      margin-left: auto;
+      flex-shrink: 0;
+      font-size: 12px;
+      color: #888;
+      padding: 1px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      line-height: 1.4;
+    }
+
+.agent-shell-sidebar .sidebar-new-toggle:hover { background: #fff; color: #333; }
+
+.agent-shell-sidebar.sidebar { overflow: hidden; }
+
+.agent-shell-sidebar .sidebar-new-sec { flex-shrink: 0; }
+
+.agent-shell-sidebar .sidebar-agent-drop { display: block; }
+
+.agent-shell-sidebar .sidebar-agent-drop.collapsed { display: none; }
+
+.agent-shell-sidebar .sidebar-tasks-sec { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
+.agent-shell-sidebar .sidebar-task-scroll { flex: 1; min-height: 0; overflow-y: auto; }
+
+.agent-shell-sidebar .sidebar-bottom-nav { flex-shrink: 0; }
+
+.agent-shell-sidebar .sidebar-quick-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: #555;
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+.agent-shell-sidebar .sidebar-quick-item:hover { background: #dfe9f4; color: #333; }
+
+.agent-shell-sidebar .sidebar-quick-item.all { color: #4a6fa5; font-weight: 500; }
+
+.agent-shell-sidebar .sidebar-quick-name {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+.agent-shell-sidebar .sidebar-task-text { color: #222; font-weight: 500; }
+.agent-shell-sidebar .sidebar-task-item.draft .sidebar-task-text { color: #999; }
+
+.agent-shell-sidebar .sidebar-quick-soon {
+      flex-shrink: 0;
+      font-size: 10px;
+      color: #999;
+      background: #f3f3f3;
+      border-radius: 3px;
+      padding: 1px 6px;
+    }
+
+.agent-shell-sidebar .sidebar-quick-item.disabled { opacity: 0.55; cursor: default; }
+
+.agent-shell-sidebar .sidebar-quick-item.disabled:hover { background: transparent; color: #555; }
+
+.agent-shell-sidebar .sidebar-task-item {
+      position: relative;
+      flex-wrap: wrap;
+      row-gap: 2px;
+      padding: 7px 48px 7px 14px;
+    }
+
+.agent-shell-sidebar .sidebar-task-item:hover .task-status-icon { display: inline-flex; }
+
+.agent-shell-sidebar .task-actions {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #dfe9f4;
+      border-radius: 4px;
+      padding: 1px;
+    }
+
+.agent-shell-sidebar .sidebar-task-meta {
+      flex-basis: 100%;
+      font-size: 11px;
+      color: #999;
+      padding-left: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+.agent-shell-sidebar .sidebar-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 8px 12px 4px;
+    }
+
+.agent-shell-sidebar .sidebar-label-row .sidebar-label { padding: 0; }
+
+.agent-shell-sidebar .sidebar-task-filter {
+  height: 22px;
+  font-size: 11px;
+  border: 1px solid #d8e2f0;
+  border-radius: 4px;
+  color: #555;
+  background: transparent;
+  max-width: 112px;
+  cursor: pointer;
+}
+
+.agent-shell-sidebar .sidebar-task-more {
+      padding: 6px 12px;
+      font-size: 12px;
+      color: #4a6fa5;
+      cursor: pointer;
+    }
+
+.agent-shell-sidebar .sidebar-task-more:hover { text-decoration: underline; }
+
+.agent-shell-sidebar .sidebar-task-loading {
+      text-align: center;
+      font-size: 11px;
+      color: #999;
+      padding: 8px 0;
+    }
+
+.agent-shell-sidebar .task-status-icon {
+      width: 6px;
+      height: 6px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      border: none;
+      animation: none;
+      background: #bbb;
+    }
+
+.agent-shell-sidebar .task-status-icon.running { border: none; animation: none; background: #d9822b; }
+
+.agent-shell-sidebar .task-status-icon.writing { background: #f0ad4e; }
+
+.agent-shell-sidebar .task-status-icon.done { background: #58a06e; }
+
+.agent-shell-sidebar .task-status-icon.done::before { content: ''; }
+
+.agent-shell-sidebar .task-status-icon.draft { background: #bbb; }
+/* 未查看蓝点（固定占位，保证标题对齐） */
+.agent-shell-sidebar .task-view-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4a6fa5;
+  flex-shrink: 0;
+  margin-right: 0;
+  display: inline-flex;
+}
+.agent-shell-sidebar .task-view-dot.hide { visibility: hidden; }
+/* 进行中加载环 + 悬浮隐藏 */
+.agent-shell-sidebar .task-load-ring {
+  position: absolute;
+  right: 30px;
+  top: 10px;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #d9dde3;
+  border-top-color: #4a6fa5;
+  border-radius: 50%;
+  animation: taskSpin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+.agent-shell-sidebar .sidebar-task-item:hover .task-load-ring { display: none; }
+
+.agent-shell-sidebar.sidebar {
+  z-index: 3000;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.5;
+  color: #333;
+}
+.agent-shell-sidebar .divider {
+  height: 1px;
+  background: #e8e8e8;
+  margin: 4px 12px;
+}
+.agent-shell-sidebar button,
+.agent-shell-sidebar input,
+.agent-shell-sidebar select,
+.agent-shell-sidebar textarea {
+  font-family: inherit;
+}
+
+/* ---------- 顶部标题栏（报告名称 + 步骤条，与专业版一致） ---------- */
+.agent-shell-header {
+  position: fixed;
+  top: 0;
+  left: 220px;
+  right: 0;
+  z-index: 3000;
+  background: #fff;
+  border-bottom: 1px solid #e8e8e8;
+  padding: 12px 32px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.5;
+}
+.agent-shell-header .agent-shell-head-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.agent-shell-back {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #d9e3ef;
+  border-radius: 50%;
+  background: #fff;
+  color: #4a6fa5;
+  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-family: inherit;
+}
+.agent-shell-back:hover { background: #f0f5fb; border-color: #4a6fa5; }
+.agent-shell-header .agent-shell-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #333;
+}
+.agent-shell-header .agent-shell-steps {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.agent-shell-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  color: #999;
+  border: 1px solid #e0e0e0;
+  background: #fafafa;
+}
+.agent-shell-step .agent-shell-step-num {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid #ccc;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+.agent-shell-step.active {
+  color: #fff;
+  background: #4a6fa5;
+  border-color: #4a6fa5;
+  font-weight: 500;
+}
+.agent-shell-step.active .agent-shell-step-num { border-color: #fff; }
+.agent-shell-step.done {
+  color: #27804a;
+  border-color: #bfe3cd;
+  background: #f0faf4;
+}
+.agent-shell-step.done .agent-shell-step-num { border-color: #27804a; }
+/* 生成中：独立的状态样式（虚线边框 + 琥珀色） */
+.agent-shell-step.generating {
+  color: #b8860b;
+  border-style: dashed;
+  background: #fffbf0;
+}
+.agent-shell-step.generating .agent-shell-step-num {
+  border-color: #e0b45f;
+  background: #fff3d6;
+  color: #8a6100;
+}
+.agent-shell-step.generating.active {
+  color: #7a5500;
+  background: #fff3d6;
+  border-style: solid;
+  border-color: #e0a93f;
+}
+.agent-shell-step.generating.active .agent-shell-step-num {
+  border-color: #7a5500;
+  background: #fff;
+}
+
+/* ---------- 底部固定操作栏 ---------- */
+.agent-shell-foot {
+  position: fixed;
+  left: 220px;
+  right: 0;
+  bottom: 0;
+  height: 64px;
+  z-index: 3000;
+  background: #fff;
+  border-top: 1px solid #e8e8e8;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 0 32px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+.agent-shell-secondary-btn {
+  padding: 9px 22px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4a6fa5;
+  background: #fff;
+  border: 1px solid #4a6fa5;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.agent-shell-secondary-btn:hover { background: #f0f5fb; }
+.agent-shell-primary-btn {
+  padding: 9px 26px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  background: #4a6fa5;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.agent-shell-primary-btn:hover { background: #3d5e8e; }
+
+/* 简单提示气泡 */
+.agent-shell-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 60px;
+  transform: translateX(-50%);
+  background: rgba(51, 51, 51, 0.92);
+  color: #fff;
+  font-size: 13px;
+  padding: 9px 18px;
+  border-radius: 6px;
+  z-index: 9999;
+  font-family: 'Inter', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}

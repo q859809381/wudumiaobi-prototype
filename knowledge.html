@@ -63,7 +63,7 @@
     #fileTable td {
       white-space: nowrap;
     }
-    #fileTable td:first-child {
+    #fileTable td:nth-child(2) {
       max-width: 420px;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -78,6 +78,37 @@
       text-align: center;
       color: #bbb;
       font-size: 13px;
+    }
+    /* 批量操作栏 */
+    .batch-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding: 8px 12px;
+      border: 1px solid #d8e2f0;
+      border-radius: 8px;
+      background: #f0f6fd;
+    }
+    .batch-count {
+      font-size: 13px;
+      color: #555;
+    }
+    .batch-count b { color: #4a6fa5; font-weight: 600; }
+    .batch-btn-danger {
+      color: #c0392b;
+      border-color: #e0b4ab;
+      background: #fdf6f5;
+    }
+    .batch-btn-danger:hover {
+      color: #fff;
+      border-color: #c0392b;
+      background: #c0392b;
+    }
+    .move-tip {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #999;
     }
     /* 标题行 + 上传按钮 */
     .page-head {
@@ -128,8 +159,12 @@
     .modal-actions {
       display: flex;
       justify-content: flex-end;
-      gap: 10px;
+      gap: 12px;
       margin-top: 20px;
+      padding: 14px 24px;
+      border-top: 1px solid #f0f0f0;
+      background: #fafbfc;
+      border-radius: 0 0 12px 12px;
     }
     /* 上传任务面板（右下角） */
     .upload-panel {
@@ -264,6 +299,59 @@
       color: #555;
       margin-bottom: 6px;
     }
+    /* 侧栏：新建报告 + 任务列表（与工作台一致） */
+    .sidebar { overflow: hidden; }
+    .sidebar-new-sec { flex-shrink: 0; }
+    .sidebar-new-report { width: auto; margin-bottom: 0; padding: 10px 14px; border: none; border-radius: 6px; background: transparent; color: #555; font-size: 14px; font-weight: 400; }
+    .sidebar-new-report:hover { background: #dfe9f4; color: #333; }
+    .sidebar-new-report.active { background: #eef2f8; color: #333; font-weight: 500; }
+    .sidebar-quick-item { display: flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 6px; font-size: 13px; color: #555; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-quick-item:hover { background: #dfe9f4; color: #333; }
+    .sidebar-quick-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .sidebar-task-text { color: #222; font-weight: 500; }
+    .sidebar-tasks-sec { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    .sidebar-task-scroll { flex: 1; min-height: 0; overflow-y: auto; }
+    .sidebar-task-item { position: relative; flex-wrap: wrap; row-gap: 2px; padding: 7px 48px 7px 14px; }
+    .sidebar-task-item:hover .task-status-icon { display: inline-flex; }
+    .task-actions { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: #dfe9f4; border-radius: 4px; padding: 1px; }
+    .sidebar-task-meta { flex-basis: 100%; font-size: 11px; color: #999; padding-left: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-label-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 8px 12px 4px; }
+    .sidebar-label-row .sidebar-label { padding: 0; }
+    .sidebar-task-filter { height: 22px; font-size: 11px; border: 1px solid #d8e2f0; border-radius: 4px; color: #555; background: transparent; max-width: 112px; cursor: pointer; }
+    .sidebar-bottom-nav { flex-shrink: 0; }
+    .sidebar-task-loading { text-align: center; font-size: 11px; color: #999; padding: 8px 0; }
+    .task-status-icon { width: 6px; height: 6px; flex-shrink: 0; border-radius: 50%; border: none; animation: none; background: #bbb; }
+    .task-status-icon.running { border: none; animation: none; background: #d9822b; }
+    .task-status-icon.writing { background: #f0ad4e; }
+    .task-status-icon.done { background: #58a06e; }
+    .task-status-icon.done::before { content: ''; }
+    .task-toast {
+      display: none;
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1500;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      padding: 12px 18px;
+      min-width: 240px;
+    }
+    .task-toast.active { display: block; }
+    .task-toast-close {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      cursor: pointer;
+      color: #999;
+      font-size: 14px;
+      line-height: 1;
+    }
+    .task-toast-close:hover { color: #333; }
+    .task-toast-title { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 4px; }
+    .task-toast-desc { font-size: 12px; color: #777; line-height: 1.6; }
   </style>
 </head>
 <body>
@@ -273,38 +361,33 @@
       <div class="sidebar-brand-logo">5</div>
       <div class="sidebar-brand-name">5度易链<small>5 DEGREE EASY CHAIN</small></div>
     </div>
-    <div class="sidebar-section">
-      <div class="sidebar-item" onclick="window.location.href='report.html'">
+    <div class="sidebar-section sidebar-new-sec">
+      <div class="sidebar-item sidebar-new-report" onclick="window.location.href='report.html'">
         <div class="sidebar-icon">✎</div>
-        <span>生成报告</span>
+        <span>新建报告</span>
       </div>
+    </div>
+    <div class="divider" style="margin:4px 12px;"></div>
+    <div class="sidebar-section sidebar-tasks-sec">
+      <div class="sidebar-label-row">
+        <div class="sidebar-label">任务列表</div>
+        <select class="sidebar-task-filter" id="taskFilter" onchange="filterSidebarTasks(this)">
+          <option value="all">全部智能体</option>
+          <option value="可研专业版">可研专业版</option>
+          <option value="项目立项报告">项目立项报告</option>
+        </select>
+      </div>
+      <div class="sidebar-task-scroll" id="sidebarTaskScroll"></div>
+    </div>
+    <div class="divider" style="margin:4px 12px;"></div>
+    <div class="sidebar-section sidebar-bottom-nav">
       <div class="sidebar-item" onclick="window.location.href='assets.html'">
         <div class="sidebar-icon">▤</div>
         <span>报告资产</span>
       </div>
-      <div class="sidebar-item active">
+      <div class="sidebar-item active" onclick="window.location.href='knowledge.html'">
         <div class="sidebar-icon">○</div>
         <span>知识库</span>
-      </div>
-    </div>
-    <div class="divider" style="margin:4px 12px;"></div>
-    <div class="sidebar-section">
-      <div class="sidebar-label">任务列表</div>
-      <div class="sidebar-task-item" onclick="window.location.href='report.html?task=1'">
-        <span class="sidebar-task-text">海关总署2025年数据治理咨询及实施服务项目实施方案</span>
-        <span class="task-status-icon running" title="进行中"></span>
-        <span class="task-actions">
-          <button class="task-act" title="编辑任务名称" onclick="event.stopPropagation();showToast()">✎</button>
-          <button class="task-act danger" title="删除任务" onclick="event.stopPropagation();showToast()">✕</button>
-        </span>
-      </div>
-      <div class="sidebar-task-item" onclick="window.location.href='report.html?task=2'">
-        <span class="sidebar-task-text">海关总署2025年数据治理咨询项目</span>
-        <span class="task-status-icon done" title="已完成"></span>
-        <span class="task-actions">
-          <button class="task-act" title="编辑任务名称" onclick="event.stopPropagation();showToast()">✎</button>
-          <button class="task-act danger" title="删除任务" onclick="event.stopPropagation();showToast()">✕</button>
-        </span>
       </div>
     </div>
 
@@ -338,11 +421,20 @@
       <button class="btn btn-outline" onclick="renderList()">🔍 搜索</button>
     </div>
 
+    <!-- 批量操作栏 -->
+    <div class="batch-bar" id="batchBar" style="display:none;">
+      <span class="batch-count">已选 <b id="batchCount">0</b> 项</span>
+      <button class="btn btn-sm" onclick="openBatchMove()">➜ 移动到…</button>
+      <button class="btn btn-sm batch-btn-danger" onclick="batchDelete()">✕ 删除</button>
+      <button class="btn btn-sm btn-outline" onclick="clearSelection()">取消选择</button>
+    </div>
+
     <!-- 文件/文件夹表格 -->
     <div style="border:1px solid #e8e8e8;border-radius:8px;overflow:hidden;background:#fff;">
       <table class="table" id="fileTable">
         <thead>
           <tr>
+            <th style="width:36px;"><input type="checkbox" id="kbSelectAll" onchange="toggleSelectAll(this)"></th>
             <th>名称</th>
             <th style="width:100px;"><span class="sortable" data-key="size" onclick="toggleKbSort('size')">文件大小 <span class="sort-ind">⇅</span></span></th>
             <th style="width:160px;"><span class="sortable" data-key="created" onclick="toggleKbSort('created')">创建时间 <span class="sort-ind">⇅</span></span></th>
@@ -360,6 +452,7 @@
 
   <!-- 更多操作浮窗（固定定位，避免被表格遮挡） -->
   <div class="ctx-menu" id="ctxMenu">
+    <span class="ctx-item link-move">➜ 移动到…</span>
     <span class="ctx-item link-rename">✎ 重命名</span>
     <span class="ctx-item danger link-del">✕ 删除</span>
   </div>
@@ -408,6 +501,27 @@
           <button class="btn btn-outline" onclick="closeUploadGuide()">取消</button>
           <button class="btn btn-primary" onclick="chooseFile()">选择文件上传</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 移动到文件夹弹窗 -->
+  <div class="modal-overlay" id="moveModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title">移动到文件夹</span>
+        <span class="modal-close" onclick="closeMoveModal()">×</span>
+      </div>
+      <div class="modal-body">
+        <div class="upload-target">
+          <label>目标文件夹</label>
+          <select class="input" id="moveTargetSelect"></select>
+        </div>
+        <div class="move-tip" id="moveTip"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeMoveModal()">取消</button>
+        <button class="btn btn-primary" onclick="confirmMove()">移动</button>
       </div>
     </div>
   </div>
@@ -470,6 +584,11 @@
     let uploadTarget = KB_ROOT;
     /* 表头排序状态：文件大小 / 创建时间 / 更新时间 */
     const kbSort = { key: null, dir: 1 };
+    /* 批量选择与移动 */
+    let kbSelected = [];
+    let kbVisibleItems = [];
+    let kbMoveItems = [];
+    let kbMoveCandidates = [];
     function parseBytes(str) {
       const m = String(str || '').match(/^([\d.]+)\s*(KB|MB|GB|K|M)$/i);
       if (!m) return -1;
@@ -566,6 +685,9 @@
         h.querySelector('.sort-ind').textContent = active ? (kbSort.dir === 1 ? '▲' : '▼') : '⇅';
       });
       document.getElementById('kbEmpty').style.display = items.length ? 'none' : 'block';
+      kbVisibleItems = items;
+      kbSelected = kbSelected.filter(it => currentFolder().children.indexOf(it) >= 0);
+      updateBatchBar();
       items.forEach(it => {
         const tr = document.createElement('tr');
         const icon = it.type === 'folder'
@@ -576,11 +698,15 @@
         const primaryIcon = it.type === 'folder' ? '📂' : '⬇';
         const ops = '<button class="row-act link-primary" title="' + primaryLabel + '">' + primaryIcon + '</button>'
           + '<button class="row-act more-btn" title="更多操作">⋯</button>';
-        tr.innerHTML = '<td><span class="file-name-cell">' + icon + '<span>' + escHtml(it.name) + '</span></span></td>'
+        tr.innerHTML = '<td><input type="checkbox" class="kb-row-check" title="选择"></td>'
+          + '<td><span class="file-name-cell">' + icon + '<span>' + escHtml(it.name) + '</span></span></td>'
           + '<td>' + size + '</td>'
           + '<td>' + it.time + '</td>'
           + '<td>' + (it.updateTime || it.time) + '</td>'
           + '<td>' + ops + '</td>';
+        const rowCheck = tr.querySelector('.kb-row-check');
+        rowCheck.checked = kbSelected.indexOf(it) >= 0;
+        rowCheck.onchange = function () { onRowCheck(it, rowCheck); };
         const nameCell = tr.querySelector('.file-name-cell');
         nameCell.style.cursor = it.type === 'folder' ? 'pointer' : 'default';
         nameCell.title = it.name;
@@ -610,6 +736,12 @@
         ctxMenu.style.top = (rect.bottom + 4) + 'px';
       }
       ctxMenu.querySelector('.link-rename').onclick = function () { closeMoreMenu(); startInlineRename(it, tr, false); };
+      const moveItem = ctxMenu.querySelector('.link-move');
+      moveItem.style.display = '';
+      moveItem.onclick = function () {
+        closeMoreMenu();
+        openMoveModal([it], it.type === 'folder' ? '文件夹移动：其内文件将批量移动到目标文件夹，原文件夹删除' : '将文件移动到指定文件夹');
+      };
       ctxMenu.querySelector('.link-del').onclick = function () { closeMoreMenu(); deleteItem(it); };
     }
     function closeMoreMenu() {
@@ -619,6 +751,95 @@
       if (!e.target.closest('.ctx-menu') && !e.target.closest('.more-btn')) closeMoreMenu();
     });
     window.addEventListener('scroll', closeMoreMenu, true);
+
+    /* ==================== 批量选择 / 移动 / 删除 ==================== */
+    function onRowCheck(it, cb) {
+      const i = kbSelected.indexOf(it);
+      if (cb.checked && i === -1) kbSelected.push(it);
+      if (!cb.checked && i > -1) kbSelected.splice(i, 1);
+      updateBatchBar();
+    }
+    function updateBatchBar() {
+      const bar = document.getElementById('batchBar');
+      const n = kbSelected.length;
+      document.getElementById('batchCount').textContent = n;
+      bar.style.display = n ? 'flex' : 'none';
+      const all = document.getElementById('kbSelectAll');
+      if (all) {
+        const checkedCount = kbVisibleItems.filter(it => kbSelected.indexOf(it) >= 0).length;
+        all.checked = kbVisibleItems.length > 0 && checkedCount === kbVisibleItems.length;
+        all.indeterminate = checkedCount > 0 && checkedCount < kbVisibleItems.length;
+      }
+    }
+    function toggleSelectAll(cb) {
+      kbSelected = cb.checked ? kbVisibleItems.slice() : [];
+      renderList();
+    }
+    function clearSelection() {
+      kbSelected = [];
+      renderList();
+    }
+    function openBatchMove() {
+      if (!kbSelected.length) { showToast(); return; }
+      const hasFolder = kbSelected.some(it => it.type === 'folder');
+      openMoveModal(kbSelected.slice(), hasFolder ? '文件夹移动：其内文件将批量并入目标文件夹，原文件夹删除' : '共 ' + kbSelected.length + ' 个文件将被移动');
+    }
+    function openMoveModal(items, tip) {
+      kbMoveItems = items;
+      const sel = document.getElementById('moveTargetSelect');
+      const folders = [];
+      collectFolders(KB_ROOT, '', folders);
+      const cur = currentFolder();
+      const exclude = new Set(kbMoveItems.filter(it => it.type === 'folder'));
+      kbMoveCandidates = [];
+      // 支持移动到主目录（根目录/默认列表），当前已在根目录时不再重复提供
+      if (cur !== KB_ROOT) kbMoveCandidates.push({ folder: KB_ROOT, label: '根目录（默认列表）' });
+      kbMoveCandidates = kbMoveCandidates.concat(folders.filter(f => f.folder !== cur && !exclude.has(f.folder)));
+      sel.innerHTML = kbMoveCandidates.length
+        ? kbMoveCandidates.map((f, i) => '<option value="' + i + '">' + f.label + '</option>').join('')
+        : '<option value="">暂无可移动的目标文件夹</option>';
+      document.getElementById('moveTip').textContent = tip || ('共 ' + items.length + ' 个文件');
+      document.getElementById('moveModal').classList.add('active');
+    }
+    function closeMoveModal() {
+      document.getElementById('moveModal').classList.remove('active');
+    }
+    function confirmMove() {
+      const sel = document.getElementById('moveTargetSelect');
+      const target = kbMoveCandidates[Number(sel.value)];
+      if (!target || !kbMoveItems.length) { closeMoveModal(); return; }
+      const cur = currentFolder();
+      kbMoveItems.forEach(item => {
+        const i = cur.children.indexOf(item);
+        if (i < 0) return;
+        if (item.type === 'folder') {
+          // 文件夹移动：其内文件批量并入目标文件夹，原文件夹删除
+          item.children.forEach(f => target.folder.children.push(f));
+          cur.children.splice(i, 1);
+        } else {
+          cur.children.splice(i, 1);
+          target.folder.children.push(item);
+        }
+      });
+      if (cur !== KB_ROOT) cur.updateTime = nowText();
+      target.folder.updateTime = nowText();
+      kbMoveItems = [];
+      kbSelected = [];
+      closeMoveModal();
+      renderList();
+      showToast();
+    }
+    function batchDelete() {
+      const cur = currentFolder();
+      kbSelected.forEach(it => {
+        const i = cur.children.indexOf(it);
+        if (i > -1) cur.children.splice(i, 1);
+      });
+      kbSelected = [];
+      if (cur !== KB_ROOT) cur.updateTime = nowText();
+      renderList();
+      showToast();
+    }
 
     function openFolder(folder) {
       kbPath.push(folder);
@@ -845,6 +1066,104 @@
         el.addEventListener('mouseleave', function () { tip.style.display = 'none'; });
       });
     })();
+
+    /* ==================== 侧栏：新建报告下拉 + 任务列表（与工作台一致） ==================== */
+    const SIDEBAR_TASKS = [
+      { name: '数据治理实施方案', status: 'running', agent: '可研专业版' },
+      { name: '商业大数据可研', status: 'writing', agent: '可研专业版' },
+      { name: '智能仓储立项报告', status: 'done', agent: '项目立项报告' },
+      { name: '企业全景尽调分析', status: 'running', agent: '企业全景分析' },
+      { name: '投前尽调报告', status: 'done', agent: '投前咨询分析' },
+      { name: '园区招商策略初稿', status: 'writing', agent: '招商策略分析' },
+      { name: '冷链项目立项报告', status: 'done', agent: '项目立项报告' },
+      { name: '新能源可研报告', status: 'running', agent: '可研专业版' },
+      { name: '数据资产入表分析', status: 'writing', agent: '数据要素资产化' },
+      { name: '生物医药产业分析', status: 'done', agent: '生物医药产业分析' },
+      { name: '智慧园区招商方案', status: 'running', agent: '招商策略分析' },
+      { name: '银行数据治理立项', status: 'done', agent: '项目立项报告' },
+      { name: '工业互联网可研报告', status: 'writing', agent: '可研快速版' },
+      { name: '供应链金融可研', status: 'running', agent: '可研专业版' },
+      { name: '跨境电商企业全景', status: 'done', agent: '企业全景分析' },
+      { name: '半导体项目投前咨询', status: 'writing', agent: '投前咨询分析' },
+      { name: '智慧城市数据中心立项', status: 'done', agent: '项目立项报告' },
+      { name: '零售企业全景分析', status: 'running', agent: '企业全景分析' },
+      { name: '光伏组件产线可研', status: 'writing', agent: '可研专业版' },
+      { name: '医药物流园区立项', status: 'done', agent: '项目立项报告' },
+      { name: '长三角产业招商策略', status: 'running', agent: '招商策略分析' },
+      { name: '芯片封装投前咨询', status: 'writing', agent: '投前咨询分析' },
+      { name: '数据中台建设可研', status: 'running', agent: '可研专业版' },
+      { name: '冷链企业全景尽调', status: 'done', agent: '企业全景分析' }
+    ];
+    const SIDEBAR_TASK_PAGE = 20;
+    let sidebarTaskPage = 0;
+    let sidebarTaskFilter = 'all';
+    let sidebarTaskLoading = false;
+    function sidebarTaskList() {
+      return sidebarTaskFilter === 'all'
+        ? SIDEBAR_TASKS
+        : SIDEBAR_TASKS.filter(t => t.agent === sidebarTaskFilter);
+    }
+    function renderSidebarTaskItem(t) {
+      const el = document.createElement('div');
+      el.className = 'sidebar-task-item';
+      el.dataset.agent = t.agent;
+      el.onclick = function () { window.location.href = 'report.html'; };
+      const dotClass = t.status === 'done' ? 'done' : t.status === 'writing' ? 'writing' : 'running';
+      const dotTitle = t.status === 'done' ? '已导出' : t.status === 'writing' ? '填写中' : '生成中';
+      el.innerHTML = '<span class="task-status-icon ' + dotClass + '" title="' + dotTitle + '"></span>'
+        + '<span class="sidebar-task-text">' + t.name + '</span>'
+        + '<span class="sidebar-task-meta">' + t.agent + '</span>'
+        + '<span class="task-actions">'
+        + '<button class="task-act" title="编辑任务名称" onclick="event.stopPropagation();showToast()">✎</button>'
+        + '<button class="task-act danger" title="删除任务" onclick="event.stopPropagation();showToast()">✕</button>'
+        + '</span>';
+      return el;
+    }
+    function ensureTaskLoadingEl() {
+      const scroll = document.getElementById('sidebarTaskScroll');
+      let l = document.getElementById('sidebarTaskLoading');
+      if (!l) {
+        l = document.createElement('div');
+        l.id = 'sidebarTaskLoading';
+        l.className = 'sidebar-task-loading';
+        scroll.appendChild(l);
+      }
+      return l;
+    }
+    function loadSidebarTasks() {
+      const scroll = document.getElementById('sidebarTaskScroll');
+      if (!scroll) return;
+      const list = sidebarTaskList();
+      const start = sidebarTaskPage * SIDEBAR_TASK_PAGE;
+      const batch = list.slice(start, start + SIDEBAR_TASK_PAGE);
+      batch.forEach(t => scroll.appendChild(renderSidebarTaskItem(t)));
+      sidebarTaskPage++;
+      const l = ensureTaskLoadingEl();
+      l.textContent = start + batch.length >= list.length ? '已全部加载' : '加载中…';
+      scroll.appendChild(l); // 提示始终位于最后一条数据之后
+      sidebarTaskLoading = false;
+    }
+    function initSidebarTasks() {
+      sidebarTaskPage = 0;
+      sidebarTaskLoading = false;
+      const scroll = document.getElementById('sidebarTaskScroll');
+      if (scroll) scroll.innerHTML = '';
+      loadSidebarTasks();
+    }
+    function filterSidebarTasks(sel) {
+      sidebarTaskFilter = sel.value;
+      initSidebarTasks();
+    }
+    document.getElementById('sidebarTaskScroll').addEventListener('scroll', function () {
+      if (this.scrollTop + this.clientHeight >= this.scrollHeight - 40) {
+        const list = sidebarTaskList();
+        if (sidebarTaskPage * SIDEBAR_TASK_PAGE < list.length && !sidebarTaskLoading) {
+          sidebarTaskLoading = true;
+          setTimeout(loadSidebarTasks, 400);
+        }
+      }
+    });
+    initSidebarTasks();
   </script>
 </body>
 </html>

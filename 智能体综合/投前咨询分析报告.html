@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>投前咨询分析报告</title>
+  <link rel="stylesheet" href="agent-shell.css">
+  <link rel="stylesheet" href="agent-flow.css">
+</head>
+<body>
+<div id="agentShellRoot"></div>
+<script>
+window.AGENT_CONFIG = {
+  name: '投前咨询分析报告',
+  steps: ['编辑基本信息', '生成中', '完整报告输出'],
+  flow: [{ key: 'form', primary: '生成报告' }],
+  genMinutes: 10,
+  form: {
+    title: '目标企业信息',
+    fields: [
+      { label: '目标公司名称', required: true, max: 50, placeholder: '请输入完整的企业名称', hint: '企业名称会用于数据检索匹配' },
+      { label: '委托目的与分析重点', required: true, type: 'select', options: ['请选择调查目的', '股权投资尽调', '并购尽调', '风险排查', '其他'] }
+    ]
+  },
+  dims: [
+    { title: '公司基本情况', desc: '工商注册信息、股东结构、对外投资、历史沿革与变更记录' },
+    { title: '股权穿透', desc: '逐层穿透实际控制人、股权质押与冻结情况' },
+    { title: '司法风险', desc: '行政处罚、司法诉讼、失信被执行、经营异常等法律风险排查' },
+    { title: '荣誉资质与知识产权', desc: '高新技术企业、专精特新等资质；专利、软著、标准参与情况' },
+    { title: '产品矩阵与核心技术', desc: '产品结构、技术迭代、核心技术来源及研发投入' },
+    { title: '经营与舆情', desc: '经营异常、负面舆情、关联交易与潜在风险信号' }
+  ],
+  reportName: '某某公司投前咨询分析报告'
+};
+</script>
+<script src="agent-shell.js"></script>
+<script src="agent-flow.js"></script>
+</body>
+</html>

@@ -95,6 +95,59 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+    /* 侧栏：新建报告 + 任务列表（与工作台一致） */
+    .sidebar { overflow: hidden; }
+    .sidebar-new-sec { flex-shrink: 0; }
+    .sidebar-new-report { width: auto; margin-bottom: 0; padding: 10px 14px; border: none; border-radius: 6px; background: transparent; color: #555; font-size: 14px; font-weight: 400; }
+    .sidebar-new-report:hover { background: #dfe9f4; color: #333; }
+    .sidebar-new-report.active { background: #eef2f8; color: #333; font-weight: 500; }
+    .sidebar-quick-item { display: flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 6px; font-size: 13px; color: #555; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-quick-item:hover { background: #dfe9f4; color: #333; }
+    .sidebar-quick-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .sidebar-task-text { color: #222; font-weight: 500; }
+    .sidebar-tasks-sec { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    .sidebar-task-scroll { flex: 1; min-height: 0; overflow-y: auto; }
+    .sidebar-task-item { position: relative; flex-wrap: wrap; row-gap: 2px; padding: 7px 48px 7px 14px; }
+    .sidebar-task-item:hover .task-status-icon { display: inline-flex; }
+    .task-actions { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: #dfe9f4; border-radius: 4px; padding: 1px; }
+    .sidebar-task-meta { flex-basis: 100%; font-size: 11px; color: #999; padding-left: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-label-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 8px 12px 4px; }
+    .sidebar-label-row .sidebar-label { padding: 0; }
+    .sidebar-task-filter { height: 22px; font-size: 11px; border: 1px solid #d8e2f0; border-radius: 4px; color: #555; background: transparent; max-width: 112px; cursor: pointer; }
+    .sidebar-bottom-nav { flex-shrink: 0; }
+    .sidebar-task-loading { text-align: center; font-size: 11px; color: #999; padding: 8px 0; }
+    .task-status-icon { width: 6px; height: 6px; flex-shrink: 0; border-radius: 50%; border: none; animation: none; background: #bbb; }
+    .task-status-icon.running { border: none; animation: none; background: #d9822b; }
+    .task-status-icon.writing { background: #f0ad4e; }
+    .task-status-icon.done { background: #58a06e; }
+    .task-status-icon.done::before { content: ''; }
+    .task-toast {
+      display: none;
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1500;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      padding: 12px 18px;
+      min-width: 240px;
+    }
+    .task-toast.active { display: block; }
+    .task-toast-close {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      cursor: pointer;
+      color: #999;
+      font-size: 14px;
+      line-height: 1;
+    }
+    .task-toast-close:hover { color: #333; }
+    .task-toast-title { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 4px; }
+    .task-toast-desc { font-size: 12px; color: #777; line-height: 1.6; }
   </style>
 </head>
 <body>
@@ -104,38 +157,33 @@
       <div class="sidebar-brand-logo">5</div>
       <div class="sidebar-brand-name">5度易链<small>5 DEGREE EASY CHAIN</small></div>
     </div>
-    <div class="sidebar-section">
-      <div class="sidebar-item" onclick="window.location.href='report.html'">
+    <div class="sidebar-section sidebar-new-sec">
+      <div class="sidebar-item sidebar-new-report" onclick="window.location.href='report.html'">
         <div class="sidebar-icon">✎</div>
-        <span>生成报告</span>
+        <span>新建报告</span>
       </div>
-      <div class="sidebar-item active">
+    </div>
+    <div class="divider" style="margin:4px 12px;"></div>
+    <div class="sidebar-section sidebar-tasks-sec">
+      <div class="sidebar-label-row">
+        <div class="sidebar-label">任务列表</div>
+        <select class="sidebar-task-filter" id="taskFilter" onchange="filterSidebarTasks(this)">
+          <option value="all">全部智能体</option>
+          <option value="可研专业版">可研专业版</option>
+          <option value="项目立项报告">项目立项报告</option>
+        </select>
+      </div>
+      <div class="sidebar-task-scroll" id="sidebarTaskScroll"></div>
+    </div>
+    <div class="divider" style="margin:4px 12px;"></div>
+    <div class="sidebar-section sidebar-bottom-nav">
+      <div class="sidebar-item active" onclick="window.location.href='assets.html'">
         <div class="sidebar-icon">▤</div>
         <span>报告资产</span>
       </div>
       <div class="sidebar-item" onclick="window.location.href='knowledge.html'">
         <div class="sidebar-icon">○</div>
         <span>知识库</span>
-      </div>
-    </div>
-    <div class="divider" style="margin:4px 12px;"></div>
-    <div class="sidebar-section">
-      <div class="sidebar-label">任务列表</div>
-      <div class="sidebar-task-item" onclick="window.location.href='report.html?task=1'">
-        <span class="sidebar-task-text">海关总署2025年数据治理咨询及实施服务项目实施方案</span>
-        <span class="task-status-icon running" title="进行中"></span>
-        <span class="task-actions">
-          <button class="task-act" title="编辑任务名称" onclick="event.stopPropagation();showToast()">✎</button>
-          <button class="task-act danger" title="删除任务" onclick="event.stopPropagation();showToast()">✕</button>
-        </span>
-      </div>
-      <div class="sidebar-task-item" onclick="window.location.href='report.html?task=2'">
-        <span class="sidebar-task-text">海关总署2025年数据治理咨询项目</span>
-        <span class="task-status-icon done" title="已完成"></span>
-        <span class="task-actions">
-          <button class="task-act" title="编辑任务名称" onclick="event.stopPropagation();showToast()">✎</button>
-          <button class="task-act danger" title="删除任务" onclick="event.stopPropagation();showToast()">✕</button>
-        </span>
       </div>
     </div>
 
@@ -291,6 +339,103 @@
   </div>
 
   <script>
+    /* ==================== 侧栏：新建报告下拉 + 任务列表（与工作台一致） ==================== */
+    const SIDEBAR_TASKS = [
+      { name: '数据治理实施方案', status: 'running', agent: '可研专业版' },
+      { name: '商业大数据可研', status: 'writing', agent: '可研专业版' },
+      { name: '智能仓储立项报告', status: 'done', agent: '项目立项报告' },
+      { name: '企业全景尽调分析', status: 'running', agent: '企业全景分析' },
+      { name: '投前尽调报告', status: 'done', agent: '投前咨询分析' },
+      { name: '园区招商策略初稿', status: 'writing', agent: '招商策略分析' },
+      { name: '冷链项目立项报告', status: 'done', agent: '项目立项报告' },
+      { name: '新能源可研报告', status: 'running', agent: '可研专业版' },
+      { name: '数据资产入表分析', status: 'writing', agent: '数据要素资产化' },
+      { name: '生物医药产业分析', status: 'done', agent: '生物医药产业分析' },
+      { name: '智慧园区招商方案', status: 'running', agent: '招商策略分析' },
+      { name: '银行数据治理立项', status: 'done', agent: '项目立项报告' },
+      { name: '工业互联网可研报告', status: 'writing', agent: '可研快速版' },
+      { name: '供应链金融可研', status: 'running', agent: '可研专业版' },
+      { name: '跨境电商企业全景', status: 'done', agent: '企业全景分析' },
+      { name: '半导体项目投前咨询', status: 'writing', agent: '投前咨询分析' },
+      { name: '智慧城市数据中心立项', status: 'done', agent: '项目立项报告' },
+      { name: '零售企业全景分析', status: 'running', agent: '企业全景分析' },
+      { name: '光伏组件产线可研', status: 'writing', agent: '可研专业版' },
+      { name: '医药物流园区立项', status: 'done', agent: '项目立项报告' },
+      { name: '长三角产业招商策略', status: 'running', agent: '招商策略分析' },
+      { name: '芯片封装投前咨询', status: 'writing', agent: '投前咨询分析' },
+      { name: '数据中台建设可研', status: 'running', agent: '可研专业版' },
+      { name: '冷链企业全景尽调', status: 'done', agent: '企业全景分析' }
+    ];
+    const SIDEBAR_TASK_PAGE = 20;
+    let sidebarTaskPage = 0;
+    let sidebarTaskFilter = 'all';
+    let sidebarTaskLoading = false;
+    function sidebarTaskList() {
+      return sidebarTaskFilter === 'all'
+        ? SIDEBAR_TASKS
+        : SIDEBAR_TASKS.filter(t => t.agent === sidebarTaskFilter);
+    }
+    function renderSidebarTaskItem(t) {
+      const el = document.createElement('div');
+      el.className = 'sidebar-task-item';
+      el.dataset.agent = t.agent;
+      el.onclick = function () { window.location.href = 'report.html'; };
+      const dotClass = t.status === 'done' ? 'done' : t.status === 'writing' ? 'writing' : 'running';
+      const dotTitle = t.status === 'done' ? '已导出' : t.status === 'writing' ? '填写中' : '生成中';
+      el.innerHTML = '<span class="task-status-icon ' + dotClass + '" title="' + dotTitle + '"></span>'
+        + '<span class="sidebar-task-text">' + t.name + '</span>'
+        + '<span class="sidebar-task-meta">' + t.agent + '</span>'
+        + '<span class="task-actions">'
+        + '<button class="task-act" title="编辑任务名称" onclick="event.stopPropagation();showToast()">✎</button>'
+        + '<button class="task-act danger" title="删除任务" onclick="event.stopPropagation();showToast()">✕</button>'
+        + '</span>';
+      return el;
+    }
+    function ensureTaskLoadingEl() {
+      const scroll = document.getElementById('sidebarTaskScroll');
+      let l = document.getElementById('sidebarTaskLoading');
+      if (!l) {
+        l = document.createElement('div');
+        l.id = 'sidebarTaskLoading';
+        l.className = 'sidebar-task-loading';
+        scroll.appendChild(l);
+      }
+      return l;
+    }
+    function loadSidebarTasks() {
+      const scroll = document.getElementById('sidebarTaskScroll');
+      if (!scroll) return;
+      const list = sidebarTaskList();
+      const start = sidebarTaskPage * SIDEBAR_TASK_PAGE;
+      const batch = list.slice(start, start + SIDEBAR_TASK_PAGE);
+      batch.forEach(t => scroll.appendChild(renderSidebarTaskItem(t)));
+      sidebarTaskPage++;
+      const l = ensureTaskLoadingEl();
+      l.textContent = start + batch.length >= list.length ? '已全部加载' : '加载中…';
+      scroll.appendChild(l); // 提示始终位于最后一条数据之后
+      sidebarTaskLoading = false;
+    }
+    function initSidebarTasks() {
+      sidebarTaskPage = 0;
+      sidebarTaskLoading = false;
+      const scroll = document.getElementById('sidebarTaskScroll');
+      if (scroll) scroll.innerHTML = '';
+      loadSidebarTasks();
+    }
+    function filterSidebarTasks(sel) {
+      sidebarTaskFilter = sel.value;
+      initSidebarTasks();
+    }
+    document.getElementById('sidebarTaskScroll').addEventListener('scroll', function () {
+      if (this.scrollTop + this.clientHeight >= this.scrollHeight - 40) {
+        const list = sidebarTaskList();
+        if (sidebarTaskPage * SIDEBAR_TASK_PAGE < list.length && !sidebarTaskLoading) {
+          sidebarTaskLoading = true;
+          setTimeout(loadSidebarTasks, 400);
+        }
+      }
+    });
+    initSidebarTasks();
     function filterTable() {
       const q = document.getElementById('searchInput').value.toLowerCase();
       document.querySelectorAll('#reportList tr').forEach(row => {

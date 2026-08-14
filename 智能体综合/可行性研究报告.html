@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>可行性研究报告</title>
+  <link rel="stylesheet" href="agent-shell.css">
+  <link rel="stylesheet" href="agent-flow.css">
+</head>
+<body>
+<div id="agentShellRoot"></div>
+<script>
+window.AGENT_CONFIG = {
+  name: '可行性研究报告',
+  steps: ['编辑基本信息', '上传项目信息', '生成中', '完整报告输出'],
+  flow: [
+    { key: 'form', primary: '下一步' },
+    { key: 'upload', primary: '生成报告' }
+  ],
+  genMinutes: 30,
+  form: {
+    title: '项目基础信息',
+    fields: [
+      { label: '项目名称', required: true, max: 80, placeholder: '示例：北京笃威尔AI数据中台开发项目' },
+      { label: '企业名称', required: true, max: 30, placeholder: '示例：北京笃威尔数字技术有限公司', hint: '企业名称会用于数据检索匹配' },
+      { label: '项目建设内容、规模', required: true, type: 'textarea', max: 400, placeholder: '示例：本项目拟建设企业级AI数据中台，整合公司现有工商、专利、司法等数据资源，打造统一的数据底座…' },
+      { label: '项目总投资', required: true, type: 'textarea', max: 100, placeholder: '示例：本项目总投资500万元，自筹350万，贷款150万。其中设备购置费205万元、软件采购80万元…' },
+      { label: '需求描述（可选）', type: 'textarea', max: 1500, placeholder: '报告主旨、重点内容、核心目标、需要注意和规避的内容…' }
+    ]
+  },
+  reportName: '企查查商业大数据人工智能研发建设项目·可行性研究报告'
+};
+</script>
+<script src="agent-shell.js"></script>
+<script src="agent-flow.js"></script>
+</body>
+</html>

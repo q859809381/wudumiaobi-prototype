@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>招商策略分析报告</title>
+  <link rel="stylesheet" href="agent-shell.css">
+  <link rel="stylesheet" href="agent-flow.css">
+</head>
+<body>
+<div id="agentShellRoot"></div>
+<script>
+window.AGENT_CONFIG = {
+  name: '招商策略分析报告',
+  steps: ['编辑基本信息', '生成中', '完整报告输出'],
+  flow: [{ key: 'form', primary: '生成报告' }],
+  genMinutes: 10,
+  form: {
+    title: '招商对象信息',
+    fields: [
+      { label: '招商区域', required: true, max: 100, placeholder: '请填写具体到市/区/县/园区的完整地址', hint: '若招商区域具体到市/区/县/园区等，为避免重名问题导致定位错误，请补充全部地址，如“xx省xx市xx区”' },
+      { label: '企业名称', required: true, max: 50, placeholder: '请输入完整的企业名称', hint: '企业名称会用于数据检索匹配' }
+    ]
+  },
+  dims: [
+    { title: '企业基本信息', desc: '工商注册、股权结构、主营业务、资质荣誉及信用记录（司法、行政处罚等）' },
+    { title: '股权穿透', desc: '逐层穿透实际控制人、关联企业与投资布局' },
+    { title: '产能与布局', desc: '产能规模、生产基地分布、扩产计划与选址倾向' },
+    { title: '产业协同评估', desc: '企业与当地产业链、政策方向及配套资源的匹配度' },
+    { title: '招商切入策略', desc: '基于企业诉求提炼招商切入点与接触策略' },
+    { title: '潜在风险提示', desc: '政策依赖、环保、用工及经营稳定性等风险提示' }
+  ],
+  reportName: '某某企业招商策略分析报告'
+};
+</script>
+<script src="agent-shell.js"></script>
+<script src="agent-flow.js"></script>
+</body>
+</html>

@@ -535,6 +535,13 @@
     }
     .anchor-tip:hover { background: #d5dfec; }
     .anchor-value { flex: 1; min-width: 0; }
+    .anchor-hint {
+      display: inline;
+      font-size: 10.5px;
+      color: #b8860b;
+      margin-left: 4px;
+      line-height: 1.4;
+    }
     /* 只读统计展示：维度值 */
     .anchor-value .dim-val {
       display: block;
@@ -603,8 +610,11 @@
       border: 1px solid #eef1f5;
       border-radius: 6px;
       padding: 12px;
-      border-bottom: none;
       margin-top: 4px;
+    }
+    /* 差额行补齐下描边（不被 last-child 规则去掉） */
+    .anchor-row.anchor-summary {
+      border-bottom: 1px solid #eef1f5;
     }
     .anchor-summary .anchor-label { padding: 0; font-weight: 600; color: #555; }
     .anchor-summary .anchor-value { font-size: 14px; font-weight: 600; color: #4a6fa5; }
@@ -708,6 +718,33 @@
       align-items: center;
       gap: 8px;
     }
+    /* 版本栏控件统一高度 */
+    .outline-version-bar .btn,
+    .outline-version-bar select {
+      height: 30px;
+      box-sizing: border-box;
+    }
+    /* 大纲回退/恢复：有记录时黑色可点，无记录时灰显 */
+    .outline-undo-btn {
+      color: #fff;
+      background: #333;
+      border-color: #333;
+    }
+    .outline-undo-btn:hover {
+      background: #555;
+      border-color: #555;
+    }
+    .outline-undo-btn:disabled {
+      color: #bbb;
+      background: #f2f2f2;
+      border-color: #e0e0e0;
+      cursor: default;
+      opacity: 1;
+    }
+    .outline-undo-btn:disabled:hover {
+      background: #f2f2f2;
+      border-color: #e0e0e0;
+    }
     .outline-version-label {
       font-size: 13px;
       font-weight: 600;
@@ -800,14 +837,14 @@
     /* 章节小字描述：名称下方浅灰框 */
     .node-desc {
       display: block;
-      margin: 4px 6px 4px 20px;
+      margin: 4px 0 4px 20px;
       padding: 6px 10px;
       font-size: 12px;
       color: #777;
       background: #f4f5f7;
       border-radius: 5px;
       line-height: 1.5;
-      max-width: 560px;
+      max-width: none;
     }
     /* 章节行悬浮操作按钮（添加子章节 / 删除） */
     .node-actions {
@@ -1032,6 +1069,72 @@
       font-size: 12px;
       color: #888;
       margin-left: 6px;
+    }
+    .tool-ai-credit {
+      margin-left: auto;
+      font-size: 12px;
+      color: #3f5f92;
+      background: #eaf2fc;
+      border: 1px solid #c4d6ec;
+      border-radius: 12px;
+      padding: 3px 12px;
+      white-space: nowrap;
+    }
+    .tool-ai-credit.empty {
+      color: #c0392b;
+      background: #fdf0ec;
+      border-color: #e8b4a3;
+    }
+    .ai-credit-toast {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3000;
+      background: #333;
+      color: #fff;
+      font-size: 13px;
+      border-radius: 20px;
+      padding: 8px 18px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .ai-credit-toast.show { opacity: 1; }
+    /* 导出 Word 二次确认弹窗 */
+    .export-warn {
+      font-size: 15px;
+      font-weight: 700;
+      color: #c0392b;
+      margin-bottom: 8px;
+    }
+    .export-desc {
+      font-size: 13px;
+      color: #555;
+      line-height: 1.8;
+      margin-bottom: 18px;
+    }
+    .export-desc strong { color: #c0392b; }
+    .export-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+    /* 导出后：报告锁定为只读，隐藏所有编辑/AI操作入口 */
+    body.exported .editor-toolbar,
+    body.exported .editor-progress,
+    body.exported .editor-float-btns,
+    body.exported .check-area,
+    body.exported .issue-group-head,
+    body.exported #issuePendingList,
+    body.exported .ai-write-btn,
+    body.exported .sel-menu {
+      display: none !important;
+    }
+    .export-time {
+      font-size: 12px;
+      color: #2e8b57;
+      font-weight: 500;
     }
     /* 仿 Word：桌面背景 + A4 纸张 */
     .editor-content {
@@ -1524,44 +1627,94 @@
       gap: 12px;
     }
 
-    /* ---------- 生成流程弹窗（三步向导） ---------- */
+    /* ---------- 生成流程（整页式：标题+步骤固定，内容区滚动） ---------- */
     .stage-mask {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.45);
-      z-index: 800;
       display: none;
-      align-items: center;
-      justify-content: center;
+      background: transparent;
+      transition: opacity 0.18s ease, transform 0.18s ease;
     }
-    .stage-mask.active { display: flex; }
-    .stage-box {
-      width: 1180px;
-      max-width: calc(100% - 48px);
-      max-height: calc(100% - 48px);
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 12px 44px rgba(0, 0, 0, 0.2);
+    .stage-mask.active {
+      position: fixed;
+      top: 0;
+      left: 220px;
+      right: 0;
+      bottom: 0;
+      z-index: 60;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
+      background: #f6f7f9;
+    }
+    .stage-mask.leaving {
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+    }
+    .stage-box {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      background: transparent;
+    }
+    /* 向导内联展示时：隐藏重复的顶部名称栏；进入正文编辑后隐藏向导 */
+    body.wizard-active .content-head { display: none; }
+    body.editor-mode .stage-mask { display: none; }
+    /* 正文编辑淡入，弱化切换突兀感 */
+    body.editor-mode #step4.active { animation: editorFadeIn 0.25s ease; }
+    @keyframes editorFadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: none; }
     }
     .stage-head {
-      padding: 16px 28px;
-      border-bottom: 1px solid #eee;
-      background: #fafbfc;
+      flex-shrink: 0;
+      padding: 12px 32px;
+      border-bottom: 1px solid #e8e8e8;
+      background: #fff;
       display: flex;
+      flex-direction: column;
       align-items: flex-start;
-      justify-content: space-between;
       gap: 12px;
     }
+    /* 返回箭头 + 标题一行，步骤在下一行（与智能体详情页一致） */
+    .stage-head-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
     .stage-title { font-size: 17px; font-weight: 700; color: #333; }
-    .stage-steps { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+    /* 返回智能体首页 */
+    .stage-back {
+      width: 30px;
+      height: 30px;
+      border: 1px solid #d9e3ef;
+      border-radius: 50%;
+      background: #fff;
+      color: #4a6fa5;
+      font-size: 15px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .stage-back:hover { background: #f0f5fb; border-color: #4a6fa5; }
+    /* 保存草稿：与智能体页面“保存内容”同款蓝色描边 */
+    .stage-save-draft {
+      color: #4a6fa5;
+      border-color: #4a6fa5;
+      background: #fff;
+    }
+    .stage-save-draft:hover {
+      background: #f0f5fb;
+      border-color: #4a6fa5;
+      color: #4a6fa5;
+    }
+    .stage-steps { display: flex; gap: 10px; margin-top: 0; flex-wrap: wrap; }
     .stage-step {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 7px 16px;
+      padding: 6px 16px;
       border-radius: 20px;
       font-size: 13px;
       color: #999;
@@ -1596,37 +1749,39 @@
       flex: 1;
       min-height: 0;
       overflow-y: auto;
-      padding: 20px 28px;
+      padding: 24px 32px;
+      background: #f6f7f9;
     }
     .stage-body.no-scroll {
       overflow: hidden;
       display: flex;
       flex-direction: column;
     }
-    /* 第三步：页面固定不滚动，左侧列表独立滚动，右侧设置栏固定高度 */
-    #stagePanel3.active {
+    /* 第四步：页面固定不滚动，左侧列表独立滚动，右侧设置栏固定高度 */
+    #stagePanel4.active {
       flex: 1;
       min-height: 0;
       display: flex;
       flex-direction: column;
     }
-    #stagePanel3 .outline-layout {
+    #stagePanel4 .outline-layout {
       flex: 1;
       min-height: 0;
     }
-    #stagePanel3 .chapter-settings-panel {
+    #stagePanel4 .chapter-settings-panel {
       overflow: hidden;
     }
     .stage-panel { display: none; }
     .stage-panel.active { display: block; }
     .stage-foot {
+      flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      padding: 14px 28px;
-      border-top: 1px solid #eee;
-      background: #fafbfc;
+      padding: 14px 32px;
+      border-top: 1px solid #e8e8e8;
+      background: #fff;
     }
     .stage-foot-left {
       display: flex;
@@ -1883,16 +2038,49 @@
       top: calc(100% + 4px);
       left: 0;
       right: 0;
-      max-height: 240px;
-      overflow-y: auto;
+      max-height: 260px;
+      overflow: hidden;
       background: #fff;
       border: 1px solid #e0e0e0;
       border-radius: 8px;
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
       z-index: 50;
+    }
+    .kb-ms-panel.open { display: flex; }
+    .kb-ms-left {
+      width: 260px;
+      flex-shrink: 0;
+      max-height: 260px;
+      overflow-y: auto;
       padding: 4px 0;
     }
-    .kb-ms-panel.open { display: block; }
+    .kb-ms-drawer {
+      display: none;
+      flex: 1;
+      min-width: 0;
+      max-height: 260px;
+      overflow-y: auto;
+      border-left: 1px solid #f0f0f0;
+      background: #fafbfd;
+      padding: 4px 0;
+    }
+    .kb-ms-drawer.show { display: block; }
+    .kb-ms-drawer-head {
+      position: sticky;
+      top: 0;
+      background: #fafbfd;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #666;
+      border-bottom: 1px solid #f0f0f0;
+      margin-bottom: 2px;
+    }
+    .kb-ms-drawer-empty {
+      padding: 12px 14px;
+      font-size: 12px;
+      color: #bbb;
+    }
     /* 打开时切换为 fixed 定位，避免被弹窗内容区滚动容器裁剪 */
     .kb-ms-panel.fixed-open {
       position: fixed;
@@ -1902,11 +2090,12 @@
       margin: 0;
       z-index: 200;
     }
-    .kb-ms-item {
+    .kb-ms-panel .kb-ms-item {
       display: flex;
       align-items: center;
       gap: 8px;
       padding: 7px 14px;
+      margin-bottom: 0;
       font-size: 13px;
       color: #555;
       cursor: pointer;
@@ -1921,6 +2110,131 @@
     .kb-ms-item .ms-icon { width: 16px; text-align: center; flex-shrink: 0; }
     .kb-ms-item.depth-1 { padding-left: 30px; }
     .kb-ms-item.depth-2 { padding-left: 46px; }
+    .kb-ms-item .kb-ms-name {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    /* 第二步：引用知识库标题行（含上传按钮） */
+    .kb-ref-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    /* 上传说明弹窗 */
+    .upload-target { margin-bottom: 14px; }
+    .upload-target label {
+      display: block;
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 6px;
+    }
+    .upload-target select { max-width: 320px; }
+    .upload-guide {
+      font-size: 13px;
+      color: #555;
+      line-height: 1.9;
+      padding-left: 14px;
+      position: relative;
+    }
+    .upload-guide li::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: #4a6fa5;
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    /* 上传任务面板（右下角，层级高于向导弹窗） */
+    .upload-panel {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: 320px;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+      z-index: 1300;
+      display: none;
+    }
+    .upload-panel.active { display: block; }
+    .upload-panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+    .upload-panel-close {
+      cursor: pointer;
+      color: #999;
+      font-size: 16px;
+      line-height: 1;
+    }
+    .upload-panel-close:hover { color: #333; }
+    .upload-panel-body {
+      padding: 8px 0;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+    .upload-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+    }
+    .upload-item + .upload-item { border-top: 1px dashed #f0f0f0; }
+    .upload-item-info { flex: 1; min-width: 0; }
+    .upload-item-name {
+      font-size: 13px;
+      color: #333;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .upload-item-size { font-size: 11px; color: #bbb; margin-top: 2px; }
+    .upload-item-status {
+      flex-shrink: 0;
+      font-size: 12px;
+      color: #666;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .upload-item-status .spin {
+      width: 10px;
+      height: 10px;
+      border: 1.5px solid #d0d0d0;
+      border-top-color: #4a6fa5;
+      border-radius: 50%;
+      animation: upSpin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+    .upload-item-status.done { color: #2e8b57; }
+    .upload-item-del {
+      flex-shrink: 0;
+      border: none;
+      background: transparent;
+      color: #bbb;
+      font-size: 13px;
+      cursor: pointer;
+      padding: 2px;
+    }
+    .upload-item-del:hover { color: #c0392b; }
+    @keyframes upSpin {
+      to { transform: rotate(360deg); }
+    }
     .kb-current-outline {
       display: flex;
       align-items: center;
@@ -2040,10 +2354,162 @@
       max-height: none;
     }
 
-    /* ---------- 智能体选择页 ---------- */
+    /* ---------- 侧栏：新建报告 + 快捷智能体 ---------- */
+    .sidebar-new-report {
+      width: auto;
+      margin-bottom: 0;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: #555;
+      font-size: 14px;
+      font-weight: 400;
+    }
+    .sidebar-new-report:hover { background: #dfe9f4; color: #333; }
+    .sidebar-new-report.active { background: #eef2f8; color: #333; font-weight: 500; }
+    .sidebar { overflow: hidden; }
+    .sidebar-new-sec { flex-shrink: 0; }
+    .sidebar-tasks-sec { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    .sidebar-task-scroll { flex: 1; min-height: 0; overflow-y: auto; }
+    .sidebar-bottom-nav { flex-shrink: 0; }
+    .sidebar-quick-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: #555;
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .sidebar-quick-item:hover { background: #dfe9f4; color: #333; }
+    .sidebar-quick-item.all { color: #4a6fa5; font-weight: 500; }
+    .sidebar-quick-name {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .sidebar-task-text { color: #222; font-weight: 500; }
+    /* 草稿任务标题用灰色区分 */
+    .sidebar-task-item.draft .sidebar-task-text { color: #999; }
+    .sidebar-quick-soon {
+      flex-shrink: 0;
+      font-size: 10px;
+      color: #999;
+      background: #f3f3f3;
+      border-radius: 3px;
+      padding: 1px 6px;
+    }
+    .sidebar-quick-item.disabled { opacity: 0.55; cursor: default; }
+    .sidebar-quick-item.disabled:hover { background: transparent; color: #555; }
+    .sidebar-task-item {
+      position: relative;
+      flex-wrap: wrap;
+      row-gap: 2px;
+      padding: 7px 48px 7px 14px;
+    }
+    /* 悬浮时保留状态点，避免布局跳动 */
+    .sidebar-task-item:hover .task-status-icon { display: inline-flex; }
+    .task-actions {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #dfe9f4;
+      border-radius: 4px;
+      padding: 1px;
+    }
+    .sidebar-task-meta {
+      flex-basis: 100%;
+      font-size: 11px;
+      color: #999;
+      padding-left: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .sidebar-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 8px 12px 4px;
+    }
+    .sidebar-label-row .sidebar-label { padding: 0; }
+    .sidebar-task-filter {
+      height: 22px;
+      font-size: 11px;
+      border: 1px solid #d8e2f0;
+      border-radius: 4px;
+      color: #555;
+      background: transparent;
+      max-width: 112px;
+      cursor: pointer;
+    }
+    .sidebar-task-more {
+      padding: 6px 12px;
+      font-size: 12px;
+      color: #4a6fa5;
+      cursor: pointer;
+    }
+    .sidebar-task-more:hover { text-decoration: underline; }
+    .sidebar-task-loading {
+      text-align: center;
+      font-size: 11px;
+      color: #999;
+      padding: 8px 0;
+    }
+    .task-status-icon {
+      width: 6px;
+      height: 6px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      border: none;
+      animation: none;
+      background: #bbb;
+    }
+    .task-status-icon.running { border: none; animation: none; background: #d9822b; }
+    .task-status-icon.writing { background: #f0ad4e; }
+    .task-status-icon.done { background: #58a06e; }
+    .task-status-icon.done::before { content: ''; }
+    .task-status-icon.draft { background: #bbb; }
+    /* 未查看：任务前蓝色小圆点（固定占位，保证标题对齐） */
+    .task-view-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #4a6fa5;
+      flex-shrink: 0;
+      margin-right: 0;
+      display: inline-flex;
+    }
+    .task-view-dot.hide { visibility: hidden; }
+    /* 进行中：任务后的加载环 */
+    .task-load-ring {
+      position: absolute;
+      right: 30px;
+      top: 10px;
+      width: 12px;
+      height: 12px;
+      border: 2px solid #d9dde3;
+      border-top-color: #4a6fa5;
+      border-radius: 50%;
+      animation: taskSpin 0.8s linear infinite;
+      flex-shrink: 0;
+    }
+    /* 悬浮任务时：隐藏加载圈，展示操作按钮 */
+    .sidebar-task-item:hover .task-load-ring { display: none; }
+
+    /* ---------- 智能体选择页（新建报告） ---------- */
     /* 选择页时隐藏顶部名称栏（避免与页面标题重复） */
     body.agent-select .content-head { display: none; }
-    body.agent-select .main-content { overflow: hidden; }
+    body.agent-select .main-content { overflow-y: auto; }
     #agentSelectView {
       height: 100%;
       display: flex;
@@ -2349,9 +2815,10 @@
       color: #fff;
     }
 
-    /* 智能体选择区：自然高度，任务区自动补充剩余一屏高度 */
+    /* 智能体选择区：弹性占满剩余一屏高度 */
     .agent-section {
-      flex-shrink: 0;
+      flex: 1;
+      min-height: 0;
       display: flex;
       flex-direction: column;
     }
@@ -2363,7 +2830,10 @@
     .agent-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
+      grid-auto-rows: 1fr;
       gap: 12px 16px;
+      flex: 1;
+      min-height: 0;
     }
     .agent-card {
       border: 1px solid #e8e8e8;
@@ -2478,6 +2948,276 @@
     @media (max-width: 1400px) {
       .review-panel { width: 260px; }
     }
+
+    /* ==================== 新建报告页（工作台首页） ==================== */
+    .nr-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .nr-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #333;
+    }
+    .nr-sub {
+      font-size: 13px;
+      color: #999;
+      margin-top: 4px;
+    }
+    .nr-count {
+      font-size: 12px;
+      color: #999;
+      padding-bottom: 2px;
+    }
+    .nr-count b { color: #4a6fa5; font-weight: 600; }
+    .nr-section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    /* 最近使用 */
+    .nr-recent {
+      flex-shrink: 0;
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 10px;
+      padding: 12px 16px;
+    }
+    .nr-recent-list {
+      display: flex;
+      gap: 12px;
+    }
+    .nr-recent-item {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid #f0f0f0;
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .nr-recent-item:hover { border-color: #b9cfe8; background: #f7fafd; }
+    .nr-recent-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: #eef3fa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .nr-recent-main { flex: 1; min-width: 0; }
+    .nr-recent-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .nr-recent-time { font-size: 11px; color: #999; margin-top: 2px; }
+    .nr-recent-use {
+      flex-shrink: 0;
+      font-size: 12px;
+      color: #4a6fa5;
+      border: 1px solid #b9cfe8;
+      border-radius: 12px;
+      padding: 3px 12px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .nr-recent-use:hover { background: #eaf2fc; }
+    /* 全部智能体 */
+    .nr-agents {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .nr-agents-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .nr-agents-head .nr-section-title { margin-bottom: 0; }
+    .nr-search { max-width: 280px; height: 32px; }
+    .nr-tabs {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+      margin: 10px 0;
+    }
+    .nr-tab {
+      padding: 5px 14px;
+      border-radius: 16px;
+      font-size: 12px;
+      color: #666;
+      background: #f3f6fa;
+      cursor: pointer;
+      white-space: nowrap;
+      border: 1px solid transparent;
+    }
+    .nr-tab:hover { background: #e7eef7; }
+    .nr-tab.active {
+      background: #4a6fa5;
+      color: #fff;
+      border-color: #4a6fa5;
+    }
+    /* 智能体卡片（纵向、简化展示） */
+    #agentSelectView .agent-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-auto-rows: auto;
+      gap: 14px;
+      align-content: start;
+      padding-bottom: 12px;
+    }
+    #agentSelectView .agent-card {
+      border: 1px solid #e8e8e8;
+      border-radius: 10px;
+      background: #fff;
+      padding: 14px 16px;
+      height: 196px;
+      box-sizing: border-box;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    #agentSelectView .agent-card.custom-card { cursor: default; }
+    #agentSelectView .agent-card.custom-card .agent-card-icon { background: #eef3fa; }
+    #agentSelectView .agent-card:hover {
+      border-color: #b9cfe8;
+      box-shadow: 0 4px 16px rgba(74, 111, 165, 0.12);
+    }
+    #agentSelectView .agent-card.disabled {
+      cursor: default;
+      opacity: 0.6;
+    }
+    #agentSelectView .agent-card.disabled:hover {
+      border-color: #e8e8e8;
+      box-shadow: none;
+    }
+    /* 专业版卡片：突出展示 */
+    #agentSelectView .agent-card.pro {
+      border-color: #b9cfe8;
+      background: #f7fafd;
+      box-shadow: none;
+    }
+    #agentSelectView .agent-card.pro:hover {
+      border-color: #9fb8d8;
+      background: #f1f6fc;
+    }
+    #agentSelectView .agent-card.pro .agent-card-icon {
+      background: #eef3fa;
+      color: inherit;
+    }
+    #agentSelectView .agent-card.pro .agent-card-btn {
+      background: #4a6fa5;
+      color: #fff;
+      border: none;
+    }
+    #agentSelectView .agent-card.pro .agent-card-btn:hover {
+      background: #3d5e8e;
+    }
+    #agentSelectView .agent-card.disabled .agent-card-tag {
+      color: #999;
+      background: #f3f3f3;
+      border-color: #e0e0e0;
+    }
+    #agentSelectView .agent-card-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #agentSelectView .agent-card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: #eef3fa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    #agentSelectView .agent-card-title {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #agentSelectView .agent-card-tag {
+      font-size: 10px;
+      color: #3f5f92;
+      background: #eaf2fc;
+      border: 1px solid #c4d6ec;
+      border-radius: 3px;
+      padding: 1px 6px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    #agentSelectView .agent-card-desc {
+      font-size: 12px;
+      color: #888;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      flex: 1;
+    }
+    #agentSelectView .agent-card-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      min-height: 20px;
+      margin-top: 2px;
+    }
+    #agentSelectView .agent-card-chip {
+      font-size: 11px;
+      color: #666;
+      background: #f5f7fa;
+      border: 1px solid #e8ecf2;
+      border-radius: 3px;
+      padding: 1px 8px;
+      white-space: nowrap;
+    }
+    #agentSelectView .agent-card-btn {
+      align-self: flex-end;
+      padding: 8px 28px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #fff;
+      background: #4a6fa5;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: auto;
+    }
+    #agentSelectView .agent-card-btn:hover { background: #3d5e8e; }
+    #agentSelectView .agent-card.disabled .agent-card-btn {
+      background: #e5e5e5;
+      color: #999;
+      cursor: default;
+    }
   </style>
 </head>
 <body>
@@ -2487,11 +3227,26 @@
       <div class="sidebar-brand-logo">5</div>
       <div class="sidebar-brand-name">5度易链<small>5 DEGREE EASY CHAIN</small></div>
     </div>
-    <div class="sidebar-section">
-      <div class="sidebar-item active" onclick="window.location.href='report.html'">
+    <div class="sidebar-section sidebar-new-sec">
+      <div class="sidebar-item active sidebar-new-report" onclick="selectNewReport()">
         <div class="sidebar-icon">✎</div>
-        <span>生成报告</span>
+        <span>新建报告</span>
       </div>
+    </div>
+    <div class="divider" style="margin:4px 12px;"></div>
+    <div class="sidebar-section sidebar-tasks-sec">
+      <div class="sidebar-label-row">
+        <div class="sidebar-label">任务列表</div>
+        <select class="sidebar-task-filter" id="taskFilter" onchange="filterSidebarTasks(this)">
+          <option value="all">全部智能体</option>
+          <option value="可研专业版">可研专业版</option>
+          <option value="项目立项报告">项目立项报告</option>
+        </select>
+      </div>
+      <div class="sidebar-task-scroll" id="sidebarTaskScroll"></div>
+    </div>
+    <div class="divider" style="margin:4px 12px;"></div>
+    <div class="sidebar-section sidebar-bottom-nav">
       <div class="sidebar-item" onclick="window.location.href='assets.html'">
         <div class="sidebar-icon">▤</div>
         <span>报告资产</span>
@@ -2499,26 +3254,6 @@
       <div class="sidebar-item" onclick="window.location.href='knowledge.html'">
         <div class="sidebar-icon">○</div>
         <span>知识库</span>
-      </div>
-    </div>
-    <div class="divider" style="margin:4px 12px;"></div>
-    <div class="sidebar-section">
-      <div class="sidebar-label">任务列表</div>
-      <div class="sidebar-task-item" onclick="enterTaskEditor()">
-        <span class="sidebar-task-text">海关总署2025年数据治理咨询及实施服务项目实施方案</span>
-        <span class="task-status-icon running" title="进行中"></span>
-        <span class="task-actions">
-          <button class="task-act" title="编辑任务名称" onclick="event.stopPropagation();showTaskToast()">✎</button>
-          <button class="task-act danger" title="删除任务" onclick="event.stopPropagation();showTaskToast()">✕</button>
-        </span>
-      </div>
-      <div class="sidebar-task-item" onclick="enterTaskEditor()">
-        <span class="sidebar-task-text">海关总署2025年数据治理咨询项目</span>
-        <span class="task-status-icon done" title="已完成"></span>
-        <span class="task-actions">
-          <button class="task-act" title="编辑任务名称" onclick="event.stopPropagation();showTaskToast()">✎</button>
-          <button class="task-act danger" title="删除任务" onclick="event.stopPropagation();showTaskToast()">✕</button>
-        </span>
       </div>
     </div>
 
@@ -2541,104 +3276,35 @@
 
     <!-- 智能体选择页 -->
     <div id="agentSelectView">
-      <div class="agent-banner">
-        <div class="agent-banner-text">
-          <div class="agent-banner-title">动态模板生成平台</div>
-          <div class="agent-banner-desc">基于行业知识库与 AI 大模型，按需动态生成可行性研究、企业全景、招商策略等专业报告模板，分钟级产出高质量成果。</div>
+      <div class="nr-head">
+        <div>
+          <div class="nr-title">新建报告</div>
+          <div class="nr-sub">选择智能体并创建新的报告任务</div>
         </div>
-        <div class="agent-banner-badge">AI 驱动 · 动态生成</div>
+        <div class="nr-count">共 <b id="nrCountNum">10</b> 个</div>
       </div>
 
-      <!-- 首页统计：用户信息 / 任务统计 / 报告资产 / 知识库 -->
-      <div class="dash-stats">
-        <div class="dash-card">
-          <div class="dash-card-icon gold">👤</div>
-          <div class="dash-card-main">
-            <div class="dash-card-title">用户信息</div>
-            <div class="dash-card-value">度小满</div>
-            <div class="dash-card-sub">积分余额 <b>¥ 998</b></div>
-          </div>
-          <div class="dash-card-link" onclick="footerAction()">充值 ›</div>
-        </div>
-        <div class="dash-card">
-          <div class="dash-card-icon">📋</div>
-          <div class="dash-card-main">
-            <div class="dash-card-title">任务统计</div>
-            <div class="dash-card-value">8<span class="unit">个任务</span></div>
-            <div class="dash-card-sub">进行中 <b class="running">2</b> · 已完成 <b class="done">6</b></div>
-          </div>
-        </div>
-        <div class="dash-card">
-          <div class="dash-card-icon blue">▤</div>
-          <div class="dash-card-main">
-            <div class="dash-card-title">报告资产</div>
-            <div class="dash-card-value">12<span class="unit">篇报告</span></div>
-            <div class="dash-card-sub">本月新增 <b class="up">4</b> · 总字数 <b>8.6万</b></div>
-          </div>
-          <div class="dash-card-link" onclick="window.location.href='assets.html'">查看 ›</div>
-        </div>
-        <div class="dash-card">
-          <div class="dash-card-icon green">○</div>
-          <div class="dash-card-main">
-            <div class="dash-card-title">知识库</div>
-            <div class="dash-card-value">23<span class="unit">个文件</span></div>
-            <div class="dash-card-sub">文件夹 <b>5</b> · 总大小 <b>46.8M</b></div>
-          </div>
-          <div class="dash-card-link" onclick="window.location.href='knowledge.html'">查看 ›</div>
-        </div>
+      <!-- 最近使用 -->
+      <div class="nr-recent">
+        <div class="nr-section-title">最近使用</div>
+        <div class="nr-recent-list" id="nrRecentList"></div>
       </div>
 
-      <!-- 智能体选择 -->
-      <div class="agent-section">
-        <div class="section-title">选择智能体</div>
-        <div class="agent-select-sub">选择您需要的报告智能体，进入对应生成工作台</div>
+      <!-- 全部智能体 -->
+      <div class="nr-agents">
+        <div class="nr-agents-head">
+          <div class="nr-section-title">全部智能体</div>
+          <input class="input nr-search" id="nrSearch" placeholder="搜索智能体名称或用途" oninput="renderAgentGrid()">
+        </div>
+        <div class="nr-tabs" id="nrTabs">
+          <span class="nr-tab active" data-cat="全部">全部</span>
+          <span class="nr-tab" data-cat="可研与资金申请">可研与资金申请</span>
+          <span class="nr-tab" data-cat="企业分析">企业分析</span>
+          <span class="nr-tab" data-cat="产业研究">产业研究</span>
+          <span class="nr-tab" data-cat="地方招商">地方招商</span>
+          <span class="nr-tab" data-cat="定制化服务">定制化服务</span>
+        </div>
         <div class="agent-grid" id="agentGrid"></div>
-      </div>
-
-      <!-- 当前任务及状态 -->
-      <div class="dash-tasks">
-        <div class="dash-tasks-head">
-          <div class="section-title">当前任务及状态</div>
-          <div class="dash-task-chips">
-            <span class="task-chip">全部<b>8</b></span>
-            <span class="task-chip">进行中<b>2</b></span>
-            <span class="task-chip">已完成<b>6</b></span>
-          </div>
-        </div>
-        <div class="task-list">
-          <div class="task-row" onclick="enterTaskEditor()">
-            <div class="task-row-icon">📄</div>
-            <div class="task-row-main">
-              <div class="task-row-name" title="海关总署2025年数据治理咨询及实施服务项目实施方案">海关总署2025年数据治理咨询及实施服务项目实施方案</div>
-              <div class="task-row-meta">可行性研究报告 · 更新于 2026-08-05 10:32</div>
-            </div>
-            <div class="task-row-progress-wrap">
-              <div class="task-progress running"><i></i></div>
-              <div class="task-row-status running">撰写中 · 45%</div>
-            </div>
-            <div class="task-row-act">继续撰写</div>
-          </div>
-          <div class="task-row" onclick="enterTaskEditor()">
-            <div class="task-row-icon">📄</div>
-            <div class="task-row-main">
-              <div class="task-row-name" title="海关总署2025年数据治理咨询项目">海关总署2025年数据治理咨询项目</div>
-              <div class="task-row-meta">可行性研究报告 · 更新于 2026-08-04 18:20</div>
-            </div>
-            <div class="task-row-progress-wrap">
-              <div class="task-progress done"><i></i></div>
-              <div class="task-row-status done">已完成 · 100%</div>
-            </div>
-            <div class="task-row-act">查看报告</div>
-          </div>
-        </div>
-        <div class="dash-tasks-foot">
-          <div class="pager">
-            <span class="pager-info">共 2 条</span>
-            <button class="pager-btn" disabled>‹</button>
-            <span class="pager-num active">1</span>
-            <button class="pager-btn" disabled>›</button>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -2775,23 +3441,28 @@
     <div class="stage-mask" id="stageMask">
       <div class="stage-box">
         <div class="stage-head">
-          <div>
+          <div class="stage-head-row">
+            <button class="stage-back" title="返回智能体首页" onclick="showAgentSelect()">←</button>
             <div class="stage-title" id="stageTitle">生成报告</div>
-            <div class="stage-steps">
-              <span class="stage-step active" id="stageTag1"><span class="num">1</span>基础信息录入及确认</span>
-              <span class="stage-step" id="stageTag2"><span class="num">2</span>知识库引用及设置</span>
-              <span class="stage-step" id="stageTag3"><span class="num">3</span>目录生成及管理</span>
-            </div>
           </div>
-          <span class="stage-close" title="关闭弹窗（完成最后一步后才进入正文编辑）" onclick="showAgentSelect()">×</span>
+          <div class="stage-steps">
+            <span class="stage-step active" id="stageTag1"><span class="num">1</span>基础信息录入及确认</span>
+            <span class="stage-step" id="stageTag2"><span class="num">2</span>知识库引用及设置</span>
+            <span class="stage-step" id="stageTag3"><span class="num">3</span>信息确认与锚定</span>
+            <span class="stage-step" id="stageTag4"><span class="num">4</span>目录生成及管理</span>
+          </div>
         </div>
         <div class="stage-body">
           <div class="stage-panel active" id="stagePanel1">
           </div>
           <div class="stage-panel" id="stagePanel2">
             <div class="kb-ref">
-              <div class="kb-ref-title">引用知识库</div>
-              <div class="kb-ref-desc">从知识库中选择要引用的文件夹，本次报告生成将仅引用该文件夹内的文件（知识库内文件均已解析完成，可直接引用）。</div>
+              <div class="kb-ref-title-row">
+                <div class="kb-ref-title">引用知识库</div>
+                <button class="btn btn-primary" onclick="openKbUploadGuide()">＋ 上传文件</button>
+                <input type="file" id="kbUploadInput" style="display:none" multiple onchange="onKbUploaded()">
+              </div>
+              <div class="kb-ref-desc">从知识库中选择引用资料，也可以在当前步骤直接上传文件，无需退出后重新填写报告信息。</div>
               <div class="kb-folder-select">
                 <label>引用范围（可勾选任意文件夹或最外层文件）</label>
                 <div class="kb-multiselect" id="kbMultiSelect">
@@ -2799,7 +3470,13 @@
                     <span id="kbMsLabel">请选择引用范围</span>
                     <span class="kb-ms-caret" title="清空引用" onclick="kbCaretClick(event)"></span>
                   </div>
-                  <div class="kb-ms-panel" id="kbMsPanel"></div>
+                  <div class="kb-ms-panel" id="kbMsPanel">
+                    <div class="kb-ms-left" id="kbMsLeft"></div>
+                    <div class="kb-ms-drawer" id="kbMsDrawer">
+                      <div class="kb-ms-drawer-head" id="kbMsDrawerHead"></div>
+                      <div class="kb-ms-drawer-body" id="kbMsDrawerBody"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div class="kb-current-outline" id="kbCurrentOutlineBox">
@@ -2823,55 +3500,8 @@
               </div>
             </div>
           </div>
-          <div class="stage-panel" id="stagePanel3"></div>
-        </div>
-        <div class="stage-foot">
-          <div class="stage-foot-left">
-            <button class="btn btn-sm" onclick="addChapter()">＋ 添加章节</button>
-            <button class="btn btn-sm btn-outline" id="outlineCheckBtn" onclick="toggleCheckAll()">取消全选</button>
-            <button class="btn btn-sm btn-outline" id="outlineDescBtn" onclick="toggleOutlineDesc()">隐藏描述</button>
-            <select class="btn btn-sm btn-outline word-count-select" id="wordCountSelect" onchange="onWordCountSelect(this)">
-              <option value="2-3">2-3万字报告</option>
-              <option value="3-5" selected>3-5万字报告</option>
-              <option value="6-10">6-10万字报告</option>
-              <option value="custom">自定义报告字数</option>
-            </select>
-            <span class="word-count-custom" id="wordCountCustom" style="display:none;">
-              <input class="input word-count-input" id="wordCountInput" type="number" min="1" max="100000" step="1" placeholder="输入字数" oninput="onWordCountInput(this)" onchange="onWordCountInput(this)">
-              <span>字</span>
-            </span>
-          </div>
-          <div class="stage-foot-right">
-            <button class="btn btn-outline" id="stagePrevBtn" onclick="prevStage()" style="display:none;">上一步</button>
-            <button class="btn btn-primary" id="stageNextBtn" onclick="nextStage()">下一步</button>
-            <button class="btn btn-primary" id="stageFinishBtn" onclick="finishWizard()" style="display:none;">确认完成，开始撰写正文 →</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 正在生成大纲（过渡弹窗） -->
-    <div class="gen-mask" id="genMask">
-      <div class="gen-box">
-        <div class="gen-title">正在生成大纲</div>
-        <div class="gen-sub">AI 大模型正在分析引用资料并构建报告目录结构，请稍候…</div>
-        <div class="gen-progress">
-          <div class="gen-progress-bar" id="genProgressBar"></div>
-        </div>
-        <div class="gen-status" id="genStatus">0%</div>
-        <div class="gen-think" id="genThink"></div>
-      </div>
-    </div>
-
-    <!-- ============ 步骤2：信息确认与锚定（确认弹窗） ============ -->
-    <div class="modal-mask" id="confirmModal" style="display:none">
-      <div class="modal-box">
-        <div class="modal-head">
-          <span class="modal-title">信息确认与锚定</span>
-          <span class="modal-close" onclick="closeConfirmModal()">✕</span>
-        </div>
-        <div class="modal-body">
-      <div class="confirm-note">
+          <div class="stage-panel confirm-step" id="stagePanel3">
+          <div class="confirm-note">
         以下数据为系统根据您输入的信息及知识库整理，请确认以下核心数据，所有数据均可修改。确认后，若数据为空或财务数据不平衡，模型将自行推理补充。
       </div>
 
@@ -2886,7 +3516,7 @@
         </div>
         <div class="collapse-body cols-4">
           <div class="anchor-row">
-            <div class="anchor-label">项目总投资（万元）</div>
+            <div class="anchor-label">项目总投资（万元）<span class="req">*</span></div>
             <div class="anchor-value"><span class="dim-val">68,259.35</span></div></div>
           <div class="anchor-row">
             <div class="anchor-label">产业方向</div>
@@ -2895,16 +3525,16 @@
             <div class="anchor-label">建设性质</div>
             <div class="anchor-value"><span class="dim-val">新建</span></div></div>
           <div class="anchor-row">
-            <div class="anchor-label">运营期</div>
+            <div class="anchor-label">运营期<span class="req">*</span></div>
             <div class="anchor-value"><span class="dim-val">10年</span></div></div>
           <div class="anchor-row">
-            <div class="anchor-label">建设周期</div>
+            <div class="anchor-label">建设周期<span class="req">*</span></div>
             <div class="anchor-value"><span class="dim-val">2026/06/01~2028/06/01</span></div></div>
           <div class="anchor-row">
-            <div class="anchor-label">建筑面积（㎡）<span class="anchor-tip" title="若无土建填0">?</span></div>
+            <div class="anchor-label">建筑面积（㎡）<span class="anchor-hint">无建筑面积填0，若不填系统将自行判断</span></div>
             <div class="anchor-value"><span class="dim-val">24000.00</span></div></div>
           <div class="anchor-row">
-            <div class="anchor-label">用地面积（㎡）<span class="anchor-tip" title="无新增用地填0">?</span></div>
+            <div class="anchor-label">用地面积（㎡）<span class="anchor-hint">无新增用地填0，若不填系统将自行判断</span></div>
             <div class="anchor-value"><span class="dim-val">0</span></div></div>
         </div>
       </div>
@@ -3030,13 +3660,85 @@
       </div><!-- /投资与资金列 -->
 
       </div><!-- /step2-groups -->
-
-        </div><!-- /modal-body -->
-        <div class="modal-foot">
-          <button class="btn btn-outline" onclick="closeConfirmModal()">← 返回修改</button>
-          <button class="btn btn-primary" onclick="confirmOutline()">确认，生成大纲 →</button>
+          </div>
+          <div class="stage-panel" id="stagePanel4"></div>
+        </div>
+        <div class="stage-foot">
+          <div class="stage-foot-left">
+            <span class="stage-foot-outline" id="stageFootOutline">
+              <button class="btn btn-sm" onclick="addChapter()">＋ 添加章节</button>
+              <button class="btn btn-sm btn-outline" id="outlineCheckBtn" onclick="toggleCheckAll()">取消全选</button>
+              <button class="btn btn-sm btn-outline" id="outlineDescBtn" onclick="toggleOutlineDesc()">隐藏描述</button>
+              <select class="btn btn-sm btn-outline word-count-select" id="wordCountSelect" onchange="onWordCountSelect(this)">
+                <option value="2-3">2-3万字报告</option>
+                <option value="3-5" selected>3-5万字报告</option>
+                <option value="6-10">6-10万字报告</option>
+                <option value="custom">自定义报告字数</option>
+              </select>
+              <span class="word-count-custom" id="wordCountCustom" style="display:none;">
+                <input class="input word-count-input" id="wordCountInput" type="number" min="1" max="100000" step="1" placeholder="输入字数" oninput="onWordCountInput(this)" onchange="onWordCountChange(this)">
+                <span>字</span>
+              </span>
+            </span>
+          </div>
+          <div class="stage-foot-right">
+            <button class="btn btn-outline stage-save-draft" onclick="saveDraft()">保存草稿</button>
+            <button class="btn btn-outline" id="stagePrevBtn" onclick="prevStage()" style="display:none;">上一步</button>
+            <button class="btn btn-primary" id="stageNextBtn" onclick="nextStage()">下一步</button>
+            <button class="btn btn-primary" id="stageFinishBtn" onclick="finishWizard()" style="display:none;">确认完成，开始撰写正文 →</button>
+          </div>
         </div>
       </div>
+    </div>
+
+    <!-- 正在生成大纲（过渡弹窗） -->
+    <div class="gen-mask" id="genMask">
+      <div class="gen-box">
+        <div class="gen-title">正在生成大纲</div>
+        <div class="gen-sub">AI 大模型正在分析引用资料并构建报告目录结构，请稍候…</div>
+        <div class="gen-progress">
+          <div class="gen-progress-bar" id="genProgressBar"></div>
+        </div>
+        <div class="gen-status" id="genStatus">0%</div>
+        <div class="gen-think" id="genThink"></div>
+      </div>
+    </div>
+
+    <!-- ============ 步骤2：信息确认与锚定（确认弹窗） ============ -->
+    <!-- 知识库上传说明弹窗 -->
+    <div class="modal-mask" id="kbUploadGuideModal" style="display:none;">
+      <div class="modal-box" style="width:520px;">
+        <div class="modal-head">
+          <span class="modal-title">文件上传说明</span>
+          <span class="modal-close" onclick="closeKbUploadGuide()">✕</span>
+        </div>
+        <div class="modal-body">
+          <div class="upload-target">
+            <label>上传到文件夹</label>
+            <select class="input" id="kbUploadTargetSelect"></select>
+          </div>
+          <div class="upload-guide">
+            <p>将资料上传至知识库后，将作为本次报告的引用材料，上传完成后自动加入引用范围。</p>
+            <ul>
+              <li>可一次选择多个文件</li>
+              <li>上传后文件进入解析队列，解析完成后可引用</li>
+            </ul>
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeKbUploadGuide()">取消</button>
+            <button class="btn btn-primary" onclick="chooseKbUpload()">选择文件上传</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 上传任务面板（右下角） -->
+    <div class="upload-panel" id="kbUploadPanel">
+      <div class="upload-panel-head">
+        <span>文件上传</span>
+        <span class="upload-panel-close" onclick="closeKbUploadPanel()">×</span>
+      </div>
+      <div class="upload-panel-body" id="kbUploadPanelBody"></div>
     </div>
 
     <!-- ============ 步骤3：大纲调整 ============ -->
@@ -3071,6 +3773,8 @@
               <div class="outline-tpl-panel" id="outlineTplPanel"></div>
             </div>
             <select class="input outline-version-select" id="outlineVersionSelect" onchange="switchOutlineVersion(this.value)"></select>
+            <button class="btn btn-sm outline-undo-btn" id="outlineUndoBtn" onclick="undoOutline()" disabled>↶ 上一步</button>
+            <button class="btn btn-sm outline-undo-btn" id="outlineRedoBtn" onclick="redoOutline()" disabled>↷ 下一步</button>
             <button class="btn btn-sm btn-outline" onclick="saveOutlineVersion()">保存版本</button>
           </div>
           <div class="outline-tree-panel">
@@ -3236,7 +3940,7 @@
           </div>
           <div class="settings-actions">
             <button class="btn btn-sm btn-primary" onclick="applySettings()">应用修改</button>
-            <button class="btn btn-sm btn-outline" onclick="addChildNode(document.querySelector('.tree-node-row.selected'))">增加子章节</button>
+            <button class="btn btn-sm btn-outline" id="settingsAddChildBtn" onclick="addChildNode(document.querySelector('.tree-node-row.selected'))">增加子章节</button>
             <button class="btn btn-sm btn-outline" onclick="deleteNode(document.querySelector('.tree-node-row.selected'))">删除当前项</button>
           </div>
           <div class="pre-check">
@@ -3258,8 +3962,9 @@
         <div class="report-title">企查查商业大数据人工智能研发建设项目·可行性研究报告</div>
         <div class="editor-actions">
           <span class="save-state">☁ 已保存 <span id="saveTime">--:--:--</span></span>
-          <button class="btn btn-sm btn-outline" onclick="updateSaveTime()">保存</button>
-          <button class="btn btn-sm btn-primary" onclick="showTaskToast()">📄 导出Word</button>
+          <button class="btn btn-sm btn-outline" id="saveBtn" onclick="updateSaveTime()">保存</button>
+          <span class="export-time" id="exportTime" style="display:none;"></span>
+          <button class="btn btn-sm btn-primary" onclick="openExportModal()">📄 导出Word</button>
         </div>
       </div>
 
@@ -3288,6 +3993,13 @@
             <button class="tool-btn" title="上一步" onclick="editorUndo()">↶</button>
             <button class="tool-btn" title="下一步" onclick="editorRedo()">↷</button>
             <span class="tool-sep"></span>
+            <select class="tool-select" id="toolFontSelect" title="字体" onchange="applyToolFont(this)">
+              <option>宋体</option>
+              <option>黑体</option>
+              <option>仿宋</option>
+              <option>楷体</option>
+              <option>微软雅黑</option>
+            </select>
             <select class="tool-select"><option>正文</option><option>标题1</option><option>标题2</option><option>标题3</option></select>
             <select class="tool-select"><option>14px</option><option>12px</option><option>16px</option><option>18px</option></select>
             <span class="tool-sep"></span>
@@ -3307,6 +4019,7 @@
             <button class="tool-btn" title="插入表格">▦</button>
             <button class="tool-btn" title="插入图片">🖼</button>
             <span class="tool-wordcount" id="toolWordCount">字数：0</span>
+            <span class="tool-ai-credit" id="toolAiCredit" title="每个任务最多 10 次免费 AI 修正" style="display:none;">剩余免费AI修正 10 次</span>
           </div>
           <div class="editor-content" id="editorContent">
             <div class="paper" id="paper" contenteditable="true">
@@ -3323,11 +4036,9 @@
             <span class="ep-label">AI 撰写进度</span>
             <div class="ep-bar"><div class="ep-bar-inner" id="epBarInner"></div></div>
             <span class="ep-pct" id="epPct">0%</span>
-            <button class="btn btn-sm" id="epBtn" onclick="toggleAiWriting()">开始</button>
           </div>
           <div class="editor-float-btns">
             <button class="float-btn" title="返回顶部" onclick="backToTop()">↑</button>
-            <button class="float-btn" title="重新撰写" onclick="rewriteDoc()">↻</button>
           </div>
         </div>
 
@@ -3374,10 +4085,10 @@
 
     <!-- 选中文本快捷菜单 -->
     <div class="sel-menu" id="selMenu">
-      <span class="sel-menu-item" onmousedown="event.preventDefault()" onclick="aiAction('重写')">重写</span>
-      <span class="sel-menu-item" onmousedown="event.preventDefault()" onclick="aiAction('润色')">润色</span>
+      <span class="sel-menu-item" onmousedown="event.preventDefault()" onclick="aiAction('改写')">改写</span>
       <span class="sel-menu-item" onmousedown="event.preventDefault()" onclick="aiAction('扩写')">扩写</span>
       <span class="sel-menu-item" onmousedown="event.preventDefault()" onclick="aiAction('缩写')">缩写</span>
+      <span class="sel-menu-item" onmousedown="event.preventDefault()" onclick="aiAction('润色')">润色</span>
     </div>
 
 </main>
@@ -3405,14 +4116,34 @@
     </div>
   </div>
 
+  <!-- 导出 Word 二次确认弹窗 -->
+  <div class="modal-mask" id="exportModal" style="display:none;">
+    <div class="modal-box" style="width:480px;">
+      <div class="modal-head">
+        <span class="modal-title">导出 Word 报告</span>
+        <span class="modal-close" onclick="closeExportModal()">✕</span>
+      </div>
+      <div class="modal-body">
+        <div class="export-warn">⚠ 导出前请确认</div>
+        <p class="export-desc">文件导出后，该报告将<strong>不再支持修改及任何 AI 辅助操作</strong>（AI撰写、重写、润色、扩写、缩写等）。</p>
+        <div class="export-actions">
+          <button class="btn btn-outline" onclick="closeExportModal()">取消</button>
+          <button class="btn btn-primary" onclick="confirmExport()">确认导出</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     /* 弹窗移出主内容区：避免被正文编辑区的模糊效果波及 */
-    const stageMaskEl = document.getElementById('stageMask');
-    const confirmModalEl = document.getElementById('confirmModal');
     const genMaskEl = document.getElementById('genMask');
-    if (stageMaskEl) document.body.appendChild(stageMaskEl);
-    if (confirmModalEl) document.body.appendChild(confirmModalEl);
+    const kbUpModalEl = document.getElementById('kbUploadGuideModal');
+    const kbUpPanelEl = document.getElementById('kbUploadPanel');
+    const exportModalEl = document.getElementById('exportModal');
     if (genMaskEl) document.body.appendChild(genMaskEl);
+    if (kbUpModalEl) document.body.appendChild(kbUpModalEl);
+    if (kbUpPanelEl) document.body.appendChild(kbUpPanelEl);
+    if (exportModalEl) document.body.appendChild(exportModalEl);
 
 /* ==================== 智能体与报告类型 ==================== */
     const params = new URLSearchParams(location.search);
@@ -3426,6 +4157,85 @@
     let lastSelRange = null;
     let aiRequirement = '';
     let aiPhase = 1;
+    /* 每个任务最多 10 次免费 AI 修正（AI撰写/重写/润色/扩写/缩写） */
+    let aiCreditLeft = 10;
+    let aiCreditToast = null;
+    function updateAiCreditUI() {
+      const el = document.getElementById('toolAiCredit');
+      if (!el) return;
+      el.textContent = '剩余免费AI修正 ' + aiCreditLeft + ' 次';
+      el.classList.toggle('empty', aiCreditLeft <= 0);
+    }
+    function showCreditToast(msg) {
+      if (!aiCreditToast) {
+        aiCreditToast = document.createElement('div');
+        aiCreditToast.className = 'ai-credit-toast';
+        document.body.appendChild(aiCreditToast);
+      }
+      aiCreditToast.textContent = msg;
+      aiCreditToast.classList.add('show');
+      clearTimeout(aiCreditToast._t);
+      aiCreditToast._t = setTimeout(function () { aiCreditToast.classList.remove('show'); }, 2200);
+    }
+    function consumeAiCredit() {
+      if (aiCreditLeft <= 0) {
+        showCreditToast('免费AI修正次数已用完');
+        return false;
+      }
+      aiCreditLeft--;
+      updateAiCreditUI();
+      return true;
+    }
+    /* ==================== 导出 Word：一次确认 ==================== */
+    function openExportModal() {
+      document.getElementById('exportModal').style.display = 'flex';
+    }
+    function closeExportModal() {
+      document.getElementById('exportModal').style.display = 'none';
+    }
+    /* 应用导出只读状态（供导出操作与“已完成且已导出”任务复用） */
+    function applyExportedState() {
+      const paper = document.getElementById('paper');
+      if (paper) paper.contentEditable = 'false';
+      closeAiPanel();
+      document.body.classList.add('exported');
+      const saveState = document.querySelector('.editor-actions .save-state');
+      if (saveState) saveState.style.display = 'none';
+      const saveBtn = document.getElementById('saveBtn');
+      if (saveBtn) saveBtn.style.display = 'none';
+      const d = new Date();
+      const p = n => String(n).padStart(2, '0');
+      const exportTime = document.getElementById('exportTime');
+      if (exportTime) {
+        exportTime.textContent = '文件导出时间：' + d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate())
+          + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+        exportTime.style.display = '';
+      }
+      document.querySelectorAll('.chapter-nav-item .nav-status').forEach(dot => {
+        dot.className = 'nav-status done';
+        dot.title = 'AI撰写完成';
+      });
+      renderPaperByStatus();
+    }
+    function resetExportedState() {
+      document.body.classList.remove('exported');
+      const paper = document.getElementById('paper');
+      if (paper) paper.contentEditable = 'true';
+      const saveState = document.querySelector('.editor-actions .save-state');
+      if (saveState) saveState.style.display = '';
+      const saveBtn = document.getElementById('saveBtn');
+      if (saveBtn) saveBtn.style.display = '';
+      const exportTime = document.getElementById('exportTime');
+      if (exportTime) { exportTime.style.display = 'none'; exportTime.textContent = ''; }
+      if (typeof updateSaveTime === 'function') updateSaveTime();
+    }
+    function confirmExport() {
+      closeExportModal();
+      applyExportedState();
+      aiCreditLeft = 0;
+      updateAiCreditUI();
+      showCreditToast('已导出 Word，报告已锁定，不再支持修改及 AI 辅助操作');
+    }
     const PAPER_SAMPLE_PARAS = [
       '本项目立足于行业数字化转型趋势，围绕数据要素价值释放，系统推进基础设施建设与智能化应用落地，为业务高质量发展提供坚实支撑。',
       '项目遵循“统筹规划、分步实施、安全可控”的建设原则，在充分调研现状与需求的基础上，科学制定建设方案与实施路径。',
@@ -3450,9 +4260,89 @@
       ]
     };
     const REPORT_AGENTS = [
-      { name: '可行性研究报告', icon: '📊', desc: '项目全维度可信性论证与方案评估', tag: '限时免费', featured: true },
-      { name: '项目资金申请报告', icon: '💰', desc: '专项资金申报全流程支持', tag: '即将上线' }
+      { name: '可行性研究报告（专业版）', icon: '📊', desc: '完整财务测算、自定义大纲、知识库引用和在线编辑工作台。', cat: '可研与资金申请', tag: '专业编制·推荐', chips: ['财务测算', '自定义大纲', '在线编辑'], available: true, pro: true, featured: true },
+      { name: '可行性研究报告（快速版）', icon: '📊', desc: '轻量流程，少量填写，快速生成结构完整的基础可研初稿。', cat: '可研与资金申请', chips: ['快速交付', '企业自用'], available: true, page: '可行性研究报告.html' },
+      { name: '企业全景分析报告', icon: '🏢', desc: '多维数据透视企业全貌，支持供应商考察和竞争分析。', cat: '企业分析', tag: '企业分析', chips: ['工商穿透', '风险扫描'], available: true, page: '企业全景分析报告.html' },
+      { name: '投前咨询分析报告', icon: '💼', desc: '目标企业穿透分析与投资风险扫描，辅助投前决策。', cat: '企业分析', tag: '企业分析', chips: ['投资评估', '财税核查'], available: true, page: '投前咨询分析报告.html' },
+      { name: '招商策略分析报告', icon: '🤝', desc: '企业画像、产业协同评估和招商切入策略分析。', cat: '地方招商', tag: '地方招商', chips: ['精准招商', '资源匹配'], available: true, page: '招商策略分析报告.html' },
+      { name: '项目立项报告', icon: '📋', desc: '构建背景、方案、投资估算与效益预测，完成早期论证。', cat: '可研与资金申请', tag: '项目论证', chips: ['基础论证', '实施建议'], available: true, page: '项目立项报告.html' },
+      { name: '项目资金申请报告', icon: '💰', desc: '匹配政策依据，生成专项资金申报规范材料。', cat: '可研与资金申请', tag: '项目申报', chips: ['政策匹配', '申报材料'], available: true, page: '项目资金申请报告.html' },
+      { name: '全产业分析报告', icon: '📈', desc: '宏观趋势、技术演进与竞争格局的产业深度分析。', cat: '产业研究', tag: '即将上线', chips: ['产业链', '竞争格局'], available: false },
+      { name: '生物医药产业分析报告', icon: '🔬', desc: '面向生物医药园区、企业和投资机构的产业研究。', cat: '产业研究', tag: '即将上线', chips: ['医药产业', '园区研究'], available: false },
+      { name: '定制化报告服务', icon: '✎', desc: '标准智能体无法覆盖时，提供专属报告解决方案。', cat: '定制化服务', tag: '专家服务', chips: ['专家服务', '专属方案'], available: true, service: true }
     ];
+    const RECENT_AGENTS = [
+      { name: '可行性研究报告（专业版）', time: '今天 10:32' },
+      { name: '可行性研究报告（快速版）', time: '昨天 16:18' },
+      { name: '企业全景分析报告', time: '8月9日' }
+    ];
+    let currentAgentCat = '全部';
+    function openAgentLink(name) {
+      const a = REPORT_AGENTS.find(x => x.name === name);
+      if (a && a.page) {
+        window.location.href = '智能体综合/' + a.page;
+        return;
+      }
+      window.open('report.html?type=' + encodeURIComponent(name), '_blank');
+    }
+    function agentOpenHandler(a) {
+      if (!a.available) return;
+      if (a.service) { showTaskToast(); return; }
+      if (a.pro) selectAgent(a.name);
+      else openAgentLink(a.name);
+    }
+    function selectNewReport() {
+      showAgentSelect();
+    }
+    function renderRecentAgents() {
+      const list = document.getElementById('nrRecentList');
+      if (!list) return;
+      list.innerHTML = RECENT_AGENTS.map(r => {
+        const a = REPORT_AGENTS.find(x => x.name === r.name);
+        const icon = a ? a.icon : '📄';
+        return '<div class="nr-recent-item" onclick="agentOpenHandler(REPORT_AGENTS.find(function(x){return x.name===\'' + r.name + '\'}))">'
+          + '<div class="nr-recent-icon">' + icon + '</div>'
+          + '<div class="nr-recent-main"><div class="nr-recent-name">' + r.name + '</div><div class="nr-recent-time">' + r.time + '</div></div>'
+          + '<span class="nr-recent-use">使用</span>'
+          + '</div>';
+      }).join('');
+    }
+    function renderAgentGrid() {
+      const grid = document.getElementById('agentGrid');
+      if (!grid) return;
+      const q = document.getElementById('nrSearch').value.trim().toLowerCase();
+      const list = REPORT_AGENTS.filter(a => {
+        const okCat = currentAgentCat === '全部' || a.cat === currentAgentCat;
+        const okQ = !q || a.name.toLowerCase().includes(q) || a.desc.toLowerCase().includes(q);
+        return okCat && okQ;
+      });
+      const countEl = document.getElementById('nrCountNum');
+      if (countEl) countEl.textContent = list.length;
+      grid.innerHTML = list.map(a => {
+        const coming = !a.available;
+        const tag = a.tag || (coming ? '即将上线' : '');
+        const btnText = a.service ? '咨询' : (coming ? '待上线' : '新建');
+        return '<div class="agent-card' + (a.pro ? ' pro' : '') + (coming ? ' disabled' : '') + (a.service ? ' custom-card' : '') + '" onclick="agentOpenHandler(REPORT_AGENTS[' + REPORT_AGENTS.indexOf(a) + '])">'
+          + '<div class="agent-card-top"><div class="agent-card-icon">' + a.icon + '</div>'
+          + '<div class="agent-card-title">' + a.name + '</div>'
+          + (tag ? '<span class="agent-card-tag">' + tag + '</span>' : '')
+          + '</div>'
+          + '<div class="agent-card-desc">' + a.desc + '</div>'
+          + '<div class="agent-card-chips">' + a.chips.map(c => '<span class="agent-card-chip">' + c + '</span>').join('') + '</div>'
+          + '<button class="agent-card-btn">' + btnText + '</button>'
+          + '</div>';
+      }).join('');
+    }
+    function switchAgentTab(el) {
+      document.querySelectorAll('#nrTabs .nr-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      currentAgentCat = el.dataset.cat;
+      renderAgentGrid();
+    }
+    document.getElementById('nrTabs').addEventListener('click', function (e) {
+      const tab = e.target.closest('.nr-tab');
+      if (tab) switchAgentTab(tab);
+    });
     let reportType = params.get('type') || '';
     function setAgentName(t) {
       document.getElementById('reportTypeTitle').textContent = t || '选择智能体';
@@ -3480,9 +4370,9 @@
       const tools = s3.querySelectorAll('.outline-toolbar')[1];
       const hint = s3.querySelector('.outline-hint');
       const layout = s3.querySelector('.outline-layout');
-      const panel3 = document.getElementById('stagePanel3');
-      if (hint) panel3.appendChild(hint);
-      if (layout) panel3.appendChild(layout);
+      const panel4 = document.getElementById('stagePanel4');
+      if (hint) panel4.appendChild(hint);
+      if (layout) panel4.appendChild(layout);
     document.getElementById('flowSteps').style.display = 'none';
 
     /* ==================== 第二步：知识库引用及设置 ==================== */
@@ -3506,64 +4396,140 @@
       { name: '项目申报材料及编制要求.docx', size: '2.30M', time: '2026-07-22 16:24', type: 'docx' },
       { name: '公司资质与认证材料.pdf', size: '2.85M', time: '2026-07-16 15:40', type: 'pdf' }
     ];
-    let kbSelFolders = [];
-    let kbSelRootFiles = [];
-    function buildKbMsPanel() {
-      const panel = document.getElementById('kbMsPanel');
-      panel.innerHTML = '';
+    /* 文件级唯一 ID 与选中模型：文件夹、各层级文件、根目录文件均支持多选 */
+    let kbUidSeq = 1;
+    let kbSelUids = [];
+    function kbAssignUids() {
+      KB_FOLDERS.forEach(f => f.files.forEach(x => { x.uid = 'kf' + (kbUidSeq++); }));
+      KB_ROOT_FILES.forEach(x => { x.uid = 'kf' + (kbUidSeq++); });
+    }
+    function kbFindFile(uid) {
+      for (const folder of KB_FOLDERS) {
+        for (const f of folder.files) if (f.uid === uid) return { file: f, folder: folder };
+      }
+      for (const f of KB_ROOT_FILES) if (f.uid === uid) return { file: f, folder: null };
+      return null;
+    }
+    function kbIsSelected(uid) { return kbSelUids.indexOf(uid) >= 0; }
+    function kbFolderSelState(folder) {
+      if (!folder.files.length) return 0;
+      const sel = folder.files.filter(f => kbIsSelected(f.uid)).length;
+      if (sel === 0) return 0;
+      if (sel === folder.files.length) return 2;
+      return 1;
+    }
+    /* 左侧层级列表：文件夹（悬浮打开右侧抽屉）+ 根目录文件 */
+    function buildKbMsLeft() {
+      const left = document.getElementById('kbMsLeft');
+      if (!left) return;
+      left.innerHTML = '';
       KB_FOLDERS.forEach((f, i) => {
         const item = document.createElement('label');
         item.className = 'kb-ms-item';
+        item.dataset.folder = i;
         const cb = document.createElement('input');
         cb.type = 'checkbox';
-        cb.checked = kbSelFolders.includes(f);
+        const st = kbFolderSelState(f);
+        cb.checked = st === 2;
+        if (st === 1) cb.indeterminate = true;
         cb.onchange = function () { toggleKbSelFolder(i, cb.checked); };
         item.appendChild(cb);
         const icon = document.createElement('span');
         icon.className = 'ms-icon';
         icon.textContent = '📁';
         item.appendChild(icon);
-        item.appendChild(document.createTextNode(f.name));
-        panel.appendChild(item);
+        const name = document.createElement('span');
+        name.className = 'kb-ms-name';
+        name.textContent = f.name;
+        item.appendChild(name);
+        item.onmouseenter = function () { showKbDrawer(f); };
+        left.appendChild(item);
       });
-      KB_ROOT_FILES.forEach((f, i) => {
+      KB_ROOT_FILES.forEach(f => {
         const item = document.createElement('label');
         item.className = 'kb-ms-item';
         const cb = document.createElement('input');
         cb.type = 'checkbox';
-        cb.checked = kbSelRootFiles.includes(f);
-        cb.onchange = function () { toggleKbSelRootFile(i, cb.checked); };
+        cb.checked = kbIsSelected(f.uid);
+        cb.onchange = function () { toggleKbSelFile(f.uid, cb.checked); };
         item.appendChild(cb);
         const icon = document.createElement('span');
         icon.className = 'ms-icon';
         icon.textContent = '📄';
         item.appendChild(icon);
-        item.appendChild(document.createTextNode(f.name));
-        panel.appendChild(item);
+        const name = document.createElement('span');
+        name.className = 'kb-ms-name';
+        name.textContent = f.name;
+        item.appendChild(name);
+        left.appendChild(item);
+      });
+    }
+    /* 右侧抽屉：展示所悬浮文件夹内的文件，支持多选 */
+    function showKbDrawer(folder) {
+      const drawer = document.getElementById('kbMsDrawer');
+      if (!drawer) return;
+      document.getElementById('kbMsDrawerHead').textContent = '📁 ' + folder.name;
+      const body = document.getElementById('kbMsDrawerBody');
+      body.innerHTML = '';
+      if (!folder.files.length) {
+        body.innerHTML = '<div class="kb-ms-drawer-empty">该文件夹暂无文件</div>';
+      } else {
+        folder.files.forEach(file => {
+          const item = document.createElement('label');
+          item.className = 'kb-ms-item';
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.checked = kbIsSelected(file.uid);
+          cb.onchange = function () { toggleKbSelFile(file.uid, cb.checked); };
+          item.appendChild(cb);
+          const icon = document.createElement('span');
+          icon.className = 'ms-icon';
+          icon.textContent = '📄';
+          item.appendChild(icon);
+          const name = document.createElement('span');
+          name.className = 'kb-ms-name';
+          name.textContent = file.name;
+          item.appendChild(name);
+          body.appendChild(item);
+        });
+      }
+      drawer.classList.add('show');
+    }
+    /* 仅刷新左侧文件夹勾选状态（半选/全选），不重建列表 */
+    function refreshKbLeft() {
+      document.querySelectorAll('#kbMsLeft .kb-ms-item[data-folder]').forEach(item => {
+        const i = Number(item.dataset.folder);
+        const st = kbFolderSelState(KB_FOLDERS[i]);
+        const cb = item.querySelector('input');
+        cb.checked = st === 2;
+        cb.indeterminate = st === 1;
       });
     }
     function toggleKbSelFolder(i, checked) {
-      const f = KB_FOLDERS[i];
-      const idx = kbSelFolders.indexOf(f);
-      if (checked && idx === -1) kbSelFolders.push(f);
-      if (!checked && idx > -1) kbSelFolders.splice(idx, 1);
+      const folder = KB_FOLDERS[i];
+      folder.files.forEach(f => {
+        const idx = kbSelUids.indexOf(f.uid);
+        if (checked && idx === -1) kbSelUids.push(f.uid);
+        if (!checked && idx > -1) kbSelUids.splice(idx, 1);
+      });
+      refreshKbLeft();
       updateKbMsLabel();
       renderKbFiles();
     }
-    function toggleKbSelRootFile(i, checked) {
-      const f = KB_ROOT_FILES[i];
-      const idx = kbSelRootFiles.indexOf(f);
-      if (checked && idx === -1) kbSelRootFiles.push(f);
-      if (!checked && idx > -1) kbSelRootFiles.splice(idx, 1);
+    function toggleKbSelFile(uid, checked) {
+      const idx = kbSelUids.indexOf(uid);
+      if (checked && idx === -1) kbSelUids.push(uid);
+      if (!checked && idx > -1) kbSelUids.splice(idx, 1);
+      refreshKbLeft();
       updateKbMsLabel();
       renderKbFiles();
     }
     function updateKbMsLabel() {
-      const names = kbSelFolders.map(f => f.name).concat(kbSelRootFiles.map(f => f.name));
+      const n = kbSelUids.length;
       const label = document.getElementById('kbMsLabel');
-      document.querySelector('.kb-ms-btn').classList.toggle('has-selection', names.length > 0);
-      if (!names.length) { label.textContent = '请选择引用范围'; return; }
-      label.textContent = '已选 ' + names.length + ' 项：' + names.join('、');
+      document.querySelector('.kb-ms-btn').classList.toggle('has-selection', n > 0);
+      if (!n) { label.textContent = '请选择引用范围'; return; }
+      label.textContent = '已选 ' + n + ' 项';
     }
     function kbCaretClick(e) {
       e.stopPropagation();
@@ -3575,11 +4541,10 @@
       }
     }
     function clearKbRef() {
-      kbSelFolders = [];
-      kbSelRootFiles = [];
+      kbSelUids = [];
       KB_FOLDERS.forEach(folder => folder.files.forEach(f => { f.outline = false; }));
       KB_ROOT_FILES.forEach(f => { f.outline = false; });
-      buildKbMsPanel();
+      buildKbMsLeft();
       updateKbMsLabel();
       renderKbFiles();
     }
@@ -3588,28 +4553,40 @@
       const tip = document.createElement('div');
       tip.className = 'task-tip';
       document.body.appendChild(tip);
-      const label = document.getElementById('kbMsLabel');
-      label.addEventListener('mouseenter', function () {
-        if (label.scrollWidth > label.clientWidth + 1) {
-          tip.textContent = label.textContent.trim();
+      function showTip(el, e) {
+        if (el.scrollWidth > el.clientWidth + 1) {
+          tip.textContent = el.textContent.trim();
           tip.style.display = 'block';
+          tip.style.left = Math.min(e.clientX + 12, window.innerWidth - 300) + 'px';
+          tip.style.top = (e.clientY + 12) + 'px';
         }
+      }
+      // 引用范围按钮与下拉中的文件夹/文件名：内容超长时悬浮展示完整信息
+      document.addEventListener('mouseover', function (e) {
+        const el = e.target.closest('#kbMsLabel, .kb-ms-name');
+        if (el) showTip(el, e);
       });
-      label.addEventListener('mousemove', function (e) {
+      document.addEventListener('mousemove', function (e) {
         if (tip.style.display === 'block') {
           tip.style.left = Math.min(e.clientX + 12, window.innerWidth - 300) + 'px';
           tip.style.top = (e.clientY + 12) + 'px';
         }
       });
-      label.addEventListener('mouseleave', function () { tip.style.display = 'none'; });
+      document.addEventListener('mouseout', function (e) {
+        if (!e.target.closest('#kbMsLabel, .kb-ms-name')) tip.style.display = 'none';
+      });
     })();
     function toggleKbDropdown(e) {
       e.stopPropagation();
       const panel = document.getElementById('kbMsPanel');
       const willOpen = !panel.classList.contains('open');
       panel.classList.toggle('open');
-      if (willOpen) positionKbPanel();
-      else clearKbPanelPos();
+      if (willOpen) {
+        positionKbPanel();
+        if (KB_FOLDERS.length) showKbDrawer(KB_FOLDERS[0]);
+      } else {
+        clearKbPanelPos();
+      }
     }
     /* 下拉打开时按按钮位置 fixed 定位，并保证面板在可视区内 */
     function positionKbPanel() {
@@ -3619,7 +4596,7 @@
       const r = btn.getBoundingClientRect();
       panel.classList.add('fixed-open');
       panel.style.left = r.left + 'px';
-      panel.style.width = r.width + 'px';
+      panel.style.width = Math.min(r.width + 180, window.innerWidth - r.left - 16) + 'px';
       const below = window.innerHeight - r.bottom - 16;
       if (below >= 180) {
         panel.style.top = (r.bottom + 4) + 'px';
@@ -3666,31 +4643,34 @@
       const tbody = document.getElementById('kbRefList');
       tbody.innerHTML = '';
       const empty = document.getElementById('kbRefEmpty');
-      if (!kbSelFolders.length && !kbSelRootFiles.length) {
+      const selMap = {};
+      KB_FOLDERS.forEach((folder, fi) => {
+        const sels = folder.files.filter(f => kbIsSelected(f.uid));
+        if (sels.length) selMap[fi] = sels;
+      });
+      const rootSels = KB_ROOT_FILES.filter(f => kbIsSelected(f.uid));
+      if (!Object.keys(selMap).length && !rootSels.length) {
         empty.style.display = 'block';
-        empty.textContent = '请至少勾选一个文件夹或最外层文件';
+        empty.textContent = '请至少勾选一个文件夹、文件或最外层文件';
         updateKbOutlineDisplay();
         return;
       }
       empty.style.display = 'none';
-      kbSelFolders.forEach(folder => {
-        if (!folder.files.length) return;
+      Object.keys(selMap).forEach(fi => {
+        const folder = KB_FOLDERS[Number(fi)];
+        const sels = selMap[fi];
         const headRow = document.createElement('tr');
         headRow.className = 'kb-group-head';
-        headRow.innerHTML = '<td colspan="5">📁 ' + folder.name + '（' + folder.files.length + ' 个文件）</td>';
+        headRow.innerHTML = '<td colspan="5">📁 ' + folder.name + '（已选 ' + sels.length + ' 个文件）</td>';
         tbody.appendChild(headRow);
-        folder.files.forEach(f => {
-          appendKbFileRow(tbody, f, KB_FOLDERS.indexOf(folder), folder.files.indexOf(f));
-        });
+        sels.forEach(f => appendKbFileRow(tbody, f, Number(fi), folder.files.indexOf(f)));
       });
-      if (kbSelRootFiles.length) {
+      if (rootSels.length) {
         const headRow = document.createElement('tr');
         headRow.className = 'kb-group-head';
-        headRow.innerHTML = '<td colspan="5">📄 根目录独立文件（' + kbSelRootFiles.length + ' 个）</td>';
+        headRow.innerHTML = '<td colspan="5">📄 根目录独立文件（已选 ' + rootSels.length + ' 个）</td>';
         tbody.appendChild(headRow);
-        kbSelRootFiles.forEach(f => {
-          appendKbFileRow(tbody, f, -1, KB_ROOT_FILES.indexOf(f));
-        });
+        rootSels.forEach(f => appendKbFileRow(tbody, f, -1, KB_ROOT_FILES.indexOf(f)));
       }
       updateKbOutlineDisplay();
     }
@@ -3743,7 +4723,127 @@
         + '&type=' + encodeURIComponent(f.type);
       window.open(url, '_blank');
     }
-    buildKbMsPanel();
+
+    /* ==================== 第二步：上传文件（选择位置 + 上传进度） ==================== */
+    let kbUploadTargetFiles = KB_ROOT_FILES;
+    function openKbUploadGuide() {
+      const sel = document.getElementById('kbUploadTargetSelect');
+      if (!sel) return;
+      sel.innerHTML = '<option value="root">根目录（默认列表）</option>'
+        + KB_FOLDERS.map((f, i) => '<option value="' + i + '">' + f.name + '</option>').join('');
+      const modal = document.getElementById('kbUploadGuideModal');
+      if (modal) modal.style.display = 'flex';
+    }
+    function closeKbUploadGuide() {
+      const modal = document.getElementById('kbUploadGuideModal');
+      if (modal) modal.style.display = 'none';
+    }
+    function chooseKbUpload() {
+      const sel = document.getElementById('kbUploadTargetSelect');
+      const v = sel ? sel.value : 'root';
+      kbUploadTargetFiles = v === 'root' ? KB_ROOT_FILES : KB_FOLDERS[Number(v)].files;
+      closeKbUploadGuide();
+      const input = document.getElementById('kbUploadInput');
+      if (input) input.click();
+    }
+    function kbNowText() {
+      const d = new Date();
+      const p = n => String(n).padStart(2, '0');
+      return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+    }
+    function kbFormatSize(bytes) {
+      if (bytes >= 1048576) return (bytes / 1048576).toFixed(2) + 'MB';
+      return (bytes / 1024).toFixed(1) + 'KB';
+    }
+    function kbEscapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+    function onKbUploaded() {
+      const input = document.getElementById('kbUploadInput');
+      const files = Array.from(input.files || []);
+      files.forEach(file => {
+        const ext = (file.name.split('.').pop() || '').toLowerCase();
+        let type = 'docx';
+        if (ext === 'xlsx' || ext === 'xls') type = 'xlsx';
+        else if (ext === 'pdf') type = 'pdf';
+        const kbitem = {
+          uid: 'kf' + (kbUidSeq++),
+          name: file.name,
+          size: kbFormatSize(file.size),
+          time: kbNowText(),
+          type: type,
+          outline: false
+        };
+        kbUploadTargetFiles.unshift(kbitem);
+        // 上传后的文件自动加入引用范围
+        if (kbSelUids.indexOf(kbitem.uid) === -1) kbSelUids.push(kbitem.uid);
+        addKbUploadItem(file, kbitem);
+      });
+      input.value = '';
+      buildKbMsLeft();
+      updateKbMsLabel();
+      renderKbFiles();
+    }
+    /* 上传任务面板（右下角）：名称、大小、状态、删除 */
+    const kbUploadItems = [];
+    function closeKbUploadPanel() {
+      document.getElementById('kbUploadPanel').classList.remove('active');
+    }
+    function addKbUploadItem(file, kbitem) {
+      const panel = document.getElementById('kbUploadPanel');
+      const body = document.getElementById('kbUploadPanelBody');
+      panel.classList.add('active');
+      const item = document.createElement('div');
+      item.className = 'upload-item';
+      item.innerHTML =
+        '<div class="upload-item-info">'
+        + '<div class="upload-item-name">' + kbEscapeHtml(file.name) + '</div>'
+        + '<div class="upload-item-size">' + kbFormatSize(file.size) + '</div>'
+        + '</div>'
+        + '<span class="upload-item-status"><span class="spin"></span>上传中…</span>'
+        + '<button class="upload-item-del" title="删除">✕</button>';
+      const statusEl = item.querySelector('.upload-item-status');
+      const delBtn = item.querySelector('.upload-item-del');
+      const entry = { item: item, statusEl: statusEl, kbitem: kbitem, done: false, timer: null };
+      delBtn.onclick = function () {
+        clearTimeout(entry.timer);
+        item.remove();
+        kbUploadItems.splice(kbUploadItems.indexOf(entry), 1);
+        if (!entry.done) {
+          // 上传未完成时删除：从知识库与引用范围中移除该文件
+          const found = kbFindFile(kbitem.uid);
+          if (found) {
+            const arr = found.folder ? found.folder.files : KB_ROOT_FILES;
+            const i = arr.indexOf(kbitem);
+            if (i > -1) arr.splice(i, 1);
+          }
+          const si = kbSelUids.indexOf(kbitem.uid);
+          if (si > -1) kbSelUids.splice(si, 1);
+          buildKbMsLeft();
+          updateKbMsLabel();
+          renderKbFiles();
+        }
+        if (!kbUploadItems.length) panel.classList.remove('active');
+        showTaskToast();
+      };
+      body.appendChild(item);
+      kbUploadItems.push(entry);
+      // 模拟上传流程：上传中 → 上传完成 → 解析中 → 已完成
+      entry.timer = setTimeout(function () {
+        statusEl.innerHTML = '上传完成';
+        entry.timer = setTimeout(function () {
+          statusEl.innerHTML = '<span class="spin"></span>解析中…';
+          entry.timer = setTimeout(function () {
+            statusEl.innerHTML = '✓ 已完成';
+            statusEl.classList.add('done');
+            entry.done = true;
+          }, 1200);
+        }, 900);
+      }, 1200);
+    }
+
+    kbAssignUids();
+    buildKbMsLeft();
     updateKbOutlineDisplay();
 
     /* ==================== 来源汇总：序号 / 标题 / 类型 / 关联章节 ==================== */
@@ -3856,7 +4956,7 @@
       }
     ];
     function factValueOf(label) {
-      const modal = document.getElementById('confirmModal');
+      const modal = document.querySelector('.confirm-step');
       if (!modal) return '';
       const rows = modal.querySelectorAll('.anchor-row');
       for (let i = 0; i < rows.length; i++) {
@@ -3897,52 +4997,175 @@
     });
 
     /* 智能体选择页 */
-    function buildAgentGrid() {
-      document.getElementById('agentGrid').innerHTML = REPORT_AGENTS.map((a, i) => {
-        const coming = a.tag === '即将上线';
-        const featured = !!a.featured && !coming;
-        return '<div class="agent-card' + (coming ? ' disabled' : '') + (featured ? ' featured' : '') + '"'
-          + (coming ? '' : ' onclick="selectAgent(\'' + a.name + '\')"') + '>'
-          + '<div class="agent-card-icon">' + a.icon + '</div>'
-          + '<div class="agent-card-body">'
-          + '<div class="agent-card-name-row"><span class="agent-card-name">' + a.name + '</span>'
-          + (featured ? '<span class="agent-featured-badge">推荐</span>' : '')
-          + '</div>'
-          + '<div class="agent-card-desc">' + a.desc + '</div>'
-          + '</div>'
-          + '<div class="agent-card-footer"><span class="agent-card-tag">' + a.tag + '</span>'
-          + '<span class="agent-card-btn">' + (coming ? '敬请期待' : '开始使用 →') + '</span></div>'
-          + '</div>';
-      }).join('');
-    }
-    buildAgentGrid();
-
+    renderRecentAgents();
+    renderAgentGrid();
     function showAgentSelect() {
       document.querySelectorAll('.input-step').forEach(s => s.classList.remove('active'));
       document.getElementById('agentSelectView').classList.remove('hidden');
       document.getElementById('stageMask').classList.remove('active');
-      document.body.classList.remove('modal-blurred', 'editor-mode');
+      document.body.classList.remove('modal-blurred', 'editor-mode', 'wizard-active');
       document.body.classList.add('agent-select');
+      // 回到新建报告选择页时恢复选中态
+      const nr = document.querySelector('.sidebar-new-report');
+      if (nr) nr.classList.add('active');
       setAgentName('');
       document.title = '生成报告 - 五度妙笔';
     }
+    /* ==================== 任务列表：自动展示 + 滚动到底自动加载下一页 ==================== */
+    const SIDEBAR_TASKS = [
+      { name: '草稿 08-14 09:12', exec: 'draft', viewed: false, step: 1, agent: '可研专业版' },
+      { name: '企查查科技_商业大数据可研', exec: 'running', viewed: true, agent: '可研专业版' },
+      { name: '北京笃威尔_智能仓储立项报告', exec: 'done', viewed: false, agent: '项目立项报告' },
+      { name: '某某集团_企业全景尽调分析', exec: 'running', viewed: true, agent: '企业全景分析' },
+      { name: '星云半导体_投前尽调报告', exec: 'done', viewed: false, agent: '投前咨询分析' },
+      { name: '园区管委会_招商策略初稿', exec: 'done', viewed: true, agent: '招商策略分析' },
+      { name: '草稿 08-14 10:05', exec: 'draft', viewed: false, step: 2, agent: '可研专业版' },
+      { name: '华能集团_冷链项目立项报告', exec: 'done', viewed: true, agent: '项目立项报告' },
+      { name: '清源能源_新能源可研报告', exec: 'done', viewed: true, exported: true, agent: '可研专业版' },
+      { name: '智汇医疗_生物医药产业分析', exec: 'done', viewed: false, agent: '生物医药产业分析' },
+      { name: '智谷园区_智慧园区招商方案', exec: 'running', viewed: true, agent: '招商策略分析' },
+      { name: '宏远银行_数据治理立项', exec: 'done', viewed: true, exported: true, agent: '项目立项报告' },
+      { name: '工业云平台_工业互联网可研报告', exec: 'running', viewed: true, agent: '可研快速版' },
+      { name: '链通科技_供应链金融可研', exec: 'running', viewed: true, agent: '可研专业版' },
+      { name: '跨境购_跨境电商企业全景', exec: 'done', viewed: false, agent: '企业全景分析' },
+      { name: '芯测半导体_投前咨询报告', exec: 'done', viewed: true, agent: '投前咨询分析' },
+      { name: '城数集团_智慧城市数据中心立项', exec: 'done', viewed: true, exported: true, agent: '项目立项报告' },
+      { name: '零售王_零售企业全景分析', exec: 'running', viewed: true, agent: '企业全景分析' },
+      { name: '光晟科技_光伏组件产线可研', exec: 'done', viewed: true, agent: '可研专业版' },
+      { name: '医联物流_医药物流园区立项', exec: 'done', viewed: true, agent: '项目立项报告' },
+      { name: '长三角招商局_产业招商策略', exec: 'running', viewed: true, agent: '招商策略分析' },
+      { name: '晶圆智造_芯片封装投前咨询', exec: 'running', viewed: true, agent: '投前咨询分析' },
+      { name: '数智中台_数据中台建设可研', exec: 'done', viewed: false, exported: true, agent: '可研专业版' },
+      { name: '冷链云_冷链企业全景尽调', exec: 'done', viewed: true, agent: '企业全景分析' }
+    ];
+    const SIDEBAR_TASK_PAGE = 20;
+    let sidebarTaskPage = 0;
+    let sidebarTaskFilter = 'all';
+    let sidebarTaskLoading = false;
+    function sidebarTaskList() {
+      return sidebarTaskFilter === 'all'
+        ? SIDEBAR_TASKS
+        : SIDEBAR_TASKS.filter(t => t.agent === sidebarTaskFilter);
+    }
+    function renderSidebarTaskItem(t) {
+      const el = document.createElement('div');
+      el.className = 'sidebar-task-item' + (t.exec === 'draft' ? ' draft' : '');
+      el.dataset.agent = t.agent;
+      el.onclick = function () {
+        const dot = el.querySelector('.task-view-dot');
+        if (dot) dot.classList.add('hide');
+        openTask(t);
+      };
+      // 未查看蓝点：仅当报告已生成（已完成）且用户尚未点击查看时展示
+      const unviewed = t.exec === 'done' && !t.viewed;
+      const viewDot = '<span class="task-view-dot' + (unviewed ? '' : ' hide') + '" title="未查看"></span>';
+      const ring = t.exec === 'running' ? '<span class="task-load-ring" title="报告生成中"></span>' : '';
+      el.innerHTML = viewDot
+        + '<span class="sidebar-task-text">' + t.name + '</span>'
+        + ring
+        + '<span class="sidebar-task-meta">' + t.agent + '</span>'
+        + '<span class="task-actions">'
+        + '<button class="task-act" title="编辑任务名称" onclick="event.stopPropagation();showTaskToast()">✎</button>'
+        + '<button class="task-act danger" title="删除任务" onclick="event.stopPropagation();showTaskToast()">✕</button>'
+        + '</span>';
+      return el;
+    }
+    /* 点击任务：按执行状态展示对应页面 */
+    function openTask(t) {
+      const pageMap = {
+        '可研快速版': '可行性研究报告.html',
+        '项目立项报告': '项目立项报告.html',
+        '企业全景分析': '企业全景分析报告.html',
+        '投前咨询分析': '投前咨询分析报告.html',
+        '招商策略分析': '招商策略分析报告.html'
+      };
+      const page = pageMap[t.agent];
+      if (t.agent !== '可研专业版' && page) {
+        let href = '智能体综合/' + page;
+        if (t.exec === 'running') href += '?phase=gen';
+        else if (t.exec === 'done') href += '?phase=done';
+        window.location.href = href;
+        return;
+      }
+      if (t.agent === '可研专业版') {
+        if (t.exec === 'draft') {
+          enterWorkspace('可行性研究报告（专业版）', true);
+          showStage(t.step || 1);
+        } else if (t.exec === 'running') {
+          enterTaskEditor();
+        } else if (t.exec === 'done') {
+          enterTaskEditor();
+          if (t.exported) applyExportedState();
+        }
+        return;
+      }
+      showTaskToast();
+    }
+    function ensureTaskLoadingEl() {
+      const scroll = document.getElementById('sidebarTaskScroll');
+      let l = document.getElementById('sidebarTaskLoading');
+      if (!l) {
+        l = document.createElement('div');
+        l.id = 'sidebarTaskLoading';
+        l.className = 'sidebar-task-loading';
+        scroll.appendChild(l);
+      }
+      return l;
+    }
+    function loadSidebarTasks() {
+      const scroll = document.getElementById('sidebarTaskScroll');
+      if (!scroll) return;
+      const list = sidebarTaskList();
+      const start = sidebarTaskPage * SIDEBAR_TASK_PAGE;
+      const batch = list.slice(start, start + SIDEBAR_TASK_PAGE);
+      batch.forEach(t => scroll.appendChild(renderSidebarTaskItem(t)));
+      sidebarTaskPage++;
+      const l = ensureTaskLoadingEl();
+      l.textContent = start + batch.length >= list.length ? '已全部加载' : '加载中…';
+      scroll.appendChild(l); // 提示始终位于最后一条数据之后
+      sidebarTaskLoading = false;
+    }
+    function initSidebarTasks() {
+      sidebarTaskPage = 0;
+      sidebarTaskLoading = false;
+      const scroll = document.getElementById('sidebarTaskScroll');
+      if (scroll) scroll.innerHTML = '';
+      loadSidebarTasks();
+    }
+    function filterSidebarTasks(sel) {
+      sidebarTaskFilter = sel.value;
+      initSidebarTasks();
+    }
+    document.getElementById('sidebarTaskScroll').addEventListener('scroll', function () {
+      if (this.scrollTop + this.clientHeight >= this.scrollHeight - 40) {
+        const list = sidebarTaskList();
+        if (sidebarTaskPage * SIDEBAR_TASK_PAGE < list.length && !sidebarTaskLoading) {
+          sidebarTaskLoading = true;
+          setTimeout(loadSidebarTasks, 400);
+        }
+      }
+    });
+    initSidebarTasks();
     function enterWorkspace(type, openWizardNow) {
       reportType = type;
       setAgentName(type);
       document.getElementById('stageTitle').textContent = type + ' · 生成报告';
       document.title = type + ' - 五度妙笔';
       if (openWizardNow) {
-        // 弹窗打开：背景保持智能体选择页（模糊展示），正文编辑页暂不出现
+        // 内联展示：隐藏智能体选择页，直接在右侧内容区展示生成流程
         document.querySelectorAll('.input-step').forEach(s => s.classList.remove('active'));
-        document.getElementById('agentSelectView').classList.remove('hidden');
-        document.body.classList.remove('agent-select');
-        document.body.classList.add('modal-blurred');
+        document.getElementById('agentSelectView').classList.add('hidden');
+        document.body.classList.remove('agent-select', 'modal-blurred');
+        document.body.classList.remove('editor-mode');
+        document.body.classList.add('wizard-active');
+        // 进入智能体操作流程后，侧栏“新建报告”取消选中态
+        const nr = document.querySelector('.sidebar-new-report');
+        if (nr) nr.classList.remove('active');
         document.getElementById('stageMask').classList.add('active');
         showStage(1);
       } else {
         document.getElementById('agentSelectView').classList.add('hidden');
-        document.body.classList.remove('agent-select');
-        document.body.classList.remove('modal-blurred');
+        document.body.classList.remove('agent-select', 'modal-blurred', 'wizard-active');
         document.getElementById('stageMask').classList.remove('active');
       }
     }
@@ -3961,12 +5184,16 @@
       document.getElementById('stageMask').classList.remove('active');
       document.body.classList.remove('modal-blurred');
       document.body.classList.add('editor-mode');
+      resetExportedState();
       document.title = reportType + ' - 五度妙笔';
       renderPaperByStatus();
     }
 
     /* 默认展示页：右侧展示全部智能体，点击某个智能体后再弹出操作弹窗 */
-    if (params.get('task')) {
+    const openTaskId = params.get('taskId');
+    if (openTaskId !== null && SIDEBAR_TASKS[openTaskId]) {
+      openTask(SIDEBAR_TASKS[openTaskId]);
+    } else if (params.get('task')) {
       enterTaskEditor();
     } else {
       showAgentSelect();
@@ -4001,27 +5228,19 @@
 
     /* ==================== 确认弹窗（信息确认与锚定） ==================== */
     function openConfirmModal() {
-      const modal = document.getElementById('confirmModal');
-      modal.style.display = 'flex';
-      document.body.classList.add('confirm-level');
-      // 弹窗不占流程步骤：流程条保持第2步（知识库引用及设置）高亮
-      document.querySelectorAll('.flow-step').forEach((f, i) => {
-        f.classList.toggle('active', i === 1);
-      });
-      recalcConfirmBalances();
+      // 信息确认与锚定作为生成流程第 3 步，内联展示
+      showStage(3);
     }
     function closeConfirmModal() {
-      document.getElementById('confirmModal').style.display = 'none';
-      document.body.classList.remove('confirm-level');
+      // 内联步骤模式：返回由“上一步”处理
     }
     function confirmOutline() {
-      closeConfirmModal();
-      startOutlineGeneration(); // 确认后生成大纲并进入第三步
+      startOutlineGeneration(function () { showStage(4); }); // 确认后生成大纲并进入第4步（目录生成及管理）
     }
 
     /* 信息确认弹窗：数据直接编辑 */
     function attachConfirmEditIcons() {
-      document.querySelectorAll('#confirmModal .anchor-value .dim-val').forEach(v => {
+      document.querySelectorAll('.confirm-step .anchor-value .dim-val').forEach(v => {
         if (v.querySelector('.edit-icon')) return;
         const icon = document.createElement('span');
         icon.className = 'edit-icon';
@@ -4143,7 +5362,7 @@
     }
     /* 金额相关数字保留四位小数，百分比相关数字保留两位小数 */
     function formatConfirmNumbers() {
-      const modal = document.getElementById('confirmModal');
+      const modal = document.querySelector('.confirm-step');
       if (!modal) return;
       modal.querySelectorAll('.dim-val').forEach(function (dv) {
         if (dv.querySelector('input') || dv.querySelector('select')) return; // 编辑中跳过
@@ -4156,7 +5375,7 @@
     }
     /* 资金来源金额项：按金额 ÷ 总投资自动计算并展示占比 */
     function refreshFundingPercents(total) {
-      const modal = document.getElementById('confirmModal');
+      const modal = document.querySelector('.confirm-step');
       if (!modal) return;
       modal.querySelectorAll('#collapseFunding .dim-val[data-amount]').forEach(dv => {
         if (dv.querySelector('input') || dv.querySelector('select')) return; // 正在编辑时跳过，避免打断输入
@@ -4166,7 +5385,7 @@
       });
     }
     function recalcConfirmBalances() {
-      const modal = document.getElementById('confirmModal');
+      const modal = document.querySelector('.confirm-step');
       if (!modal) return;
       // 读取项目总投资（万元）
       let total = 0;
@@ -4212,47 +5431,66 @@
       attachConfirmEditIcons(); // 刷新占比后恢复编辑图标
     }
 
-    /* ==================== 生成流程弹窗：三步向导 ==================== */
+    /* ==================== 生成流程：四步向导（内联展示） ==================== */
     function showStage(n) {
       flowStage = n;
       document.querySelectorAll('.stage-panel').forEach(p => p.classList.remove('active'));
       document.getElementById('stagePanel' + n).classList.add('active');
-      for (let i = 1; i <= 3; i++) {
+      for (let i = 1; i <= 4; i++) {
         const tag = document.getElementById('stageTag' + i);
         tag.classList.toggle('active', i === n);
         tag.classList.toggle('done', i < n);
       }
       document.getElementById('stagePrevBtn').style.display = n > 1 ? '' : 'none';
-      document.getElementById('stageNextBtn').style.display = n < 3 ? '' : 'none';
-      document.getElementById('stageFinishBtn').style.display = n === 3 ? '' : 'none';
-      // 目录操作按钮仅在第三步显示
-      document.querySelector('.stage-foot-left').style.display = n === 3 ? '' : 'none';
-      // 第三步：弹窗页面不滚动，左侧列表内部滚动
-      document.querySelector('.stage-body').classList.toggle('no-scroll', n === 3);
+      document.getElementById('stageNextBtn').style.display = n < 4 ? '' : 'none';
+      document.getElementById('stageFinishBtn').style.display = n === 4 ? '' : 'none';
+      document.getElementById('stageNextBtn').textContent = n === 3 ? '确认，生成大纲 →' : '下一步';
+      // 目录操作按钮仅在第四步显示（保存草稿始终显示）
+      document.getElementById('stageFootOutline').style.display = n === 4 ? '' : 'none';
+      // 第四步：页面不滚动，左侧列表内部滚动
+      document.querySelector('.stage-body').classList.toggle('no-scroll', n === 4);
+      // 进入第3步（信息确认与锚定）时刷新校验数据与编辑图标
+      if (n === 3) {
+        recalcConfirmBalances();
+        attachConfirmEditIcons();
+      }
+      document.querySelector('.main-content').scrollTop = 0;
+      window.scrollTo(0, 0);
     }
     function nextStage() {
       if (flowStage === 1) { showStage(2); return; } // 基础信息录入完成 → 知识库引用及设置
-      if (flowStage === 2) { openConfirmModal(); return; } // 知识库引用完成 → 信息确认与锚定
-      if (flowStage < 3) showStage(flowStage + 1);
+      if (flowStage === 2) { showStage(3); return; } // 知识库引用完成 → 信息确认与锚定（第3步）
+      if (flowStage === 3) { confirmOutline(); return; } // 确认锚定 → 生成大纲 → 目录生成及管理（第4步）
+      if (flowStage < 4) showStage(flowStage + 1);
     }
     function prevStage() {
       if (flowStage > 1) showStage(flowStage - 1);
     }
     function finishWizard() {
-      document.getElementById('stageMask').classList.remove('active');
-      document.body.classList.remove('modal-blurred');
-      document.body.classList.add('editor-mode');
-      // 完成最后一步后才展示正文编辑页
-      document.getElementById('agentSelectView').classList.add('hidden');
-      document.querySelectorAll('.input-step').forEach(s => s.classList.remove('active'));
-      document.getElementById('step4').classList.add('active');
-      renderPaperByStatus();
-      renderFacts();
-      showTaskToast();
+      const mask = document.getElementById('stageMask');
+      mask.classList.add('leaving');
+      setTimeout(function () {
+        mask.classList.remove('active', 'leaving');
+        document.body.classList.remove('modal-blurred', 'wizard-active');
+        document.body.classList.add('editor-mode');
+        // 完成最后一步后才展示正文编辑页
+        document.getElementById('agentSelectView').classList.add('hidden');
+        document.querySelectorAll('.input-step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step4').classList.add('active');
+        renderPaperByStatus();
+        renderFacts();
+        showTaskToast();
+      }, 180);
+    }
+    /* 保存草稿：每个步骤均可保存，稍后可从任务列表继续 */
+    function saveDraft() {
+      showCreditToast('草稿已保存（第 ' + (flowStage || 1) + ' 步），可稍后从任务列表继续');
     }
     function openWizard(stageToShow) {
+      // 内联展示：无需弹窗遮罩
       document.getElementById('stageMask').classList.add('active');
-      document.body.classList.add('modal-blurred');
+      document.body.classList.remove('modal-blurred');
+      document.body.classList.add('wizard-active');
       showStage(stageToShow || flowStage);
     }
 
@@ -4321,7 +5559,7 @@
           setTimeout(() => {
             mask.classList.remove('active');
             if (typeof onComplete === 'function') onComplete();
-            else showStage(3);
+            else showStage(4);
           }, 700);
         }
       }, 120);
@@ -4504,6 +5742,9 @@
       const descTextarea = descField ? descField.querySelector('textarea') : null;
       const infoCard = panel.querySelector('.settings-node-info');
       const node = row.closest('.tree-node');
+      // 三级章节（末级）不允许再增加子章节
+      const addChildBtn = panel.querySelector('#settingsAddChildBtn');
+      if (addChildBtn) addChildBtn.style.display = nodeLevel(node) >= 3 ? 'none' : '';
       const childCount = node ? node.querySelectorAll(':scope > .tree-children > .tree-node').length : 0;
       const isLeaf = isLeafNode(node);
       const descBox = node ? node.querySelector(':scope > .node-desc') : null;
@@ -4532,6 +5773,7 @@
     function applySettings() {
       const row = document.querySelector('.tree-node-row.selected');
       if (!row) { showTaskToast(); return; }
+      pushOutlineSnapshot();
       const panel = document.querySelector('.chapter-settings-panel');
       const info = readNodeInfo(row);
       const nameInput = panel.querySelector('.settings-field > input.input');
@@ -4641,6 +5883,7 @@
       const node = row.closest('.tree-node');
       const container = node ? node.parentElement : null;
       if (!container) return;
+      pushOutlineSnapshot();
       if (dir < 0) {
         const prev = node.previousElementSibling;
         if (prev && prev.classList.contains('tree-node')) {
@@ -4656,6 +5899,7 @@
     }
     function addChildNode(row) {
       if (!row) { showTaskToast(); return; }
+      pushOutlineSnapshot();
       const node = row.closest('.tree-node');
       if (nodeLevel(node) >= 3) { showTaskToast(); return; }
       const childType = nodeLevel(node) === 1 ? 'section' : 'subsection';
@@ -4696,6 +5940,7 @@
     }
     function deleteNode(row) {
       if (!row) { showTaskToast(); return; }
+      pushOutlineSnapshot();
       const node = row.closest('.tree-node');
       const parent = node.parentElement;
       const isChapter = node.classList.contains('chapter');
@@ -4784,6 +6029,7 @@
     function addChapter() {
       const panel = document.querySelector('.outline-tree-panel');
       if (!panel) { showTaskToast(); return; }
+      pushOutlineSnapshot();
       const node = document.createElement('div');
       node.className = 'tree-node chapter';
       const row = document.createElement('div');
@@ -4803,7 +6049,22 @@
       row.appendChild(label);
       node.appendChild(row);
       node.appendChild(document.createElement('div')).className = 'tree-children open';
-      panel.appendChild(node);
+      // 添加到当前选中章节所属的大章节之后（未选中则追加到末尾）
+      const selRow = document.querySelector('.tree-node-row.selected');
+      let refChapter = null;
+      if (selRow) {
+        const selNode = selRow.closest('.tree-node');
+        if (selNode) {
+          refChapter = selNode.classList.contains('chapter')
+            ? selNode
+            : selNode.closest('.tree-node.chapter');
+        }
+      }
+      if (refChapter && refChapter.parentNode === panel) {
+        refChapter.insertAdjacentElement('afterend', node);
+      } else {
+        panel.appendChild(node);
+      }
       row.onclick = () => selectNode(row);
       attachNodeActions(row);
       refreshCaret(node);
@@ -4820,6 +6081,7 @@
       btn.textContent = allChecked ? '取消全选' : '选中全部';
     }
     function toggleCheckAll() {
+      pushOutlineSnapshot(); // 记录全选/取消全选前的状态
       const boxes = document.querySelectorAll('.outline-tree-panel input[type="checkbox"]');
       const allChecked = boxes.length > 0 && Array.from(boxes).every(c => c.checked);
       boxes.forEach(c => { c.checked = !allChecked; });
@@ -4836,18 +6098,33 @@
       if (panel) panel.classList.toggle('desc-hidden', !outlineDescVisible);
     }
     document.addEventListener('change', function (e) {
-      if (e.target.matches('.outline-tree-panel input[type="checkbox"]')) updateCheckBtnLabel();
+      if (e.target.matches('.outline-tree-panel input[type="checkbox"]')) {
+        // 记录勾选变更前的状态（checkbox 的 checked 属性变化先于 change 事件）
+        const cb = e.target;
+        cb.checked = !cb.checked;
+        pushOutlineSnapshot();
+        cb.checked = !cb.checked;
+        updateCheckBtnLabel();
+      }
     });
     applyOutlineDescState();
     updateCheckBtnLabel();
     /* ==================== 报告字数选择 ==================== */
     function onWordCountSelect(sel) {
+      pushOutlineSnapshot(lastWcState.wc, lastWcState.wcCustom); // 记录变更前的字数选择，支持回退/恢复
+      const wcInput = document.getElementById('wordCountInput');
+      lastWcState = { wc: sel.value, wcCustom: wcInput ? wcInput.value : '' };
       const custom = document.getElementById('wordCountCustom');
       if (custom) custom.style.display = sel.value === 'custom' ? 'inline-flex' : 'none';
       if (sel.value === 'custom') {
         const input = document.getElementById('wordCountInput');
         if (input) input.focus();
       }
+    }
+    function onWordCountChange(input) {
+      pushOutlineSnapshot(lastWcState.wc, lastWcState.wcCustom); // 记录变更前的自定义字数
+      onWordCountInput(input);
+      lastWcState.wcCustom = input.value;
     }
     function onWordCountInput(input) {
       let v = String(input.value).replace(/[^\d]/g, '');
@@ -4903,15 +6180,13 @@
       ]
     };
     let currentOutlineTpl = '系统生成大纲';
-    const generatedOutlines = { '系统生成大纲': true };
     const outlineTreeCache = {};
 
     function renderOutlineTplPanel() {
       const panel = document.getElementById('outlineTplPanel');
       panel.innerHTML = Object.keys(OUTLINE_TEMPLATES).map(name => {
         const active = name === currentOutlineTpl ? ' active' : '';
-        const tag = generatedOutlines[name] ? '<span class="outline-tpl-tag">已生成</span>' : '';
-        return '<div class="outline-tpl-item' + active + '" onclick="selectOutlineTpl(\'' + name + '\')"><span>' + name + '</span>' + tag + '</div>';
+        return '<div class="outline-tpl-item' + active + '" onclick="selectOutlineTpl(\'' + name + '\')"><span>' + name + '</span></div>';
       }).join('');
     }
     function toggleOutlineTpl(e) {
@@ -4933,22 +6208,12 @@
       closeOutlineTpl();
       // 保存当前大纲的编辑状态（写作方向、标题修改、新增节点等）
       cacheCurrentOutline();
-      if (generatedOutlines[name]) {
-        // 已生成过：直接切换，不触发生成弹窗
-        currentOutlineTpl = name;
-        renderOutlineTemplate(name);
-        updateOutlineTplButton();
-        renderOutlineTplPanel();
-      } else {
-        // 新大纲：触发"正在生成大纲"弹窗，完成后切换并标记已生成
-        startOutlineGeneration(function () {
-          generatedOutlines[name] = true;
-          currentOutlineTpl = name;
-          renderOutlineTemplate(name);
-          updateOutlineTplButton();
-          renderOutlineTplPanel();
-        });
-      }
+      // 各类大纲在进入第四步时已同时生成，切换直接展示，不再触发生成中弹窗
+      currentOutlineTpl = name;
+      renderOutlineTemplate(name);
+      updateOutlineTplButton();
+      renderOutlineTplPanel();
+      updateOutlineUndoButtons();
     }
     function cacheCurrentOutline() {
       const panel = document.querySelector('.outline-tree-panel');
@@ -5023,6 +6288,97 @@
     /* ==================== 大纲版本管理（按大纲类型独立） ==================== */
     const outlineVersionsByTpl = {};
     const activeVersionByTpl = {};
+    /* 大纲操作回退/恢复：按大纲类型独立记录（最近新版本的操作） */
+    const outlineUndoByTpl = {};
+    const outlineRedoByTpl = {};
+    let lastWcState = { wc: '3-5', wcCustom: '' };
+    function outlineUndoKey() { return currentOutlineTpl || '系统生成大纲'; }
+    function currentOutlineSnapshot(wcOverride, wcCustomOverride) {
+      const panel = document.querySelector('.outline-tree-panel');
+      const wcSel = document.getElementById('wordCountSelect');
+      const wcInput = document.getElementById('wordCountInput');
+      const checks = [];
+      if (panel) panel.querySelectorAll('input[type="checkbox"]').forEach(function (cb) { checks.push(cb.checked); });
+      return {
+        html: panel ? panel.innerHTML : '',
+        checks: checks,
+        wc: wcOverride !== undefined ? wcOverride : (wcSel ? wcSel.value : '3-5'),
+        wcCustom: wcCustomOverride !== undefined ? wcCustomOverride : (wcInput ? wcInput.value : '')
+      };
+    }
+    function outlineSnapEqual(a, b) {
+      if (!a || !b || a.html !== b.html || a.wc !== b.wc || a.wcCustom !== b.wcCustom) return false;
+      if (!a.checks || !b.checks || a.checks.length !== b.checks.length) return false;
+      for (var i = 0; i < a.checks.length; i++) {
+        if (a.checks[i] !== b.checks[i]) return false;
+      }
+      return true;
+    }
+    function pushOutlineSnapshot(wcOverride, wcCustomOverride) {
+      const panel = document.querySelector('.outline-tree-panel');
+      if (!panel) return;
+      const key = outlineUndoKey();
+      const snap = currentOutlineSnapshot(wcOverride, wcCustomOverride);
+      const undos = outlineUndoByTpl[key] || (outlineUndoByTpl[key] = []);
+      if (outlineSnapEqual(undos[undos.length - 1], snap)) return;
+      undos.push(snap);
+      if (undos.length > 60) undos.shift();
+      outlineRedoByTpl[key] = [];
+      updateOutlineUndoButtons();
+    }
+    function restoreOutlineSnapshot(snap) {
+      const panel = document.querySelector('.outline-tree-panel');
+      if (!panel || !snap) return;
+      panel.innerHTML = snap.html;
+      if (snap.checks) {
+        panel.querySelectorAll('input[type="checkbox"]').forEach(function (cb, i) {
+          if (snap.checks[i] !== undefined) cb.checked = snap.checks[i];
+        });
+      }
+      const wcSel = document.getElementById('wordCountSelect');
+      if (wcSel && snap.wc) {
+        wcSel.value = snap.wc;
+        const custom = document.getElementById('wordCountCustom');
+        if (custom) custom.style.display = snap.wc === 'custom' ? 'inline-flex' : 'none';
+      }
+      const wcInput = document.getElementById('wordCountInput');
+      if (wcInput) wcInput.value = snap.wcCustom || '';
+      lastWcState = { wc: snap.wc, wcCustom: snap.wcCustom || '' };
+      reinitOutlineTree(panel);
+      outlineTreeCache[currentOutlineTpl] = panel.innerHTML;
+      updateOutlineUndoButtons();
+    }
+    function undoOutline() {
+      const key = outlineUndoKey();
+      const undos = outlineUndoByTpl[key] || [];
+      const panel = document.querySelector('.outline-tree-panel');
+      if (!panel || !undos.length) return;
+      const redos = outlineRedoByTpl[key] || (outlineRedoByTpl[key] = []);
+      redos.push(currentOutlineSnapshot());
+      restoreOutlineSnapshot(undos.pop());
+    }
+    function redoOutline() {
+      const key = outlineUndoKey();
+      const redos = outlineRedoByTpl[key] || [];
+      const panel = document.querySelector('.outline-tree-panel');
+      if (!panel || !redos.length) return;
+      const undos = outlineUndoByTpl[key] || (outlineUndoByTpl[key] = []);
+      undos.push(currentOutlineSnapshot());
+      restoreOutlineSnapshot(redos.pop());
+    }
+    function resetOutlineHistory() {
+      const key = outlineUndoKey();
+      outlineUndoByTpl[key] = [];
+      outlineRedoByTpl[key] = [];
+      updateOutlineUndoButtons();
+    }
+    function updateOutlineUndoButtons() {
+      const key = outlineUndoKey();
+      const u = document.getElementById('outlineUndoBtn');
+      const r = document.getElementById('outlineRedoBtn');
+      if (u) u.disabled = !(outlineUndoByTpl[key] || []).length;
+      if (r) r.disabled = !(outlineRedoByTpl[key] || []).length;
+    }
     function ensureTplVersions(name) {
       if (!outlineVersionsByTpl[name]) {
         outlineVersionsByTpl[name] = [{ id: 1, name: 'v1', html: null, wordCount: '3-5', wordCountCustom: '' }];
@@ -5034,8 +6390,13 @@
       if (!sel) return;
       ensureTplVersions(currentOutlineTpl);
       sel.innerHTML = outlineVersionsByTpl[currentOutlineTpl].map(function (v) {
-        return '<option value="' + v.id + '"' + (v.id === activeVersionByTpl[currentOutlineTpl] ? ' selected' : '') + '>版本 ' + v.name + '</option>';
+        const time = v.savedAt ? ' · ' + v.savedAt : '';
+        return '<option value="' + v.id + '"' + (v.id === activeVersionByTpl[currentOutlineTpl] ? ' selected' : '') + '>版本 ' + v.name + time + '</option>';
       }).join('');
+    }
+    function formatVersionTime(d) {
+      function p(n) { return n < 10 ? '0' + n : '' + n; }
+      return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
     }
     function reinitOutlineTree(panel) {
       if (!panel) return;
@@ -5062,12 +6423,14 @@
         id: id,
         name: 'v' + id,
         html: panel.innerHTML,
+        savedAt: formatVersionTime(new Date()),
         wordCount: wcSel ? wcSel.value : '3-5',
         wordCountCustom: wcInput ? wcInput.value : ''
       });
       activeVersionByTpl[currentOutlineTpl] = id;
       outlineTreeCache[currentOutlineTpl] = panel.innerHTML;
       renderOutlineVersionSelect();
+      resetOutlineHistory(); // 新版本开始记录新的操作步骤
       showTaskToast();
     }
     function switchOutlineVersion(id) {
@@ -5093,6 +6456,7 @@
       const wcInput = document.getElementById('wordCountInput');
       if (wcInput && ver.wordCountCustom) wcInput.value = ver.wordCountCustom;
       renderOutlineVersionSelect();
+      resetOutlineHistory(); // 切换版本后，回退/恢复针对该版本重新记录
       showTaskToast();
     }
     function initOutlineVersions() {
@@ -5106,6 +6470,11 @@
     renderOutlineTplPanel();
     updateOutlineTplButton();
     initOutlineVersions();
+    updateOutlineUndoButtons();
+    var wcSel0 = document.getElementById('wordCountSelect');
+    var wcInput0 = document.getElementById('wordCountInput');
+    if (wcSel0) lastWcState.wc = wcSel0.value;
+    if (wcInput0) lastWcState.wcCustom = wcInput0.value || '';
     function initTreeDrag() {
       const panel = document.querySelector('.outline-tree-panel');
       if (!panel) return;
@@ -5146,6 +6515,7 @@
           if (!srcRow) return;
           const src = srcRow.closest('.tree-node');
           if (!src || src === node) return;
+          pushOutlineSnapshot();
           const rect = node.getBoundingClientRect();
           const before = (e.clientY - rect.top) < rect.height / 2;
           container.insertBefore(src, before ? node : node.nextSibling);
@@ -5463,6 +6833,10 @@
     }
     function editorUndo() { document.execCommand('undo'); updateWordCount(); }
     function editorRedo() { document.execCommand('redo'); updateWordCount(); }
+    function applyToolFont(sel) {
+      const paper = document.getElementById('paper');
+      if (paper) paper.style.fontFamily = sel.value;
+    }
     const paperEl = document.getElementById('paper');
     if (paperEl) paperEl.addEventListener('input', updateWordCount);
     updateWordCount();
@@ -5484,22 +6858,14 @@
           clearInterval(aiTimer);
           aiTimer = null;
           aiWriting = false;
-          document.getElementById('epBtn').textContent = '开始';
         }
       }, 150);
-    }
-    function toggleAiWriting() {
-      aiWriting = !aiWriting;
-      document.getElementById('epBtn').textContent = aiWriting ? '暂停' : '开始';
-      if (aiWriting) startAiTimer();
-      else { clearInterval(aiTimer); aiTimer = null; }
     }
     function rewriteDoc() {
       clearInterval(aiTimer);
       aiTimer = null;
       aiProgress = 0;
       aiWriting = true;
-      document.getElementById('epBtn').textContent = '暂停';
       updateAiProgress();
       startAiTimer();
       backToTop();
@@ -5517,6 +6883,10 @@
         aiWriteBtn.className = 'ai-write-btn';
         aiWriteBtn.textContent = 'AI 撰写';
         aiWriteBtn.addEventListener('click', function () {
+          if (aiCreditLeft <= 0) {
+            showCreditToast('免费AI修正次数已用完');
+            return;
+          }
           const p = aiHoverParagraph || aiPanelParagraph;
           if (!p) return;
           closeAiPanel();
@@ -5596,6 +6966,7 @@
       const input = document.getElementById('aiwInput');
       const taText = input ? input.value.trim() : '';
       if (action === 'generate') {
+        if (!consumeAiCredit()) return;
         const genBtn = document.getElementById('aiwGenBtn');
         if (!genBtn || genBtn.disabled) return;
         genBtn.disabled = true;
@@ -5660,6 +7031,10 @@
         document.querySelectorAll('.paper p.hover-ai').forEach(x => { if (x !== p) x.classList.remove('hover-ai'); });
         p.classList.add('hover-ai');
         if (p !== aiPanelParagraph) {
+          if (aiCreditLeft <= 0) {
+            if (aiWriteBtn) aiWriteBtn.style.display = 'none';
+            return;
+          }
           ensureAiWriteBtn();
           aiWriteBtn.style.display = 'flex';
           aiWriteBtn.style.top = (p.offsetTop + 3) + 'px';
@@ -5672,6 +7047,7 @@
       });
     }
     initAiHover();
+    updateAiCreditUI();
 
     /* 撰写要求记录悬浮气泡：内容超长时展示完整信息 */
     (function () {
@@ -5714,6 +7090,7 @@
     });
 
     function aiAction(action) {
+      if (!consumeAiCredit()) return;
       const sel = window.getSelection();
       const text = sel.toString().trim();
       const range = (text.length > 0 && sel.rangeCount > 0) ? sel.getRangeAt(0).cloneRange() : lastSelRange;

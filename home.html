@@ -66,6 +66,16 @@
       background: #fff;
     }
     .ax-btn-login:hover { background: #f5f5f5; }
+    .ax-btn-workspace {
+      padding: 6px 22px;
+      border: 1px solid #333;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #fff;
+      background: #333;
+      cursor: pointer;
+    }
+    .ax-btn-workspace:hover { background: #555; border-color: #555; }
 
     /* ============ Hero区 ============ */
     .ax-hero {
@@ -237,6 +247,36 @@
     }
     .ax-pc-btn:hover { background: #555; }
     .ax-pc-free { font-size: 11px; color: #b8860b; font-weight: 500; }
+    /* 专业版卡片（可行性研究报告专业版） */
+    .ax-product-card.pro {
+      position: relative;
+      border: 1.5px solid #4a6fa5;
+      background: linear-gradient(180deg, #f4f8fe 0%, #ffffff 72%);
+    }
+    .ax-product-card.pro::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      border-radius: 8px 8px 0 0;
+      background: linear-gradient(90deg, #4a6fa5, #8fb2d8);
+    }
+    .ax-pc-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .ax-pc-pro-badge {
+      display: inline-block;
+      font-size: 11px;
+      color: #fff;
+      background: linear-gradient(90deg, #4a6fa5, #6f9bd0);
+      border-radius: 3px;
+      padding: 2px 8px;
+      white-space: nowrap;
+    }
     .ax-pc-btn-disabled {
       padding: 8px 22px;
       font-size: 13px;
@@ -583,6 +623,7 @@
     </div>
     <div class="ax-topbar-right">
       <a href="#">产品介绍</a>
+      <button class="ax-btn-workspace" onclick="window.location.href='report.html'">智能体工作台</button>
       <button class="ax-btn-login" onclick="window.location.href='index.html'">登录注册</button>
     </div>
   </header>
@@ -605,27 +646,29 @@
 
   <!-- ========== 报告类型标签导航（默认隐藏，产品区滚出后吸顶） ========== -->
   <nav class="ax-type-nav" id="typeNav">
-    <a class="ax-type-tag" target="_blank" href="report.html?type=可行性研究报告">可行性研究报告</a>
-    <a class="ax-type-tag" target="_blank" href="report.html?type=企业全景分析报告">企业全景分析报告</a>
-    <a class="ax-type-tag" target="_blank" href="report.html?type=投前咨询分析报告">投前咨询分析报告</a>
-    <a class="ax-type-tag" target="_blank" href="report.html?type=招商策略分析报告">招商策略分析报告</a>
-    <a class="ax-type-tag" target="_blank" href="report.html?type=项目立项报告">项目立项报告</a>
-    <a class="ax-type-tag" target="_blank" href="report.html?type=项目资金申请报告">项目资金申请报告</a>
+    <a class="ax-type-tag" target="_blank" href="智能体综合/可行性研究报告.html">可行性研究报告</a>
+    <a class="ax-type-tag" target="_blank" href="智能体综合/企业全景分析报告.html">企业全景分析报告</a>
+    <a class="ax-type-tag" target="_blank" href="智能体综合/投前咨询分析报告.html">投前咨询分析报告</a>
+    <a class="ax-type-tag" target="_blank" href="智能体综合/招商策略分析报告.html">招商策略分析报告</a>
+    <a class="ax-type-tag" target="_blank" href="智能体综合/项目立项报告.html">项目立项报告</a>
+    <a class="ax-type-tag" target="_blank" href="智能体综合/项目资金申请报告.html">项目资金申请报告</a>
     <a class="ax-type-tag" target="_blank" href="report.html?type=生物医药产业分析报告">生物医药产业分析报告</a>
-    <a class="ax-type-tag" target="_blank" href="report.html?type=全产业分析报告">全产业分析报告</a>
   </nav>
 
   <!-- ========== 产品服务卡片网格（4x2） ========== -->
   <section class="ax-products">
     <div class="ax-products-grid">
 
-      <!-- 第1行第1列：可行性研究报告 -->
-      <div class="ax-product-card" onclick="window.open('report.html?type=可行性研究报告','_blank')">
+      <!-- 第1行第1列：可行性研究报告专业版 -->
+      <div class="ax-product-card pro" onclick="window.open('report.html?type=可行性研究报告','_blank')">
         <div class="ax-pc-header">
           <div class="ax-pc-icon">ICON</div>
-          <span class="ax-pc-users">5213人在用</span>
+          <div class="ax-pc-meta">
+            <span class="ax-pc-pro-badge">专业版</span>
+            <span class="ax-pc-users">5213人在用</span>
+          </div>
         </div>
-        <div class="ax-pc-name">可行性研究报告</div>
+        <div class="ax-pc-name">可行性研究报告专业版</div>
         <div class="ax-pc-price">¥ 888 <small>/份</small></div>
         <div class="ax-pc-sub">项目全维度可信性论证与方案评估</div>
         <div class="ax-pc-tags">
@@ -639,8 +682,28 @@
         </div>
       </div>
 
+      <!-- 第1行第2列：可行性研究报告 -->
+      <div class="ax-product-card" onclick="window.open('智能体综合/可行性研究报告.html','_blank')">
+        <div class="ax-pc-header">
+          <div class="ax-pc-icon">ICON</div>
+          <span class="ax-pc-users">5213人在用</span>
+        </div>
+        <div class="ax-pc-name">可行性研究报告</div>
+        <div class="ax-pc-price">¥ 888 <small>/份</small></div>
+        <div class="ax-pc-sub">项目全维度可信性论证与方案评估</div>
+        <div class="ax-pc-tags">
+          <span class="ax-pc-tag">生产制造</span><span class="ax-pc-tag">基础设施</span>
+          <span class="ax-pc-tag">系统集成</span><span class="ax-pc-tag">技术改造</span>
+        </div>
+        <div class="ax-pc-output">产出:4万字+深度可研报告，为项目立项、银行贷款市场、技术、财务全维度论证</div>
+        <div class="ax-pc-footer">
+          <button class="ax-pc-btn" onclick="event.stopPropagation();window.open('智能体综合/可行性研究报告.html','_blank')">开始使用</button>
+          <span class="ax-pc-free">新用户限时免费1次</span>
+        </div>
+      </div>
+
       <!-- 第1行第2列：企业全景分析报告 -->
-      <div class="ax-product-card" onclick="window.open('report.html?type=企业全景分析报告','_blank')">
+      <div class="ax-product-card" onclick="window.open('智能体综合/企业全景分析报告.html','_blank')">
         <div class="ax-pc-header">
           <div class="ax-pc-icon">ICON</div>
           <span class="ax-pc-users">5213人在用</span>
@@ -654,13 +717,13 @@
         </div>
         <div class="ax-pc-output">产出:多维数据深度透视，按需匹配分析场景，洞察企业全貌，赋能商业决策</div>
         <div class="ax-pc-footer">
-          <button class="ax-pc-btn" onclick="event.stopPropagation();window.open('report.html?type=企业全景分析报告','_blank')">开始使用</button>
+          <button class="ax-pc-btn" onclick="event.stopPropagation();window.open('智能体综合/企业全景分析报告.html','_blank')">开始使用</button>
           <span class="ax-pc-free">免费体验</span>
         </div>
       </div>
 
       <!-- 第1行第3列：投前咨询分析报告 -->
-      <div class="ax-product-card" onclick="window.open('report.html?type=投前咨询分析报告','_blank')">
+      <div class="ax-product-card" onclick="window.open('智能体综合/投前咨询分析报告.html','_blank')">
         <div class="ax-pc-header">
           <div class="ax-pc-icon">ICON</div>
           <span class="ax-pc-users">5213人在用</span>
@@ -674,13 +737,13 @@
         </div>
         <div class="ax-pc-output">产出:多维数据深度透视，按需匹配分析场景，洞察企业全貌，赋能商业决策</div>
         <div class="ax-pc-footer">
-          <button class="ax-pc-btn" onclick="event.stopPropagation();window.open('report.html?type=投前咨询分析报告','_blank')">开始使用</button>
+          <button class="ax-pc-btn" onclick="event.stopPropagation();window.open('智能体综合/投前咨询分析报告.html','_blank')">开始使用</button>
           <span class="ax-pc-free">限时免费</span>
         </div>
       </div>
 
       <!-- 第1行第4列：招商策略分析报告 -->
-      <div class="ax-product-card" onclick="window.open('report.html?type=招商策略分析报告','_blank')">
+      <div class="ax-product-card" onclick="window.open('智能体综合/招商策略分析报告.html','_blank')">
         <div class="ax-pc-header">
           <div class="ax-pc-icon">ICON</div>
           <span class="ax-pc-users">5213人在用</span>
@@ -694,13 +757,13 @@
         </div>
         <div class="ax-pc-output">产出:快速完成企业画像、产业协同价值评估与招商策略分析，让招商决策有据可依</div>
         <div class="ax-pc-footer">
-          <button class="ax-pc-btn" onclick="event.stopPropagation();window.open('report.html?type=招商策略分析报告','_blank')">开始使用</button>
+          <button class="ax-pc-btn" onclick="event.stopPropagation();window.open('智能体综合/招商策略分析报告.html','_blank')">开始使用</button>
           <span class="ax-pc-free">限时免费</span>
         </div>
       </div>
 
       <!-- 第2行第1列：项目立项报告 -->
-      <div class="ax-product-card" onclick="window.open('report.html?type=项目立项报告','_blank')">
+      <div class="ax-product-card" onclick="window.open('智能体综合/项目立项报告.html','_blank')">
         <div class="ax-pc-header">
           <div class="ax-pc-icon">ICON</div>
           <span class="ax-pc-users">5213人在用</span>
@@ -714,13 +777,13 @@
         </div>
         <div class="ax-pc-output">产出:快速构建包含背景、方案、投资估算与效益预测的立项初稿，完成项目早期论证</div>
         <div class="ax-pc-footer">
-          <button class="ax-pc-btn" onclick="event.stopPropagation();window.open('report.html?type=项目立项报告','_blank')">开始使用</button>
+          <button class="ax-pc-btn" onclick="event.stopPropagation();window.open('智能体综合/项目立项报告.html','_blank')">开始使用</button>
           <span class="ax-pc-free">新用户限时免费1次</span>
         </div>
       </div>
 
       <!-- 第2行第2列：项目资金申请报告 -->
-      <div class="ax-product-card" onclick="window.open('report.html?type=项目资金申请报告','_blank')">
+      <div class="ax-product-card" onclick="window.open('智能体综合/项目资金申请报告.html','_blank')">
         <div class="ax-pc-header">
           <div class="ax-pc-icon">ICON</div>
           <span class="ax-pc-users">5213人在用</span>
@@ -734,27 +797,8 @@
         </div>
         <div class="ax-pc-output">产出:匹配政策依据，生成符合专项资金申报规范的完整材料，提升申报效率</div>
         <div class="ax-pc-footer">
-          <button class="ax-pc-btn" onclick="event.stopPropagation();window.open('report.html?type=项目资金申请报告','_blank')">开始使用</button>
+          <button class="ax-pc-btn" onclick="event.stopPropagation();window.open('智能体综合/项目资金申请报告.html','_blank')">开始使用</button>
           <span class="ax-pc-free">新用户限时免费1次</span>
-        </div>
-      </div>
-
-      <!-- 第2行第3列：全产业分析报告（即将上线） -->
-      <div class="ax-product-card">
-        <div class="ax-pc-header">
-          <div class="ax-pc-icon">ICON</div>
-          <span class="ax-pc-users">5213人在用</span>
-        </div>
-        <div class="ax-pc-name">全产业分析报告</div>
-        <div class="ax-pc-price-na">敬请期待</div>
-        <div class="ax-pc-sub">跨产业宏观趋势与战略指引</div>
-        <div class="ax-pc-tags">
-          <span class="ax-pc-tag">十亿级基础数据</span><span class="ax-pc-tag">专业分析引擎</span>
-          <span class="ax-pc-tag">可自定义大纲</span><span class="ax-pc-tag">在线工作台</span>
-        </div>
-        <div class="ax-pc-output">产出:覆盖宏观趋势，技术演进与竞争格局，为战略决策提供数据支撑的产业深度分析</div>
-        <div class="ax-pc-footer">
-          <span class="ax-pc-btn-disabled">即将上线</span>
         </div>
       </div>
 
@@ -1003,12 +1047,12 @@
       </div>
       <div class="ax-footer-col">
         <h4>智能写作场景</h4>
-        <a target="_blank" href="report.html?type=可行性研究报告">可行性研究报告</a>
-        <a target="_blank" href="report.html?type=企业全景分析报告">企业全景分析报告</a>
-        <a target="_blank" href="report.html?type=投前咨询分析报告">投前咨询分析报告</a>
-        <a target="_blank" href="report.html?type=招商策略分析报告">招商策略分析报告</a>
-        <a target="_blank" href="report.html?type=项目立项报告">项目立项报告</a>
-        <a target="_blank" href="report.html?type=项目资金申请报告">项目资金申请报告</a>
+        <a target="_blank" href="智能体综合/可行性研究报告.html">可行性研究报告</a>
+        <a target="_blank" href="智能体综合/企业全景分析报告.html">企业全景分析报告</a>
+        <a target="_blank" href="智能体综合/投前咨询分析报告.html">投前咨询分析报告</a>
+        <a target="_blank" href="智能体综合/招商策略分析报告.html">招商策略分析报告</a>
+        <a target="_blank" href="智能体综合/项目立项报告.html">项目立项报告</a>
+        <a target="_blank" href="智能体综合/项目资金申请报告.html">项目资金申请报告</a>
         <a target="_blank" href="report.html?type=生物医药产业分析报告">生物医药产业分析报告</a>
         <a target="_blank" href="report.html?type=全产业分析报告">全产业分析报告</a>
       </div>
