@@ -325,6 +325,31 @@
     .task-status-icon.writing { background: #f0ad4e; }
     .task-status-icon.done { background: #58a06e; }
     .task-status-icon.done::before { content: ''; }
+    /* 未查看蓝点 + 生成中加载环（与工作台一致） */
+    .task-view-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #4a6fa5;
+      flex-shrink: 0;
+      margin-right: 0;
+      display: inline-flex;
+    }
+    .task-view-dot.hide { visibility: hidden; }
+    .task-load-ring {
+      position: absolute;
+      right: 30px;
+      top: 10px;
+      width: 12px;
+      height: 12px;
+      border: 2px solid #d9dde3;
+      border-top-color: #4a6fa5;
+      border-radius: 50%;
+      animation: taskSpin 0.8s linear infinite;
+      flex-shrink: 0;
+    }
+    .sidebar-task-item:hover .task-load-ring { display: none; }
+    .sidebar-task-item.draft .sidebar-task-text { color: #999; }
     .task-toast {
       display: none;
       position: fixed;
@@ -360,6 +385,7 @@
     <div class="sidebar-brand" title="返回首页" onclick="window.location.href='home.html'">
       <div class="sidebar-brand-logo">5</div>
       <div class="sidebar-brand-name">5度易链<small>5 DEGREE EASY CHAIN</small></div>
+      <button class="sidebar-collapse-btn" title="收起导航" onclick="event.stopPropagation();toggleSidebar()">‹</button>
     </div>
     <div class="sidebar-section sidebar-new-sec">
       <div class="sidebar-item sidebar-new-report" onclick="window.location.href='report.html'">
@@ -404,6 +430,7 @@
   <!-- Main content -->
   <main class="main-content">
     <div class="content-head">
+      <button class="sidebar-expand-btn" title="展开导航" onclick="toggleSidebar()">›</button>
       <div class="page-title">知识库</div>
       <div class="page-actions">
         <button class="btn btn-outline" id="createFolderBtn" onclick="createFolder()">＋ 新建文件夹</button>
@@ -534,6 +561,15 @@
   </div>
 
   <script>
+    /* ==================== 侧栏展开/收起 ==================== */
+    function toggleSidebar() {
+      document.body.classList.toggle('sidebar-collapsed');
+      try { localStorage.setItem('wbdmSidebarCollapsed', document.body.classList.contains('sidebar-collapsed') ? '1' : '0'); } catch (e) {}
+    }
+    (function initSidebarCollapse() {
+      try { if (localStorage.getItem('wbdmSidebarCollapsed') === '1') document.body.classList.add('sidebar-collapsed'); } catch (e) {}
+    })();
+
     function openUploadGuide() {
       const sel = document.getElementById('uploadTargetSelect');
       const folders = [];
@@ -1069,49 +1105,53 @@
 
     /* ==================== 侧栏：新建报告下拉 + 任务列表（与工作台一致） ==================== */
     const SIDEBAR_TASKS = [
-      { name: '数据治理实施方案', status: 'running', agent: '可研专业版' },
-      { name: '商业大数据可研', status: 'writing', agent: '可研专业版' },
-      { name: '智能仓储立项报告', status: 'done', agent: '项目立项报告' },
-      { name: '企业全景尽调分析', status: 'running', agent: '企业全景分析' },
-      { name: '投前尽调报告', status: 'done', agent: '投前咨询分析' },
-      { name: '园区招商策略初稿', status: 'writing', agent: '招商策略分析' },
-      { name: '冷链项目立项报告', status: 'done', agent: '项目立项报告' },
-      { name: '新能源可研报告', status: 'running', agent: '可研专业版' },
-      { name: '数据资产入表分析', status: 'writing', agent: '数据要素资产化' },
-      { name: '生物医药产业分析', status: 'done', agent: '生物医药产业分析' },
-      { name: '智慧园区招商方案', status: 'running', agent: '招商策略分析' },
-      { name: '银行数据治理立项', status: 'done', agent: '项目立项报告' },
-      { name: '工业互联网可研报告', status: 'writing', agent: '可研快速版' },
-      { name: '供应链金融可研', status: 'running', agent: '可研专业版' },
-      { name: '跨境电商企业全景', status: 'done', agent: '企业全景分析' },
-      { name: '半导体项目投前咨询', status: 'writing', agent: '投前咨询分析' },
-      { name: '智慧城市数据中心立项', status: 'done', agent: '项目立项报告' },
-      { name: '零售企业全景分析', status: 'running', agent: '企业全景分析' },
-      { name: '光伏组件产线可研', status: 'writing', agent: '可研专业版' },
-      { name: '医药物流园区立项', status: 'done', agent: '项目立项报告' },
-      { name: '长三角产业招商策略', status: 'running', agent: '招商策略分析' },
-      { name: '芯片封装投前咨询', status: 'writing', agent: '投前咨询分析' },
-      { name: '数据中台建设可研', status: 'running', agent: '可研专业版' },
-      { name: '冷链企业全景尽调', status: 'done', agent: '企业全景分析' }
+      { name: '草稿 08-14 09:12', exec: 'draft', viewed: false, step: 1, agent: '可研专业版' },
+      { name: '草稿 08-14 10:05', exec: 'draft', viewed: false, step: 2, agent: '可研专业版' },
+      { name: '企查查科技_商业大数据可研', exec: 'running', viewed: true, agent: '可研专业版' },
+      { name: '某某集团_企业全景尽调分析', exec: 'running', viewed: true, agent: '企业全景分析' },
+      { name: '北京笃威尔_智能仓储立项报告', exec: 'done', viewed: false, agent: '项目立项报告' },
+      { name: '星云半导体_投前尽调报告', exec: 'done', viewed: false, agent: '投前咨询分析' },
+      { name: '园区管委会_招商策略初稿', exec: 'done', viewed: true, agent: '招商策略分析' },
+      { name: '华能集团_冷链项目立项报告', exec: 'done', viewed: true, agent: '项目立项报告' },
+      { name: '清源能源_新能源可研报告', exec: 'done', viewed: true, exported: true, agent: '可研专业版' },
+      { name: '宏远银行_数据治理立项', exec: 'done', viewed: true, exported: true, agent: '项目立项报告' },
+      { name: '芯测半导体_投前咨询报告', exec: 'done', viewed: true, agent: '投前咨询分析' },
+      { name: '城数集团_智慧城市数据中心立项', exec: 'done', viewed: true, exported: true, agent: '项目立项报告' },
+      { name: '光晟科技_光伏组件产线可研', exec: 'done', viewed: true, agent: '可研专业版' },
+      { name: '医联物流_医药物流园区立项', exec: 'done', viewed: true, agent: '项目立项报告' },
+      { name: '冷链云_冷链企业全景尽调', exec: 'done', viewed: true, agent: '企业全景分析' }
     ];
     const SIDEBAR_TASK_PAGE = 20;
     let sidebarTaskPage = 0;
     let sidebarTaskFilter = 'all';
     let sidebarTaskLoading = false;
+    function sidebarTaskPriority(t) {
+      if (t.exec === 'draft') return 0;
+      if (t.exec === 'running') return 1;
+      if (t.exec === 'done' && !t.viewed) return 2;
+      return 3;
+    }
     function sidebarTaskList() {
-      return sidebarTaskFilter === 'all'
+      const list = sidebarTaskFilter === 'all'
         ? SIDEBAR_TASKS
         : SIDEBAR_TASKS.filter(t => t.agent === sidebarTaskFilter);
+      return list.slice().sort((a, b) => sidebarTaskPriority(a) - sidebarTaskPriority(b));
     }
     function renderSidebarTaskItem(t) {
       const el = document.createElement('div');
-      el.className = 'sidebar-task-item';
+      el.className = 'sidebar-task-item' + (t.exec === 'draft' ? ' draft' : '');
       el.dataset.agent = t.agent;
-      el.onclick = function () { window.location.href = 'report.html'; };
-      const dotClass = t.status === 'done' ? 'done' : t.status === 'writing' ? 'writing' : 'running';
-      const dotTitle = t.status === 'done' ? '已导出' : t.status === 'writing' ? '填写中' : '生成中';
-      el.innerHTML = '<span class="task-status-icon ' + dotClass + '" title="' + dotTitle + '"></span>'
+      el.onclick = function () {
+        const dot = el.querySelector('.task-view-dot');
+        if (dot) dot.classList.add('hide');
+        window.location.href = 'report.html?taskId=' + SIDEBAR_TASKS.indexOf(t);
+      };
+      const unviewed = t.exec === 'done' && !t.viewed;
+      const viewDot = '<span class="task-view-dot' + (unviewed ? '' : ' hide') + '" title="未查看"></span>';
+      const ring = t.exec === 'running' ? '<span class="task-load-ring" title="报告生成中"></span>' : '';
+      el.innerHTML = viewDot
         + '<span class="sidebar-task-text">' + t.name + '</span>'
+        + ring
         + '<span class="sidebar-task-meta">' + t.agent + '</span>'
         + '<span class="task-actions">'
         + '<button class="task-act" title="编辑任务名称" onclick="event.stopPropagation();showToast()">✎</button>'

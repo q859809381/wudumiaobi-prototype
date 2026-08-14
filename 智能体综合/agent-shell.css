@@ -107,6 +107,57 @@ body.agent-shelled #base .agent-shell-card {
   letter-spacing: 0.5px;
 }
 
+/* ----- 侧栏展开/收起 ----- */
+.agent-shell-sidebar .sidebar-collapse-btn {
+  margin-left: auto;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border: 1px solid #c5d3e4;
+  border-radius: 4px;
+  background: #fff;
+  color: #8aa0bd;
+  font-size: 14px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+}
+.agent-shell-sidebar .sidebar-collapse-btn:hover {
+  background: #dfe9f4;
+  color: #4a6fa5;
+  border-color: #4a6fa5;
+}
+.sidebar-expand-btn {
+  display: none;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border: 1px solid #d9e3ef;
+  border-radius: 6px;
+  background: #fff;
+  color: #4a6fa5;
+  font-size: 16px;
+  line-height: 1;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+}
+.sidebar-expand-btn:hover {
+  background: #f0f5fb;
+  border-color: #4a6fa5;
+}
+body.sidebar-collapsed .agent-shell-sidebar { display: none; }
+body.sidebar-collapsed .agent-shell-header,
+body.sidebar-collapsed .agent-shell-content,
+body.sidebar-collapsed .agent-shell-foot { left: 0; }
+body.sidebar-collapsed .sidebar-expand-btn { display: inline-flex; }
+
 .agent-shell-sidebar .sidebar-brand + .sidebar-section {
   padding-top: 12px;
 }

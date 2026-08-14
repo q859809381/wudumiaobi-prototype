@@ -277,6 +277,16 @@
       padding: 2px 8px;
       white-space: nowrap;
     }
+    /* 专业版卡片：价格深蓝、开始使用按钮蓝色 */
+    .ax-product-card.pro .ax-pc-price { color: #2456a6; }
+    .ax-product-card.pro .ax-pc-btn {
+      background: #4a6fa5;
+      border-color: #4a6fa5;
+    }
+    .ax-product-card.pro .ax-pc-btn:hover {
+      background: #3a5f96;
+      border-color: #3a5f96;
+    }
     .ax-pc-btn-disabled {
       padding: 8px 22px;
       font-size: 13px;
@@ -660,25 +670,22 @@
     <div class="ax-products-grid">
 
       <!-- 第1行第1列：可行性研究报告专业版 -->
-      <div class="ax-product-card pro" onclick="window.open('report.html?type=可行性研究报告','_blank')">
+      <div class="ax-product-card pro" onclick="window.open('report.html?type=可行性研究报告（专业版）&start=1','_blank')">
         <div class="ax-pc-header">
           <div class="ax-pc-icon">ICON</div>
-          <div class="ax-pc-meta">
-            <span class="ax-pc-pro-badge">专业版</span>
-            <span class="ax-pc-users">5213人在用</span>
-          </div>
+          <span class="ax-pc-users">5213人在用</span>
         </div>
-        <div class="ax-pc-name">可行性研究报告专业版</div>
+        <div class="ax-pc-name">可行性研究报告（专业版）</div>
         <div class="ax-pc-price">¥ 888 <small>/份</small></div>
-        <div class="ax-pc-sub">项目全维度可信性论证与方案评估</div>
+        <div class="ax-pc-sub">面向专业咨询公司与咨询师的深度编制工作台</div>
         <div class="ax-pc-tags">
-          <span class="ax-pc-tag">生产制造</span><span class="ax-pc-tag">基础设施</span>
-          <span class="ax-pc-tag">系统集成</span><span class="ax-pc-tag">技术改造</span>
+          <span class="ax-pc-tag">财务测算附表</span><span class="ax-pc-tag">自定义大纲</span>
+          <span class="ax-pc-tag">在线编辑</span><span class="ax-pc-tag">知识库管理</span>
         </div>
-        <div class="ax-pc-output">产出:4万字+深度可研报告，为项目立项、银行贷款市场、技术、财务全维度论证</div>
+        <div class="ax-pc-output">根据项目实际情况深度优化报告，支持完整财务测算、自定义结构、资料引用与在线修订</div>
         <div class="ax-pc-footer">
-          <button class="ax-pc-btn" onclick="event.stopPropagation();window.open('report.html?type=可行性研究报告','_blank')">开始使用</button>
-          <span class="ax-pc-free">新用户限时免费1次</span>
+          <button class="ax-pc-btn" onclick="event.stopPropagation();window.open('report.html?type=可行性研究报告（专业版）&start=1','_blank')">开始使用</button>
+          <span class="ax-pc-pro-badge">专业版</span>
         </div>
       </div>
 

@@ -2319,6 +2319,8 @@
     /* 编辑页：隐藏顶部智能体名称栏与提示，整页充满一屏 */
     body.editor-mode .content-head { display: none; }
     body.editor-mode .main-content { padding: 16px 24px; overflow: hidden; }
+    /* 侧栏收起时：整页生成流程同步左移 */
+    body.sidebar-collapsed .stage-mask.active { left: 0; }
     body.editor-mode #step4.active {
       display: flex;
       flex-direction: column;
@@ -2957,6 +2959,13 @@
       gap: 12px;
       flex-shrink: 0;
     }
+    /* 展开按钮作为首个子元素时，标题保持靠左（count 仍贴右） */
+    .nr-head .nr-head-main { margin-right: auto; }
+    /* 收起时：展开按钮垂直对齐到标题行，避免落在小字前面 */
+    body.sidebar-collapsed .nr-head .sidebar-expand-btn {
+      align-self: flex-start;
+      margin-top: 3px;
+    }
     .nr-title {
       font-size: 22px;
       font-weight: 700;
@@ -3226,6 +3235,7 @@
     <div class="sidebar-brand" title="返回首页" onclick="window.location.href='home.html'">
       <div class="sidebar-brand-logo">5</div>
       <div class="sidebar-brand-name">5度易链<small>5 DEGREE EASY CHAIN</small></div>
+      <button class="sidebar-collapse-btn" title="收起导航" onclick="event.stopPropagation();toggleSidebar()">‹</button>
     </div>
     <div class="sidebar-section sidebar-new-sec">
       <div class="sidebar-item active sidebar-new-report" onclick="selectNewReport()">
@@ -3277,7 +3287,8 @@
     <!-- 智能体选择页 -->
     <div id="agentSelectView">
       <div class="nr-head">
-        <div>
+        <button class="sidebar-expand-btn" title="展开导航" onclick="toggleSidebar()">›</button>
+        <div class="nr-head-main">
           <div class="nr-title">新建报告</div>
           <div class="nr-sub">选择智能体并创建新的报告任务</div>
         </div>
@@ -3442,6 +3453,7 @@
       <div class="stage-box">
         <div class="stage-head">
           <div class="stage-head-row">
+            <button class="sidebar-expand-btn" title="展开导航" onclick="toggleSidebar()">›</button>
             <button class="stage-back" title="返回智能体首页" onclick="showAgentSelect()">←</button>
             <div class="stage-title" id="stageTitle">生成报告</div>
           </div>
@@ -4147,6 +4159,16 @@
 
 /* ==================== 智能体与报告类型 ==================== */
     const params = new URLSearchParams(location.search);
+
+    /* ==================== 侧栏展开/收起 ==================== */
+    function toggleSidebar() {
+      document.body.classList.toggle('sidebar-collapsed');
+      try { localStorage.setItem('wbdmSidebarCollapsed', document.body.classList.contains('sidebar-collapsed') ? '1' : '0'); } catch (e) {}
+    }
+    (function initSidebarCollapse() {
+      try { if (localStorage.getItem('wbdmSidebarCollapsed') === '1') document.body.classList.add('sidebar-collapsed'); } catch (e) {}
+    })();
+
     let flowStage = 1;
     let aiPanelParagraph = null;
     let aiHoverParagraph = null;
@@ -5014,38 +5036,36 @@
     /* ==================== 任务列表：自动展示 + 滚动到底自动加载下一页 ==================== */
     const SIDEBAR_TASKS = [
       { name: '草稿 08-14 09:12', exec: 'draft', viewed: false, step: 1, agent: '可研专业版' },
+      { name: '草稿 08-14 10:05', exec: 'draft', viewed: false, step: 2, agent: '可研专业版' },
       { name: '企查查科技_商业大数据可研', exec: 'running', viewed: true, agent: '可研专业版' },
-      { name: '北京笃威尔_智能仓储立项报告', exec: 'done', viewed: false, agent: '项目立项报告' },
       { name: '某某集团_企业全景尽调分析', exec: 'running', viewed: true, agent: '企业全景分析' },
+      { name: '北京笃威尔_智能仓储立项报告', exec: 'done', viewed: false, agent: '项目立项报告' },
       { name: '星云半导体_投前尽调报告', exec: 'done', viewed: false, agent: '投前咨询分析' },
       { name: '园区管委会_招商策略初稿', exec: 'done', viewed: true, agent: '招商策略分析' },
-      { name: '草稿 08-14 10:05', exec: 'draft', viewed: false, step: 2, agent: '可研专业版' },
       { name: '华能集团_冷链项目立项报告', exec: 'done', viewed: true, agent: '项目立项报告' },
       { name: '清源能源_新能源可研报告', exec: 'done', viewed: true, exported: true, agent: '可研专业版' },
-      { name: '智汇医疗_生物医药产业分析', exec: 'done', viewed: false, agent: '生物医药产业分析' },
-      { name: '智谷园区_智慧园区招商方案', exec: 'running', viewed: true, agent: '招商策略分析' },
       { name: '宏远银行_数据治理立项', exec: 'done', viewed: true, exported: true, agent: '项目立项报告' },
-      { name: '工业云平台_工业互联网可研报告', exec: 'running', viewed: true, agent: '可研快速版' },
-      { name: '链通科技_供应链金融可研', exec: 'running', viewed: true, agent: '可研专业版' },
-      { name: '跨境购_跨境电商企业全景', exec: 'done', viewed: false, agent: '企业全景分析' },
       { name: '芯测半导体_投前咨询报告', exec: 'done', viewed: true, agent: '投前咨询分析' },
       { name: '城数集团_智慧城市数据中心立项', exec: 'done', viewed: true, exported: true, agent: '项目立项报告' },
-      { name: '零售王_零售企业全景分析', exec: 'running', viewed: true, agent: '企业全景分析' },
       { name: '光晟科技_光伏组件产线可研', exec: 'done', viewed: true, agent: '可研专业版' },
       { name: '医联物流_医药物流园区立项', exec: 'done', viewed: true, agent: '项目立项报告' },
-      { name: '长三角招商局_产业招商策略', exec: 'running', viewed: true, agent: '招商策略分析' },
-      { name: '晶圆智造_芯片封装投前咨询', exec: 'running', viewed: true, agent: '投前咨询分析' },
-      { name: '数智中台_数据中台建设可研', exec: 'done', viewed: false, exported: true, agent: '可研专业版' },
       { name: '冷链云_冷链企业全景尽调', exec: 'done', viewed: true, agent: '企业全景分析' }
     ];
     const SIDEBAR_TASK_PAGE = 20;
     let sidebarTaskPage = 0;
     let sidebarTaskFilter = 'all';
     let sidebarTaskLoading = false;
+    function sidebarTaskPriority(t) {
+      if (t.exec === 'draft') return 0;
+      if (t.exec === 'running') return 1;
+      if (t.exec === 'done' && !t.viewed) return 2;
+      return 3;
+    }
     function sidebarTaskList() {
-      return sidebarTaskFilter === 'all'
+      const list = sidebarTaskFilter === 'all'
         ? SIDEBAR_TASKS
         : SIDEBAR_TASKS.filter(t => t.agent === sidebarTaskFilter);
+      return list.slice().sort((a, b) => sidebarTaskPriority(a) - sidebarTaskPriority(b));
     }
     function renderSidebarTaskItem(t) {
       const el = document.createElement('div');
@@ -5195,6 +5215,9 @@
       openTask(SIDEBAR_TASKS[openTaskId]);
     } else if (params.get('task')) {
       enterTaskEditor();
+    } else if (params.get('start')) {
+      // 从五度妙笔首页“开始使用”直达专业版报告生成第一步
+      enterWorkspace(reportType || '可行性研究报告（专业版）', true);
     } else {
       showAgentSelect();
     }

@@ -2,6 +2,15 @@
   'use strict';
   var built = false;
 
+  /* 侧栏展开/收起（与工作台一致，状态跨页面记忆） */
+  window.toggleSidebar = function () {
+    document.body.classList.toggle('sidebar-collapsed');
+    try { localStorage.setItem('wbdmSidebarCollapsed', document.body.classList.contains('sidebar-collapsed') ? '1' : '0'); } catch (e) {}
+  };
+  (function initSidebarCollapse() {
+    try { if (localStorage.getItem('wbdmSidebarCollapsed') === '1') document.body.classList.add('sidebar-collapsed'); } catch (e) {}
+  })();
+
   /* 简单提示 */
   function shellToast(msg) {
     var old = document.querySelector('.agent-shell-toast');
@@ -280,28 +289,19 @@
 
   var TASKS = [
     { name: '草稿 08-14 09:12', exec: 'draft', viewed: false, step: 1, agent: '可研专业版' },
+    { name: '草稿 08-14 10:05', exec: 'draft', viewed: false, step: 2, agent: '可研专业版' },
     { name: '企查查科技_商业大数据可研', exec: 'running', viewed: true, agent: '可研专业版' },
-    { name: '北京笃威尔_智能仓储立项报告', exec: 'done', viewed: false, agent: '项目立项报告' },
     { name: '某某集团_企业全景尽调分析', exec: 'running', viewed: true, agent: '企业全景分析' },
+    { name: '北京笃威尔_智能仓储立项报告', exec: 'done', viewed: false, agent: '项目立项报告' },
     { name: '星云半导体_投前尽调报告', exec: 'done', viewed: false, agent: '投前咨询分析' },
     { name: '园区管委会_招商策略初稿', exec: 'done', viewed: true, agent: '招商策略分析' },
-    { name: '草稿 08-14 10:05', exec: 'draft', viewed: false, step: 2, agent: '可研专业版' },
     { name: '华能集团_冷链项目立项报告', exec: 'done', viewed: true, agent: '项目立项报告' },
     { name: '清源能源_新能源可研报告', exec: 'done', viewed: true, exported: true, agent: '可研专业版' },
-    { name: '智汇医疗_生物医药产业分析', exec: 'done', viewed: false, agent: '生物医药产业分析' },
-    { name: '智谷园区_智慧园区招商方案', exec: 'running', viewed: true, agent: '招商策略分析' },
     { name: '宏远银行_数据治理立项', exec: 'done', viewed: true, exported: true, agent: '项目立项报告' },
-    { name: '工业云平台_工业互联网可研报告', exec: 'running', viewed: true, agent: '可研快速版' },
-    { name: '链通科技_供应链金融可研', exec: 'running', viewed: true, agent: '可研专业版' },
-    { name: '跨境购_跨境电商企业全景', exec: 'done', viewed: false, agent: '企业全景分析' },
     { name: '芯测半导体_投前咨询报告', exec: 'done', viewed: true, agent: '投前咨询分析' },
     { name: '城数集团_智慧城市数据中心立项', exec: 'done', viewed: true, exported: true, agent: '项目立项报告' },
-    { name: '零售王_零售企业全景分析', exec: 'running', viewed: true, agent: '企业全景分析' },
     { name: '光晟科技_光伏组件产线可研', exec: 'done', viewed: true, agent: '可研专业版' },
     { name: '医联物流_医药物流园区立项', exec: 'done', viewed: true, agent: '项目立项报告' },
-    { name: '长三角招商局_产业招商策略', exec: 'running', viewed: true, agent: '招商策略分析' },
-    { name: '晶圆智造_芯片封装投前咨询', exec: 'running', viewed: true, agent: '投前咨询分析' },
-    { name: '数智中台_数据中台建设可研', exec: 'done', viewed: false, exported: true, agent: '可研专业版' },
     { name: '冷链云_冷链企业全景尽调', exec: 'done', viewed: true, agent: '企业全景分析' }
   ];
   var TASK_PAGE = 20;
@@ -309,8 +309,15 @@
   var taskFilter = 'all';
   var taskLoading = false;
 
+  function taskPriority(t) {
+    if (t.exec === 'draft') return 0;
+    if (t.exec === 'running') return 1;
+    if (t.exec === 'done' && !t.viewed) return 2;
+    return 3;
+  }
   function taskList() {
-    return taskFilter === 'all' ? TASKS : TASKS.filter(function (t) { return t.agent === taskFilter; });
+    var list = taskFilter === 'all' ? TASKS : TASKS.filter(function (t) { return t.agent === taskFilter; });
+    return list.slice().sort(function (a, b) { return taskPriority(a) - taskPriority(b); });
   }
 
   function renderTaskItem(t) {
@@ -386,6 +393,7 @@
       + '<div class="sidebar-brand" title="返回首页" onclick="window.location.href=\'../home.html\'">'
       +   '<div class="sidebar-brand-logo">5</div>'
       +   '<div class="sidebar-brand-name">5度易链<small>5 DEGREE EASY CHAIN</small></div>'
+      +   '<button class="sidebar-collapse-btn" title="收起导航" onclick="event.stopPropagation();window.toggleSidebar()">‹</button>'
       + '</div>'
       + '<div class="sidebar-section sidebar-new-sec">'
       +   '<div class="sidebar-item sidebar-new-report" title="新建报告" onclick="window.location.href=\'../report.html\'">'
@@ -426,6 +434,7 @@
       + '</aside>'
       + '<header class="agent-shell-header">'
       +   '<div class="agent-shell-head-row">'
+      +     '<button class="sidebar-expand-btn" title="展开导航" onclick="window.toggleSidebar()">›</button>'
       +     '<button class="agent-shell-back" title="返回智能体首页" onclick="window.location.href=\'../report.html\'">←</button>'
       +     '<div class="agent-shell-title">' + reportName + '</div>'
       +   '</div>'
