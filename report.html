@@ -3633,7 +3633,7 @@
             <div class="anchor-label">建设性质</div>
             <div class="anchor-value"><span class="dim-val">新建</span></div></div>
           <div class="anchor-row">
-            <div class="anchor-label">运营期<span class="req">*</span></div>
+            <div class="anchor-label">运营期（一般为10年）<span class="req">*</span></div>
             <div class="anchor-value"><span class="dim-val">10年</span></div></div>
           <div class="anchor-row">
             <div class="anchor-label">建设周期<span class="req">*</span></div>
@@ -3658,22 +3658,22 @@
         </div>
         <div class="collapse-body cols-2">
           <div class="anchor-row">
-            <div class="anchor-label">产品/服务名称</div>
+            <div class="anchor-label">产品/服务名称（如有多个产品，分别列出）</div>
             <div class="anchor-value"><span class="dim-val">商业大数据API服务、企业风险评估报告</span></div></div>
           <div class="anchor-row">
-            <div class="anchor-label">单价</div>
+            <div class="anchor-label">单价（如有多个产品，分别列出）</div>
             <div class="anchor-value"><span class="dim-val">API调用0.5元/次，风险评估报告2,000元/份</span></div></div>
           <div class="anchor-row">
             <div class="anchor-label">增值税率</div>
             <div class="anchor-value"><span class="dim-val" data-options="0%、3%、6%、9%、13%">13%</span></div></div>
           <div class="anchor-row">
-            <div class="anchor-label">达产年产能</div>
+            <div class="anchor-label">达产年产能（实际达到设计生产能力的那一年的产量，或者提供服务的数量，如有多个产品，请分别列出）</div>
             <div class="anchor-value"><span class="dim-val">年支撑10亿次数据查询、2万份风险评估报告</span></div></div>
           <div class="anchor-row">
             <div class="anchor-label">直接成本占比（不含人工、折旧、利息）</div>
             <div class="anchor-value"><span class="dim-val">约65%（数据采购及标注30%、算力租赁15%、研发及人力20%）</span></div></div>
           <div class="anchor-row">
-            <div class="anchor-label">爬坡计划</div>
+            <div class="anchor-label">爬坡计划（如：第一年50%，第二年70%，第三年达产100%）</div>
             <div class="anchor-value"><span class="dim-val">第1年30%、第2年70%、第3年达产100%</span></div></div>
         </div>
       </div>
@@ -3690,8 +3690,8 @@
             <div class="anchor-label">行业基准</div>
             <div class="anchor-value"><span class="dim-val" data-options="制造业、软件业、建筑业、批发零售、交通运输、服务业、其他">软件业</span></div></div>
           <div class="anchor-row">
-            <div class="anchor-label">期望投资回收期</div>
-            <div class="anchor-value"><span class="dim-val">6年</span></div></div>
+            <div class="anchor-label">期望投资回收期（年）</div>
+            <div class="anchor-value"><span class="dim-val">6</span></div></div>
         </div>
       </div>
       </div>
@@ -5055,7 +5055,7 @@
           { label: '项目总投资（万元）', chapters: [1, 7, 8] },
           { label: '产业方向', chapters: [3] },
           { label: '建设性质', chapters: [1, 4] },
-          { label: '运营期', chapters: [6, 7] },
+          { label: '运营期（一般为10年）', chapters: [6, 7] },
           { label: '建设周期', chapters: [1, 4] },
           { label: '建筑面积（㎡）', chapters: [4] },
           { label: '用地面积（㎡）', chapters: [4] }
@@ -5064,15 +5064,15 @@
       {
         title: '财务测算',
         items: [
-          { label: '产品/服务名称', chapters: [3] },
-          { label: '单价', chapters: [3, 7] },
+          { label: '产品/服务名称（如有多个产品，分别列出）', chapters: [3] },
+          { label: '单价（如有多个产品，分别列出）', chapters: [3, 7] },
           { label: '增值税率', chapters: [7] },
-          { label: '达产年产能', chapters: [3] },
+          { label: '达产年产能（实际达到设计生产能力的那一年的产量，或者提供服务的数量，如有多个产品，请分别列出）', chapters: [3] },
           { label: '直接成本占比（不含人工、折旧、利息）', chapters: [7] },
-          { label: '爬坡计划', chapters: [3, 6] },
+          { label: '爬坡计划（如：第一年50%，第二年70%，第三年达产100%）', chapters: [3, 6] },
           { label: '基准收益率（%）', chapters: [7] },
           { label: '行业基准', chapters: [7] },
-          { label: '期望投资回收期', chapters: [7] }
+          { label: '期望投资回收期（年）', chapters: [7] }
         ]
       },
       {
@@ -5451,11 +5451,13 @@
         if (done) return;
         done = true;
         const val = input.value.trim();
+        const row = v.closest('.anchor-row');
+        const label = row && row.querySelector('.anchor-label') ? row.querySelector('.anchor-label').textContent.trim() : '';
         if (amountOnly) {
           v.textContent = ''; // 清除编辑输入框，由 refreshFundingPercents 渲染金额与占比
           v.setAttribute('data-amount', parseMoney(val));
         } else {
-          v.textContent = val || oldText;
+          v.textContent = label.indexOf('回收期') >= 0 ? formatNumberText(label, val || oldText) : (val || oldText);
         }
         if (save && val && val !== oldText) v.classList.add('edited');
         attachConfirmEditIcons();
@@ -5492,6 +5494,11 @@
       const m1 = raw.match(/^([\d,]+(?:\.\d+)?)\s*[（(]([\d.]+)%[)）]$/);
       if (m1) {
         return fmtAmount4(parseFloat(m1[1].replace(/,/g, ''))) + '（' + fmtPercent2(parseFloat(m1[2])) + '%）';
+      }
+      if (label.indexOf('回收期') >= 0) {
+        const clean = raw.replace(/年$/, '').trim();
+        const n = parseFloat(clean.replace(/,/g, ''));
+        return isNaN(n) ? clean : String(n);
       }
       // 纯数字单元格
       const m2 = raw.match(/^[\d,]+(?:\.\d+)?$/);
