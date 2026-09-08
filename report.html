@@ -500,6 +500,69 @@
     }
     .collapse-body.cols-2 { grid-template-columns: repeat(2, 1fr); }
     .collapse-body.cols-4 { grid-template-columns: repeat(4, 1fr); }
+    /* 收入与成本：按产品/服务拆分展示，产品字段在卡片内按两列排列 */
+    .product-service-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 8px 12px 10px;
+    }
+    .product-service-card {
+      overflow: hidden;
+      border: 1px solid #dfe6ef;
+      border-radius: 6px;
+      background: #fff;
+    }
+    .product-service-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 12px;
+      background: #f7f9fc;
+      border-bottom: 1px solid #e5eaf1;
+      font-size: 12px;
+      font-weight: 600;
+      color: #26384f;
+    }
+    .product-service-delete {
+      width: 20px;
+      height: 20px;
+      padding: 0;
+      border: 1px solid #d7dee8;
+      border-radius: 4px;
+      background: #fff;
+      color: #9a6a6a;
+      font-size: 15px;
+      line-height: 17px;
+      cursor: pointer;
+    }
+    .product-service-delete:hover {
+      border-color: #c0392b;
+      color: #c0392b;
+      background: #fff8f7;
+    }
+    .product-service-fields {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0 18px;
+      padding: 4px 12px 8px;
+    }
+    .product-service-fields .anchor-row.full { grid-column: 1 / -1; }
+    .product-service-add {
+      width: 100%;
+      padding: 7px 12px;
+      border: 1px dashed #b9cfe8;
+      border-radius: 6px;
+      background: #fbfdff;
+      color: #4a6fa5;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .product-service-add:hover {
+      background: #f0f6fd;
+      border-color: #4a6fa5;
+    }
     .anchor-row {
       display: flex;
       flex-direction: column;
@@ -3656,25 +3719,41 @@
           <span class="title">收入与成本</span>
           <span class="arrow">▼</span>
         </div>
-        <div class="collapse-body cols-2">
-          <div class="anchor-row">
-            <div class="anchor-label">产品/服务名称（如有多个产品，分别列出）</div>
-            <div class="anchor-value"><span class="dim-val">商业大数据API服务、企业风险评估报告</span></div></div>
-          <div class="anchor-row">
-            <div class="anchor-label">单价（如有多个产品，分别列出）</div>
-            <div class="anchor-value"><span class="dim-val">API调用0.5元/次，风险评估报告2,000元/份</span></div></div>
-          <div class="anchor-row">
-            <div class="anchor-label">增值税率</div>
-            <div class="anchor-value"><span class="dim-val" data-options="0%、3%、6%、9%、13%">13%</span></div></div>
-          <div class="anchor-row">
-            <div class="anchor-label">达产年产能（实际达到设计生产能力的那一年的产量，或者提供服务的数量，如有多个产品，请分别列出）</div>
-            <div class="anchor-value"><span class="dim-val">年支撑10亿次数据查询、2万份风险评估报告</span></div></div>
-          <div class="anchor-row">
-            <div class="anchor-label">直接成本占比（不含人工、折旧、利息）</div>
-            <div class="anchor-value"><span class="dim-val">约65%（数据采购及标注30%、算力租赁15%、研发及人力20%）</span></div></div>
-          <div class="anchor-row">
-            <div class="anchor-label">爬坡计划（如：第一年50%，第二年70%，第三年达产100%）</div>
-            <div class="anchor-value"><span class="dim-val">第1年30%、第2年70%、第3年达产100%</span></div></div>
+        <div class="product-service-list" id="productServiceList">
+          <div class="product-service-card">
+            <div class="product-service-head"><span>产品/服务 1</span></div>
+            <div class="product-service-fields">
+              <div class="anchor-row full">
+                <div class="anchor-label">产品/服务名称</div>
+                <div class="anchor-value"><span class="dim-val">商业大数据API服务</span></div>
+              </div>
+              <div class="anchor-row">
+                <div class="anchor-label">计价单位（吨、次、份等，根据实际情况填写）</div>
+                <div class="anchor-value"><span class="dim-val">次</span></div>
+              </div>
+              <div class="anchor-row">
+                <div class="anchor-label">单价（元/计价单位）</div>
+                <div class="anchor-value"><span class="dim-val">0.5</span></div>
+              </div>
+              <div class="anchor-row">
+                <div class="anchor-label">达产年产能</div>
+                <div class="anchor-value"><span class="dim-val">10亿次</span></div>
+              </div>
+              <div class="anchor-row">
+                <div class="anchor-label">增值税率</div>
+                <div class="anchor-value"><span class="dim-val" data-options="0%、3%、6%、9%、13%">6%</span></div>
+              </div>
+              <div class="anchor-row">
+                <div class="anchor-label">直接成本占比（不含人工、折旧、利息）</div>
+                <div class="anchor-value"><span class="dim-val">65%</span></div>
+              </div>
+              <div class="anchor-row">
+                <div class="anchor-label">爬坡计划（如：第一年50%，第二年70%，第三年达产100%）</div>
+                <div class="anchor-value"><span class="dim-val">第1年30%、第2年70%、第3年达产100%</span></div>
+              </div>
+            </div>
+          </div>
+          <button class="product-service-add" type="button" onclick="addProductService()">＋ 添加产品/服务</button>
         </div>
       </div>
 <div class="collapse-section" id="collapseFinance">
@@ -5064,10 +5143,11 @@
       {
         title: '财务测算',
         items: [
-          { label: '产品/服务名称（如有多个产品，分别列出）', chapters: [3] },
-          { label: '单价（如有多个产品，分别列出）', chapters: [3, 7] },
+          { label: '产品/服务名称', chapters: [3] },
+          { label: '计价单位（吨、次、份等，根据实际情况填写）', chapters: [3] },
+          { label: '单价（元/计价单位）', chapters: [3, 7] },
+          { label: '达产年产能', chapters: [3] },
           { label: '增值税率', chapters: [7] },
-          { label: '达产年产能（实际达到设计生产能力的那一年的产量，或者提供服务的数量，如有多个产品，请分别列出）', chapters: [3] },
           { label: '直接成本占比（不含人工、折旧、利息）', chapters: [7] },
           { label: '爬坡计划（如：第一年50%，第二年70%，第三年达产100%）', chapters: [3, 6] },
           { label: '基准收益率（%）', chapters: [7] },
@@ -5473,6 +5553,65 @@
     attachConfirmEditIcons();
     recalcConfirmBalances();
 
+    /* 新增产品/服务：为多产品项目追加同结构的可编辑产品卡片 */
+    function addProductService() {
+      const list = document.getElementById('productServiceList');
+      if (!list) return;
+      const count = list.querySelectorAll('.product-service-card').length + 1;
+      const card = document.createElement('div');
+      card.className = 'product-service-card';
+      card.innerHTML = ''
+        + '<div class="product-service-head"><span>产品/服务 ' + count + '</span></div>'
+        + '<div class="product-service-fields">'
+        + '<div class="anchor-row full"><div class="anchor-label">产品/服务名称</div><div class="anchor-value"><span class="dim-val">待填写</span></div></div>'
+        + '<div class="anchor-row"><div class="anchor-label">计价单位（吨、次、份等，根据实际情况填写）</div><div class="anchor-value"><span class="dim-val">次</span></div></div>'
+        + '<div class="anchor-row"><div class="anchor-label">单价（元/计价单位）</div><div class="anchor-value"><span class="dim-val">0</span></div></div>'
+        + '<div class="anchor-row"><div class="anchor-label">达产年产能</div><div class="anchor-value"><span class="dim-val">待填写</span></div></div>'
+        + '<div class="anchor-row"><div class="anchor-label">增值税率</div><div class="anchor-value"><span class="dim-val" data-options="0%、3%、6%、9%、13%">6%</span></div></div>'
+        + '<div class="anchor-row"><div class="anchor-label">直接成本占比（不含人工、折旧、利息）</div><div class="anchor-value"><span class="dim-val">待填写</span></div></div>'
+        + '<div class="anchor-row"><div class="anchor-label">爬坡计划（如：第一年50%，第二年70%，第三年达产100%）</div><div class="anchor-value"><span class="dim-val">待填写</span></div></div>'
+        + '</div>';
+      list.insertBefore(card, list.querySelector('.product-service-add'));
+      renumberProductServices();
+      updateProductServiceDeleteButtons();
+      attachConfirmEditIcons();
+      card.scrollIntoView({ block: 'nearest' });
+    }
+    function renumberProductServices() {
+      document.querySelectorAll('#productServiceList .product-service-card').forEach(function (card, index) {
+        const title = card.querySelector('.product-service-head span');
+        if (title) title.textContent = '产品/服务 ' + (index + 1);
+      });
+    }
+    function updateProductServiceDeleteButtons() {
+      const list = document.getElementById('productServiceList');
+      if (!list) return;
+      const cards = list.querySelectorAll('.product-service-card');
+      cards.forEach(function (card) {
+        const head = card.querySelector('.product-service-head');
+        let button = head && head.querySelector('.product-service-delete');
+        if (cards.length > 1 && head && !button) {
+          button = document.createElement('button');
+          button.className = 'product-service-delete';
+          button.type = 'button';
+          button.title = '删除产品/服务';
+          button.setAttribute('aria-label', '删除产品/服务');
+          button.textContent = '×';
+          button.onclick = function () { deleteProductService(button); };
+          head.appendChild(button);
+        } else if (cards.length <= 1 && button) {
+          button.remove();
+        }
+      });
+    }
+    function deleteProductService(button) {
+      const list = document.getElementById('productServiceList');
+      const card = button && button.closest('.product-service-card');
+      if (!list || !card || list.querySelectorAll('.product-service-card').length <= 1) return;
+      card.remove();
+      renumberProductServices();
+      updateProductServiceDeleteButtons();
+    }
     /* 总投资构成 / 资金来源构成：与项目总投资比对，差额实时计算并警示 */
     function parseMoney(txt) {
       const base = String(txt).split('（')[0].split('(')[0].replace(/,/g, '').trim();
@@ -5524,6 +5663,7 @@
         if (dv.hasAttribute('data-options')) return; // 下拉选项值保持原样
         const row = dv.closest('.anchor-row');
         const label = row && row.querySelector('.anchor-label') ? row.querySelector('.anchor-label').textContent.trim() : '';
+        if (row && row.closest('.product-service-card')) return;
         const raw = dv.textContent.replace('✎', '').trim();
         dv.textContent = formatNumberText(label, raw);
       });
