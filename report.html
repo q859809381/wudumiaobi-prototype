@@ -3744,8 +3744,8 @@
                 <div class="anchor-value"><span class="dim-val" data-options="0%、3%、6%、9%、13%">6%</span></div>
               </div>
               <div class="anchor-row">
-                <div class="anchor-label">直接成本占比（不含人工、折旧、利息）</div>
-                <div class="anchor-value"><span class="dim-val">65%</span></div>
+                <div class="anchor-label">直接成本占比（%，不含人工、折旧、利息）</div>
+                <div class="anchor-value"><span class="dim-val" data-numeric="true">65</span></div>
               </div>
               <div class="anchor-row">
                 <div class="anchor-label">爬坡计划（如：第一年50%，第二年70%，第三年达产100%）</div>
@@ -3833,8 +3833,8 @@
             <div class="anchor-label">贷款及比例（万元）</div>
             <div class="anchor-value"><span class="dim-val" data-amount="20477.81">20,477.81（30.00%）</span></div></div>
           <div class="anchor-row">
-            <div class="anchor-label">贷款利率</div>
-            <div class="anchor-value"><span class="dim-val">3.85%</span></div></div>
+            <div class="anchor-label">贷款利率（%）</div>
+            <div class="anchor-value"><span class="dim-val" data-numeric="true">3.85</span></div></div>
           <div class="anchor-row">
             <div class="anchor-label">政府补助（万元）</div>
             <div class="anchor-value"><span class="dim-val" data-amount="5459.95">5,459.95（8.00%）</span></div></div>
@@ -5148,7 +5148,7 @@
           { label: '单价（元/计价单位）', chapters: [3, 7] },
           { label: '达产年产能', chapters: [3] },
           { label: '增值税率', chapters: [7] },
-          { label: '直接成本占比（不含人工、折旧、利息）', chapters: [7] },
+          { label: '直接成本占比（%，不含人工、折旧、利息）', chapters: [7] },
           { label: '爬坡计划（如：第一年50%，第二年70%，第三年达产100%）', chapters: [3, 6] },
           { label: '基准收益率（%）', chapters: [7] },
           { label: '行业基准', chapters: [7] },
@@ -5168,7 +5168,7 @@
           { label: '预备费（万元）', chapters: [4, 7] },
           { label: '建设期利息（万元）', chapters: [7] },
           { label: '铺底流动资金（万元）', chapters: [6, 7] },
-          { label: '贷款利率', chapters: [7] },
+          { label: '贷款利率（%）', chapters: [7] },
           { label: '企业自筹及比例（万元）', chapters: [7] },
           { label: '贷款及比例（万元）', chapters: [7] },
           { label: '政府补助（万元）', chapters: [7] }
@@ -5481,10 +5481,17 @@
         });
       });
     }
+    function sanitizeNumeric(value) {
+      let clean = String(value).replace(/[^\d.]/g, '');
+      const dot = clean.indexOf('.');
+      if (dot >= 0) clean = clean.slice(0, dot + 1) + clean.slice(dot + 1).replace(/\./g, '');
+      return clean;
+    }
     function editConfirmValue(v) {
       if (v.querySelector('input') || v.querySelector('select')) return;
       const oldText = v.textContent.replace('✎', '').trim();
       const amountOnly = v.hasAttribute('data-amount');
+      const numericOnly = v.hasAttribute('data-numeric');
       const options = v.getAttribute('data-options');
       v.classList.remove('edited');
       v.innerHTML = '';
@@ -5521,8 +5528,13 @@
       }
       const input = document.createElement('input');
       input.className = 'confirm-edit-input';
+      if (numericOnly) {
+        input.inputMode = 'decimal';
+        input.type = 'text';
+        input.addEventListener('input', function () { this.value = sanitizeNumeric(this.value); });
+      }
       // 资金来源金额项：仅编辑万元金额，比例由 refreshFundingPercents 自动计算
-      input.value = amountOnly ? String(parseMoney(v.getAttribute('data-amount') || '0')) : oldText;
+      input.value = amountOnly ? String(parseMoney(v.getAttribute('data-amount') || '0')) : (numericOnly ? sanitizeNumeric(oldText) : oldText);
       v.appendChild(input);
       input.focus();
       input.select();
@@ -5537,7 +5549,7 @@
           v.textContent = ''; // 清除编辑输入框，由 refreshFundingPercents 渲染金额与占比
           v.setAttribute('data-amount', parseMoney(val));
         } else {
-          v.textContent = label.indexOf('回收期') >= 0 ? formatNumberText(label, val || oldText) : (val || oldText);
+          v.textContent = numericOnly ? (sanitizeNumeric(val) || oldText) : (label.indexOf('回收期') >= 0 ? formatNumberText(label, val || oldText) : (val || oldText));
         }
         if (save && val && val !== oldText) v.classList.add('edited');
         attachConfirmEditIcons();
@@ -5568,7 +5580,7 @@
         + '<div class="anchor-row"><div class="anchor-label">单价（元/计价单位）</div><div class="anchor-value"><span class="dim-val">0</span></div></div>'
         + '<div class="anchor-row"><div class="anchor-label">达产年产能</div><div class="anchor-value"><span class="dim-val">待填写</span></div></div>'
         + '<div class="anchor-row"><div class="anchor-label">增值税率</div><div class="anchor-value"><span class="dim-val" data-options="0%、3%、6%、9%、13%">6%</span></div></div>'
-        + '<div class="anchor-row"><div class="anchor-label">直接成本占比（不含人工、折旧、利息）</div><div class="anchor-value"><span class="dim-val">待填写</span></div></div>'
+        + '<div class="anchor-row"><div class="anchor-label">直接成本占比（%，不含人工、折旧、利息）</div><div class="anchor-value"><span class="dim-val" data-numeric="true">0</span></div></div>'
         + '<div class="anchor-row"><div class="anchor-label">爬坡计划（如：第一年50%，第二年70%，第三年达产100%）</div><div class="anchor-value"><span class="dim-val">待填写</span></div></div>'
         + '</div>';
       list.insertBefore(card, list.querySelector('.product-service-add'));
