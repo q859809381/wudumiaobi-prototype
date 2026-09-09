@@ -552,6 +552,67 @@
       padding: 8px 12px;
       border-bottom: none;
     }
+    .ramp-plan-modal-box { width: 620px; }
+    .ramp-plan-tip {
+      margin: 0 0 12px;
+      color: #777;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    .ramp-plan-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 13px;
+    }
+    .ramp-plan-table th,
+    .ramp-plan-table td {
+      padding: 8px 10px;
+      border: 1px solid #e7ebf0;
+      text-align: left;
+      vertical-align: middle;
+    }
+    .ramp-plan-table th {
+      background: #f7f9fb;
+      color: #555;
+      font-weight: 600;
+    }
+    .ramp-plan-table th:nth-child(1) { width: 40%; }
+    .ramp-plan-table th:nth-child(2) { width: 60%; }
+    .ramp-plan-table .input { width: 100%; box-sizing: border-box; }
+    .ramp-plan-year-display {
+      display: block;
+      padding: 0;
+      color: #555;
+      font-size: 13px;
+    }
+    .ramp-plan-year-cell {
+      position: relative;
+      padding-right: 40px !important;
+    }
+    .ramp-plan-delete {
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+      width: 22px;
+      height: 22px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: #9a6a6a;
+      font-size: 16px;
+      line-height: 22px;
+      cursor: pointer;
+    }
+    .ramp-plan-delete:hover { color: #c0392b; }
+    .ramp-plan-add { margin-top: 10px; }
+    .ramp-plan-error {
+      min-height: 18px;
+      margin-top: 8px;
+      color: #c0392b;
+      font-size: 12px;
+    }
     .product-service-fields {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3762,7 +3823,7 @@
           <div class="project-ramp-card">
             <div class="anchor-row">
               <div class="anchor-label">爬坡计划（如：第一年50%，第二年70%，第三年达产100%）</div>
-              <div class="anchor-value"><span class="dim-val">第1年30%、第2年70%、第3年达产100%</span></div>
+              <div class="anchor-value"><span class="dim-val" data-ramp-plan="true">第1年达产目标30%、第2年达产目标70%、第3年达产目标100%</span></div>
             </div>
           </div>
           <button class="product-service-add" type="button" onclick="addProductService()">＋ 添加产品/服务</button>
@@ -3930,6 +3991,31 @@
             <button class="btn btn-outline" onclick="closeKbUploadGuide()">取消</button>
             <button class="btn btn-primary" onclick="chooseKbUpload()">选择文件上传</button>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 爬坡计划编辑弹窗 -->
+    <div class="modal-mask" id="rampPlanModal" style="display:none;">
+      <div class="modal-box ramp-plan-modal-box">
+        <div class="modal-head">
+          <span class="modal-title">编辑爬坡计划</span>
+          <span class="modal-close" onclick="closeRampPlanModal()">✕</span>
+        </div>
+        <div class="modal-body">
+          <p class="ramp-plan-tip">维护运营期各年的达产目标，确认后将按运营期顺序展示。</p>
+          <table class="ramp-plan-table">
+            <thead>
+              <tr><th>运营期</th><th>达产目标（%）</th></tr>
+            </thead>
+            <tbody id="rampPlanRows"></tbody>
+          </table>
+          <button class="btn btn-sm btn-outline ramp-plan-add" type="button" onclick="addRampPlanRow()">＋ 增加计划年</button>
+          <div class="ramp-plan-error" id="rampPlanError" aria-live="polite"></div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-outline" type="button" onclick="closeRampPlanModal()">取消</button>
+          <button class="btn btn-primary" type="button" onclick="confirmRampPlan()">确认</button>
         </div>
       </div>
     </div>
@@ -4343,10 +4429,12 @@
     const kbUpModalEl = document.getElementById('kbUploadGuideModal');
     const kbUpPanelEl = document.getElementById('kbUploadPanel');
     const exportModalEl = document.getElementById('exportModal');
+    const rampPlanModalEl = document.getElementById('rampPlanModal');
     if (genMaskEl) document.body.appendChild(genMaskEl);
     if (kbUpModalEl) document.body.appendChild(kbUpModalEl);
     if (kbUpPanelEl) document.body.appendChild(kbUpPanelEl);
     if (exportModalEl) document.body.appendChild(exportModalEl);
+    if (rampPlanModalEl) document.body.appendChild(rampPlanModalEl);
 
 /* ==================== 智能体与报告类型 ==================== */
     const params = new URLSearchParams(location.search);
@@ -5478,6 +5566,160 @@
       startOutlineGeneration(function () { showStage(4); }); // 确认后生成大纲并进入第4步（目录生成及管理）
     }
 
+    let rampPlanEditingValue = null;
+
+    function parseRampPlanText(text) {
+      const plans = [];
+      const pattern = /第\s*(\d+)\s*年(?:达产目标|达产)?\s*(\d+(?:\.\d+)?)\s*%/g;
+      let match;
+      while ((match = pattern.exec(String(text)))) {
+        plans.push({ year: match[1], target: match[2] });
+      }
+      return plans.length ? plans : [
+        { year: '1', target: '30' },
+        { year: '2', target: '70' },
+        { year: '3', target: '100' }
+      ];
+    }
+    function createRampPlanInput(className, value, inputMode) {
+      const input = document.createElement('input');
+      input.className = 'input ' + className;
+      input.type = 'text';
+      input.inputMode = inputMode;
+      input.autocomplete = 'off';
+      input.value = value == null ? '' : String(value);
+      input.addEventListener('input', function () {
+        this.value = sanitizeNumeric(this.value);
+      });
+      return input;
+    }
+    function createRampPlanYearCell(index) {
+      const cell = document.createElement('td');
+      cell.className = 'ramp-plan-year-cell';
+      const yearDisplay = document.createElement('span');
+      yearDisplay.className = 'ramp-plan-year-display';
+      yearDisplay.textContent = '第' + (index + 1) + '年';
+      const deleteButton = document.createElement('button');
+      deleteButton.className = 'ramp-plan-delete';
+      deleteButton.type = 'button';
+      deleteButton.textContent = '×';
+      deleteButton.title = '删除该运营期';
+      deleteButton.setAttribute('aria-label', '删除第' + (index + 1) + '年');
+      deleteButton.onclick = function () { removeRampPlanRow(deleteButton); };
+      cell.appendChild(yearDisplay);
+      cell.appendChild(deleteButton);
+      return cell;
+    }
+    function updateRampPlanRows() {
+      const tbody = document.getElementById('rampPlanRows');
+      if (!tbody) return;
+      const rows = tbody.querySelectorAll('tr');
+      rows.forEach(function (row, index) {
+        const yearDisplay = row.querySelector('.ramp-plan-year-display');
+        const deleteButton = row.querySelector('.ramp-plan-delete');
+        if (yearDisplay) yearDisplay.textContent = '第' + (index + 1) + '年';
+        if (deleteButton) {
+          deleteButton.style.display = rows.length > 1 ? '' : 'none';
+          deleteButton.title = '删除第' + (index + 1) + '年';
+          deleteButton.setAttribute('aria-label', '删除第' + (index + 1) + '年');
+        }
+      });
+    }
+    function removeRampPlanRow(button) {
+      const tbody = document.getElementById('rampPlanRows');
+      if (!tbody) return;
+      const rows = tbody.querySelectorAll('tr');
+      if (rows.length <= 1) return;
+      const row = button.closest('tr');
+      if (row) row.remove();
+      updateRampPlanRows();
+    }
+    function renderRampPlanRows(plans) {
+      const tbody = document.getElementById('rampPlanRows');
+      if (!tbody) return;
+      tbody.textContent = '';
+      plans.forEach(function (plan, index) {
+        const tr = document.createElement('tr');
+        const targetCell = document.createElement('td');
+        const yearCell = createRampPlanYearCell(index);
+        targetCell.appendChild(createRampPlanInput('ramp-plan-target', plan.target, 'decimal'));
+        tr.appendChild(yearCell);
+        tr.appendChild(targetCell);
+        tbody.appendChild(tr);
+      });
+      updateRampPlanRows();
+    }
+    function openRampPlanModal(valueEl) {
+      const modal = document.getElementById('rampPlanModal');
+      if (!modal) return;
+      rampPlanEditingValue = valueEl;
+      renderRampPlanRows(parseRampPlanText(valueEl.textContent.replace('✎', '').trim()));
+      const error = document.getElementById('rampPlanError');
+      if (error) error.textContent = '';
+      modal.style.display = 'flex';
+      const firstTarget = modal.querySelector('.ramp-plan-target');
+      if (firstTarget) firstTarget.focus();
+    }
+    function closeRampPlanModal() {
+      const modal = document.getElementById('rampPlanModal');
+      if (modal) modal.style.display = 'none';
+      rampPlanEditingValue = null;
+    }
+    function addRampPlanRow() {
+      const tbody = document.getElementById('rampPlanRows');
+      if (!tbody) return;
+      const nextYear = tbody.querySelectorAll('tr').length + 1;
+      const tr = document.createElement('tr');
+      const targetCell = document.createElement('td');
+      const yearCell = createRampPlanYearCell(nextYear - 1);
+      targetCell.appendChild(createRampPlanInput('ramp-plan-target', '', 'decimal'));
+      tr.appendChild(yearCell);
+      tr.appendChild(targetCell);
+      tbody.appendChild(tr);
+      updateRampPlanRows();
+      const target = tr.querySelector('.ramp-plan-target');
+      if (target) target.focus();
+    }
+    function formatRampPlanTarget(value) {
+      const number = parseFloat(value);
+      if (!Number.isFinite(number)) return '';
+      return number.toFixed(2).replace(/\.?(0+)$/, '');
+    }
+    function confirmRampPlan() {
+      const tbody = document.getElementById('rampPlanRows');
+      const error = document.getElementById('rampPlanError');
+      if (!tbody || !rampPlanEditingValue) return;
+      const plans = [];
+      let message = '';
+      tbody.querySelectorAll('tr').forEach(function (row, index) {
+        if (message) return;
+        const targetInput = row.querySelector('.ramp-plan-target');
+        const targetText = targetInput ? targetInput.value.trim() : '';
+        if (!/^(?:\d+(?:\.\d+)?|\.\d+)$/.test(targetText)) {
+          message = '请填写达产目标。';
+          return;
+        }
+        const target = parseFloat(targetText);
+        if (target < 0 || target > 100) {
+          message = '达产目标应在0%至100%之间。';
+          return;
+        }
+        plans.push({ year: index + 1, target: target });
+      });
+      if (!message && !plans.length) message = '请至少保留一行计划年。';
+      if (message) {
+        if (error) error.textContent = message;
+        return;
+      }
+      plans.sort(function (a, b) { return a.year - b.year; });
+      rampPlanEditingValue.textContent = plans.map(function (plan) {
+        return '第' + plan.year + '年达产目标' + formatRampPlanTarget(plan.target) + '%';
+      }).join('、');
+      rampPlanEditingValue.classList.add('edited');
+      closeRampPlanModal();
+      attachConfirmEditIcons();
+    }
+
     /* 信息确认弹窗：数据直接编辑 */
     function attachConfirmEditIcons() {
       document.querySelectorAll('.confirm-step .anchor-value .dim-val').forEach(v => {
@@ -5489,7 +5731,8 @@
         v.appendChild(icon);
         icon.addEventListener('click', function (e) {
           e.stopPropagation();
-          editConfirmValue(v);
+          if (v.hasAttribute('data-ramp-plan')) openRampPlanModal(v);
+          else editConfirmValue(v);
         });
       });
     }
@@ -5688,6 +5931,7 @@
         const row = dv.closest('.anchor-row');
         const label = row && row.querySelector('.anchor-label') ? row.querySelector('.anchor-label').textContent.trim() : '';
         if (row && row.closest('.product-service-card')) return;
+        if (row && row.closest('.project-ramp-card')) return;
         const raw = dv.textContent.replace('✎', '').trim();
         dv.textContent = formatNumberText(label, raw);
       });
