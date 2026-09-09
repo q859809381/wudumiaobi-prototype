@@ -607,6 +607,10 @@
     }
     .ramp-plan-delete:hover { color: #c0392b; }
     .ramp-plan-add { margin-top: 10px; }
+    .ramp-plan-add:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
     .ramp-plan-error {
       min-height: 18px;
       margin-top: 8px;
@@ -615,7 +619,7 @@
     }
     .product-service-fields {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 0 18px;
       padding: 4px 12px 8px;
     }
@@ -4003,7 +4007,7 @@
           <span class="modal-close" onclick="closeRampPlanModal()">✕</span>
         </div>
         <div class="modal-body">
-          <p class="ramp-plan-tip">维护运营期各年的达产目标，确认后将按运营期顺序展示。</p>
+          <p class="ramp-plan-tip">维护运营期各年的达产目标，确认后将按运营期顺序展示。最后一个已填写年度之后，后续年度均按100%计算，无需继续填写。</p>
           <table class="ramp-plan-table">
             <thead>
               <tr><th>运营期</th><th>达产目标（%）</th></tr>
@@ -5624,6 +5628,38 @@
           deleteButton.setAttribute('aria-label', '删除第' + (index + 1) + '年');
         }
       });
+      updateRampPlanAddButton();
+    }
+    function getRampPlanMaxYears() {
+      const modal = document.querySelector('.confirm-step');
+      if (!modal) return 10;
+      let maxYears = 10;
+      modal.querySelectorAll('#collapseBase .anchor-row').forEach(function (row) {
+        const label = row.querySelector('.anchor-label');
+        if (!label || label.textContent.indexOf('运营期') < 0) return;
+        const value = row.querySelector('.dim-val');
+        const match = value && value.textContent.match(/\d+/);
+        const years = match ? parseInt(match[0], 10) : NaN;
+        if (Number.isFinite(years) && years > 0) maxYears = years;
+      });
+      return maxYears;
+    }
+    function updateRampPlanAddButton(message) {
+      const button = document.querySelector('#rampPlanModal .ramp-plan-add');
+      const error = document.getElementById('rampPlanError');
+      const tbody = document.getElementById('rampPlanRows');
+      if (!button || !tbody) return;
+      const maxYears = getRampPlanMaxYears();
+      const reachedLimit = tbody.querySelectorAll('tr').length >= maxYears;
+      button.disabled = reachedLimit;
+      button.title = reachedLimit ? '已达到项目运营期上限（第' + maxYears + '年）' : '增加下一运营期';
+      if (message) {
+        if (error) error.textContent = message;
+      } else if (error && reachedLimit) {
+        error.textContent = '已达到项目运营期上限（第' + maxYears + '年），不能继续增加。';
+      } else if (error) {
+        error.textContent = '';
+      }
     }
     function removeRampPlanRow(button) {
       const tbody = document.getElementById('rampPlanRows');
@@ -5638,6 +5674,7 @@
       const tbody = document.getElementById('rampPlanRows');
       if (!tbody) return;
       tbody.textContent = '';
+      plans = plans.slice(0, getRampPlanMaxYears());
       plans.forEach(function (plan, index) {
         const tr = document.createElement('tr');
         const targetCell = document.createElement('td');
@@ -5657,6 +5694,7 @@
       const error = document.getElementById('rampPlanError');
       if (error) error.textContent = '';
       modal.style.display = 'flex';
+      updateRampPlanAddButton();
       const firstTarget = modal.querySelector('.ramp-plan-target');
       if (firstTarget) firstTarget.focus();
     }
@@ -5668,7 +5706,13 @@
     function addRampPlanRow() {
       const tbody = document.getElementById('rampPlanRows');
       if (!tbody) return;
-      const nextYear = tbody.querySelectorAll('tr').length + 1;
+      const rowCount = tbody.querySelectorAll('tr').length;
+      const maxYears = getRampPlanMaxYears();
+      if (rowCount >= maxYears) {
+        updateRampPlanAddButton('已达到项目运营期上限（第' + maxYears + '年），不能继续增加。');
+        return;
+      }
+      const nextYear = rowCount + 1;
       const tr = document.createElement('tr');
       const targetCell = document.createElement('td');
       const yearCell = createRampPlanYearCell(nextYear - 1);
