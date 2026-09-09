@@ -542,13 +542,23 @@
       color: #c0392b;
       background: #fff8f7;
     }
+    .project-ramp-card {
+      overflow: hidden;
+      border: 1px solid #dfe6ef;
+      border-radius: 6px;
+      background: #fff;
+    }
+    .project-ramp-card .anchor-row {
+      padding: 8px 12px;
+      border-bottom: none;
+    }
     .product-service-fields {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 0 18px;
       padding: 4px 12px 8px;
     }
-    .product-service-fields .anchor-row.full { grid-column: 1 / -1; }
+    .product-service-fields .anchor-row.full { grid-column: auto; }
     .product-service-add {
       width: 100%;
       padding: 7px 12px;
@@ -3747,10 +3757,12 @@
                 <div class="anchor-label">直接成本占比（%，不含人工、折旧、利息）</div>
                 <div class="anchor-value"><span class="dim-val" data-numeric="true">65</span></div>
               </div>
-              <div class="anchor-row">
-                <div class="anchor-label">爬坡计划（如：第一年50%，第二年70%，第三年达产100%）</div>
-                <div class="anchor-value"><span class="dim-val">第1年30%、第2年70%、第3年达产100%</span></div>
-              </div>
+            </div>
+          </div>
+          <div class="project-ramp-card">
+            <div class="anchor-row">
+              <div class="anchor-label">爬坡计划（如：第一年50%，第二年70%，第三年达产100%）</div>
+              <div class="anchor-value"><span class="dim-val">第1年30%、第2年70%、第3年达产100%</span></div>
             </div>
           </div>
           <button class="product-service-add" type="button" onclick="addProductService()">＋ 添加产品/服务</button>
@@ -5581,9 +5593,9 @@
         + '<div class="anchor-row"><div class="anchor-label">达产年产能</div><div class="anchor-value"><span class="dim-val">待填写</span></div></div>'
         + '<div class="anchor-row"><div class="anchor-label">增值税率</div><div class="anchor-value"><span class="dim-val" data-options="0%、3%、6%、9%、13%">6%</span></div></div>'
         + '<div class="anchor-row"><div class="anchor-label">直接成本占比（%，不含人工、折旧、利息）</div><div class="anchor-value"><span class="dim-val" data-numeric="true">0</span></div></div>'
-        + '<div class="anchor-row"><div class="anchor-label">爬坡计划（如：第一年50%，第二年70%，第三年达产100%）</div><div class="anchor-value"><span class="dim-val">待填写</span></div></div>'
         + '</div>';
-      list.insertBefore(card, list.querySelector('.product-service-add'));
+      const insertBefore = list.querySelector('.project-ramp-card') || list.querySelector('.product-service-add');
+      list.insertBefore(card, insertBefore);
       renumberProductServices();
       updateProductServiceDeleteButtons();
       attachConfirmEditIcons();
