@@ -823,6 +823,10 @@
       color: #4a5a70;
       margin-bottom: 20px;
     }
+    .outline-hint-emphasis {
+      color: #2f6496;
+      font-weight: 700;
+    }
     .outline-layout {
       display: flex;
       gap: 20px;
@@ -4054,7 +4058,7 @@
         <button class="btn btn-sm btn-outline" onclick="showTaskToast()">取消全选</button>
       </div>
 
-      <div class="outline-hint">操作说明：勾选章节可生成，点击章节或小节可在右侧修改标题和写作方向。</div>
+      <div class="outline-hint">操作说明：<span class="outline-hint-emphasis">只有勾选章节将参与正文生成</span>，点击章节或小节可在右侧修改标题和写作方向。</div>
 
       <div class="outline-layout">
         <!-- 大纲树（含版本管理） -->
