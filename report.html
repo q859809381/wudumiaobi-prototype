@@ -1120,10 +1120,20 @@
       margin-top: 12px;
     }
     .editor-version-group-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
       margin: 0 2px 6px;
       color: #7a8796;
       font-size: 12px;
       font-weight: 600;
+    }
+    .editor-version-limit {
+      color: #a1aab5;
+      font-size: 11px;
+      font-weight: 400;
+      white-space: nowrap;
     }
     .editor-version-item {
       display: flex;
@@ -1139,6 +1149,10 @@
       cursor: pointer;
       font: inherit;
       text-align: left;
+    }
+    .editor-version-item:focus-visible {
+      outline: 2px solid #8fb4df;
+      outline-offset: 1px;
     }
     .editor-version-item + .editor-version-item {
       margin-top: 6px;
@@ -1158,6 +1172,31 @@
       flex-shrink: 0;
       color: #999;
       font-size: 11px;
+    }
+    .editor-version-delete {
+      display: none;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      margin: -2px -4px -2px 0;
+      padding: 0;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      color: #9aa4af;
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+    }
+    .editor-version-item:hover .editor-version-delete,
+    .editor-version-item:focus-within .editor-version-delete {
+      display: inline-flex;
+    }
+    .editor-version-delete:hover {
+      background: #fcecec;
+      color: #c44b4b;
     }
     .editor-version-empty {
       padding: 7px 10px;
@@ -7317,7 +7356,15 @@
       group.className = 'editor-version-group';
       const heading = document.createElement('div');
       heading.className = 'editor-version-group-title';
-      heading.textContent = title;
+      const headingText = document.createElement('span');
+      headingText.textContent = title;
+      heading.appendChild(headingText);
+      if (title === '手动保存') {
+        const limit = document.createElement('span');
+        limit.className = 'editor-version-limit';
+        limit.textContent = '仅保留近20条记录';
+        heading.appendChild(limit);
+      }
       group.appendChild(heading);
       if (!versions.length) {
         const empty = document.createElement('div');
@@ -7326,9 +7373,10 @@
         group.appendChild(empty);
       } else {
         versions.forEach(function (version) {
-          const item = document.createElement('button');
-          item.type = 'button';
+          const item = document.createElement('div');
           item.className = 'editor-version-item' + (activeEditorVersionId === version.id ? ' active' : '');
+          item.setAttribute('role', 'button');
+          item.tabIndex = 0;
           const name = document.createElement('span');
           name.className = 'version-name';
           name.textContent = version.type === 'auto' ? '自动保存' : version.name;
@@ -7337,9 +7385,29 @@
           time.textContent = version.time;
           item.appendChild(name);
           item.appendChild(time);
+          if (version.type === 'manual') {
+            const deleteBtn = document.createElement('button');
+            deleteBtn.type = 'button';
+            deleteBtn.className = 'editor-version-delete';
+            deleteBtn.title = '删除此版本';
+            deleteBtn.setAttribute('aria-label', '删除 ' + version.name);
+            deleteBtn.textContent = '×';
+            deleteBtn.onclick = function (event) {
+              event.stopPropagation();
+              deleteEditorVersion(version.id);
+            };
+            item.appendChild(deleteBtn);
+          }
           item.onclick = function (event) {
+            if (event.target.closest('.editor-version-delete')) return;
             event.stopPropagation();
             switchEditorVersion(version.id);
+          };
+          item.onkeydown = function (event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              switchEditorVersion(version.id);
+            }
           };
           group.appendChild(item);
         });
@@ -7401,6 +7469,13 @@
       updateSaveTime(now);
       renderEditorVersionMenu();
       closeEditorVersionMenu();
+    }
+    function deleteEditorVersion(id) {
+      const index = editorManualVersions.findIndex(function (version) { return version.id === id; });
+      if (index < 0) return;
+      editorManualVersions.splice(index, 1);
+      if (activeEditorVersionId === id) activeEditorVersionId = null;
+      renderEditorVersionMenu();
     }
     function switchEditorVersion(id) {
       const version = getEditorVersion(id);
