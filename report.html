@@ -3882,8 +3882,8 @@
             <div class="anchor-label">运营期（一般为10年）<span class="req">*</span></div>
             <div class="anchor-value"><span class="dim-val">10年</span></div></div>
           <div class="anchor-row">
-            <div class="anchor-label">建设周期<span class="req">*</span></div>
-            <div class="anchor-value"><span class="dim-val">2026/06/01~2028/06/01</span></div></div>
+            <div class="anchor-label">建设周期（月）<span class="req">*</span></div>
+            <div class="anchor-value"><span class="dim-val" data-numeric="true">24</span></div></div>
           <div class="anchor-row">
             <div class="anchor-label">建筑面积（㎡）<span class="anchor-hint">无建筑面积填0，若不填系统将自行判断</span></div>
             <div class="anchor-value"><span class="dim-val">24000.00</span></div></div>
@@ -5365,7 +5365,7 @@
           { label: '产业方向', chapters: [3] },
           { label: '建设性质', chapters: [1, 4] },
           { label: '运营期（一般为10年）', chapters: [6, 7] },
-          { label: '建设周期', chapters: [1, 4] },
+          { label: '建设周期（月）', chapters: [1, 4] },
           { label: '建筑面积（㎡）', chapters: [4] },
           { label: '用地面积（㎡）', chapters: [4] }
         ]
@@ -6075,6 +6075,10 @@
         const clean = raw.replace(/年$/, '').trim();
         const n = parseFloat(clean.replace(/,/g, ''));
         return isNaN(n) ? clean : String(n);
+      }
+      if (label.indexOf('建设周期') >= 0) {
+        const n = parseFloat(raw.replace(/,/g, ''));
+        return isNaN(n) ? raw : String(n);
       }
       // 纯数字单元格
       const m2 = raw.match(/^[\d,]+(?:\.\d+)?$/);
