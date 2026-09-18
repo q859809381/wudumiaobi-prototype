@@ -3927,8 +3927,8 @@
                 <div class="anchor-value"><span class="dim-val" data-options="0%、3%、6%、9%、13%">6%</span></div>
               </div>
               <div class="anchor-row">
-                <div class="anchor-label">直接成本占比（%，不含人工、折旧、利息）</div>
-                <div class="anchor-value"><span class="dim-val" data-numeric="true">65</span></div>
+                <div class="anchor-label">直接成本占比（不含人工、折旧、利息）</div>
+                <div class="anchor-value"><span class="dim-val" data-numeric="true" data-percent="true">65%</span></div>
               </div>
             </div>
           </div>
@@ -3948,8 +3948,8 @@
         </div>
         <div class="collapse-body cols-4">
           <div class="anchor-row">
-            <div class="anchor-label">基准收益率（%）</div>
-            <div class="anchor-value"><span class="dim-val">8</span></div></div>
+            <div class="anchor-label">基准收益率</div>
+            <div class="anchor-value"><span class="dim-val" data-numeric="true" data-percent="true">8.00%</span></div></div>
           <div class="anchor-row">
             <div class="anchor-label">行业基准</div>
             <div class="anchor-value"><span class="dim-val" data-options="制造业、软件业、建筑业、批发零售、交通运输、服务业、其他">软件业</span></div></div>
@@ -4018,8 +4018,8 @@
             <div class="anchor-label">贷款及比例（万元）</div>
             <div class="anchor-value"><span class="dim-val" data-amount="20477.81">20,477.81（30.00%）</span></div></div>
           <div class="anchor-row">
-            <div class="anchor-label">贷款利率（%）</div>
-            <div class="anchor-value"><span class="dim-val" data-numeric="true">3.85</span></div></div>
+            <div class="anchor-label">贷款利率</div>
+            <div class="anchor-value"><span class="dim-val" data-numeric="true" data-percent="true">3.85%</span></div></div>
           <div class="anchor-row">
             <div class="anchor-label">政府补助（万元）</div>
             <div class="anchor-value"><span class="dim-val" data-amount="5459.95">5,459.95（8.00%）</span></div></div>
@@ -5378,9 +5378,9 @@
           { label: '单价（元/计价单位）', chapters: [3, 7] },
           { label: '达产年产能', chapters: [3] },
           { label: '增值税率', chapters: [7] },
-          { label: '直接成本占比（%，不含人工、折旧、利息）', chapters: [7] },
+          { label: '直接成本占比（不含人工、折旧、利息）', chapters: [7] },
           { label: '爬坡计划（如：第一年50%，第二年70%，第三年达产100%）', chapters: [3, 6] },
-          { label: '基准收益率（%）', chapters: [7] },
+          { label: '基准收益率', chapters: [7] },
           { label: '行业基准', chapters: [7] },
           { label: '期望投资回收期（年）', chapters: [7] }
         ]
@@ -5398,7 +5398,7 @@
           { label: '预备费（万元）', chapters: [4, 7] },
           { label: '建设期利息（万元）', chapters: [7] },
           { label: '铺底流动资金（万元）', chapters: [6, 7] },
-          { label: '贷款利率（%）', chapters: [7] },
+          { label: '贷款利率', chapters: [7] },
           { label: '企业自筹及比例（万元）', chapters: [7] },
           { label: '贷款及比例（万元）', chapters: [7] },
           { label: '政府补助（万元）', chapters: [7] }
@@ -5912,11 +5912,23 @@
       if (dot >= 0) clean = clean.slice(0, dot + 1) + clean.slice(dot + 1).replace(/\./g, '');
       return clean;
     }
+    function percentFractionFromDisplay(value) {
+      const n = parseFloat(sanitizeNumeric(value));
+      return isNaN(n) ? '' : String(n / 100);
+    }
+    function percentDisplayFromFraction(label, value) {
+      const n = parseFloat(sanitizeNumeric(value));
+      if (isNaN(n)) return '';
+      const pct = n * 100;
+      return (label.indexOf('直接成本占比') >= 0 ? String(Number(pct.toFixed(10))) : pct.toFixed(2)) + '%';
+    }
     function editConfirmValue(v) {
       if (v.querySelector('input') || v.querySelector('select')) return;
       const oldText = v.textContent.replace('✎', '').trim();
       const amountOnly = v.hasAttribute('data-amount');
       const numericOnly = v.hasAttribute('data-numeric');
+      const percentOnly = v.hasAttribute('data-percent');
+      const oldNumericText = percentOnly ? percentFractionFromDisplay(oldText) : oldText;
       const options = v.getAttribute('data-options');
       v.classList.remove('edited');
       v.innerHTML = '';
@@ -5959,7 +5971,7 @@
         input.addEventListener('input', function () { this.value = sanitizeNumeric(this.value); });
       }
       // 资金来源金额项：仅编辑万元金额，比例由 refreshFundingPercents 自动计算
-      input.value = amountOnly ? String(parseMoney(v.getAttribute('data-amount') || '0')) : (numericOnly ? sanitizeNumeric(oldText) : oldText);
+      input.value = amountOnly ? String(parseMoney(v.getAttribute('data-amount') || '0')) : (percentOnly ? oldNumericText : (numericOnly ? sanitizeNumeric(oldText) : oldText));
       v.appendChild(input);
       input.focus();
       input.select();
@@ -5974,9 +5986,10 @@
           v.textContent = ''; // 清除编辑输入框，由 refreshFundingPercents 渲染金额与占比
           v.setAttribute('data-amount', parseMoney(val));
         } else {
-          v.textContent = numericOnly ? (sanitizeNumeric(val) || oldText) : (label.indexOf('回收期') >= 0 ? formatNumberText(label, val || oldText) : (val || oldText));
+          const cleanValue = numericOnly ? (sanitizeNumeric(val) || oldNumericText) : (val || oldText);
+          v.textContent = percentOnly ? (percentDisplayFromFraction(label, cleanValue) || oldText) : (numericOnly ? cleanValue : (label.indexOf('回收期') >= 0 ? formatNumberText(label, val || oldText) : (val || oldText)));
         }
-        if (save && val && val !== oldText) v.classList.add('edited');
+        if (save && val && (percentOnly ? sanitizeNumeric(val) !== oldNumericText : val !== oldText)) v.classList.add('edited');
         attachConfirmEditIcons();
         recalcConfirmBalances();
       }
@@ -6005,7 +6018,7 @@
         + '<div class="anchor-row"><div class="anchor-label">单价（元/计价单位）</div><div class="anchor-value"><span class="dim-val">0</span></div></div>'
         + '<div class="anchor-row"><div class="anchor-label">达产年产能</div><div class="anchor-value"><span class="dim-val">待填写</span></div></div>'
         + '<div class="anchor-row"><div class="anchor-label">增值税率</div><div class="anchor-value"><span class="dim-val" data-options="0%、3%、6%、9%、13%">6%</span></div></div>'
-        + '<div class="anchor-row"><div class="anchor-label">直接成本占比（%，不含人工、折旧、利息）</div><div class="anchor-value"><span class="dim-val" data-numeric="true">0</span></div></div>'
+        + '<div class="anchor-row"><div class="anchor-label">直接成本占比（不含人工、折旧、利息）</div><div class="anchor-value"><span class="dim-val" data-numeric="true" data-percent="true">0%</span></div></div>'
         + '</div>';
       const insertBefore = list.querySelector('.project-ramp-card') || list.querySelector('.product-service-add');
       list.insertBefore(card, insertBefore);
@@ -6066,6 +6079,12 @@
     }
     /* 单个数据值格式化：金额四位小数、百分比两位小数 */
     function formatNumberText(label, raw) {
+      const isDirectCostPercent = label.indexOf('直接成本占比') >= 0;
+      const isStandardPercent = isDirectCostPercent || label.indexOf('基准收益率') >= 0 || label.indexOf('贷款利率') >= 0;
+      if (isDirectCostPercent) {
+        const clean = sanitizeNumeric(raw);
+        return clean ? clean + '%' : raw;
+      }
       // 金额 + 比例复合：40,955.61（60%）→ 40,955.6100（60.00%）
       const m1 = raw.match(/^([\d,]+(?:\.\d+)?)\s*[（(]([\d.]+)%[)）]$/);
       if (m1) {
@@ -6084,7 +6103,7 @@
       const m2 = raw.match(/^[\d,]+(?:\.\d+)?$/);
       if (m2) {
         const n = parseFloat(raw.replace(/,/g, ''));
-        const isPct = label.indexOf('%') >= 0 || label.indexOf('率') >= 0;
+        const isPct = isStandardPercent || label.indexOf('%') >= 0 || label.indexOf('率') >= 0;
         return isPct ? fmtPercent2(n) : fmtAmount4(n);
       }
       // 文本中内嵌百分比：30% → 30.00%

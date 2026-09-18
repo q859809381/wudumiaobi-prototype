@@ -32,6 +32,14 @@
     }
     .status-dot.parsing { background: #f0ad4e; }
     .status-dot.ready { background: #4a6fa5; }
+    .status-dot-uploading { background: #4a6fa5; }
+    .status-dot-uploaded { background: #7a8fa6; }
+    .status-dot-completed { background: #58a06e; }
+    .status-dot-muted { background: #c8c8c8; }
+    .status-badge-uploading { color: #4a6fa5; }
+    .status-badge-uploaded { color: #68798d; }
+    .status-badge-completed { color: #27804a; }
+    .status-badge-muted { color: #999; }
     .action-link {
       font-size: 13px;
       color: #4a6fa5;
@@ -490,6 +498,7 @@
             <th style="width:100px;"><span class="sortable" data-key="size" onclick="toggleKbSort('size')">文件大小 <span class="sort-ind">⇅</span></span></th>
             <th style="width:160px;"><span class="sortable" data-key="created" onclick="toggleKbSort('created')">创建时间 <span class="sort-ind">⇅</span></span></th>
             <th style="width:160px;"><span class="sortable" data-key="updated" onclick="toggleKbSort('updated')">更新时间 <span class="sort-ind">⇅</span></span></th>
+            <th style="width:120px;">状态</th>
             <th style="width:110px;">操作</th>
           </tr>
         </thead>
@@ -700,6 +709,19 @@
     }
 
     function renderList() {
+      function statusMarkup(item) {
+        if (item.type === 'folder') return '';
+        const status = item.status || 'completed';
+        const labels = {
+          uploading: '\u4e0a\u4f20\u4e2d',
+          uploaded: '\u4e0a\u4f20\u5b8c\u6210',
+          parsing: '\u89e3\u6790\u4e2d',
+          completed: '\u5df2\u5b8c\u6210'
+        };
+        const label = labels[status] || labels.completed;
+        return '<span class="status-badge status-badge-' + status + '"><span class="status-dot status-dot-' + status + '"></span>' + label + '</span>';
+      }
+
       // 面包屑
       const bc = document.getElementById('kbBreadcrumb');
       bc.innerHTML = '';
@@ -773,6 +795,7 @@
           + '<td>' + size + '</td>'
           + '<td>' + it.time + '</td>'
           + '<td>' + (it.updateTime || it.time) + '</td>'
+          + '<td>' + statusMarkup(it) + '</td>'
           + '<td>' + ops + '</td>';
         const rowCheck = tr.querySelector('.kb-row-check');
         rowCheck.checked = kbSelected.indexOf(it) >= 0;
@@ -1012,7 +1035,8 @@
           updateTime: nowText(),
           icon: icon,
           iconLetter: letter,
-          ext: extLabel
+          ext: extLabel,
+          status: 'uploading'
         };
         if (uploadTarget !== KB_ROOT) uploadTarget.updateTime = nowText();
         uploadTarget.children.unshift(kbitem);
@@ -1066,10 +1090,16 @@
       uploadItems.push(entry);
       // 模拟上传流程：上传中 → 上传完成 → 解析中 → 已完成
       entry.timer = setTimeout(function () {
+        kbitem.status = 'uploaded';
+        renderList();
         statusEl.innerHTML = '上传完成';
         entry.timer = setTimeout(function () {
+          kbitem.status = 'parsing';
+          renderList();
           statusEl.innerHTML = '<span class="spin"></span>解析中…';
           entry.timer = setTimeout(function () {
+            kbitem.status = 'completed';
+            renderList();
             statusEl.innerHTML = '✓ 已完成';
             statusEl.classList.add('done');
             entry.done = true;
