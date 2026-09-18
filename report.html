@@ -1504,6 +1504,20 @@
       margin-top: 8px;
       justify-content: flex-end;
     }
+    .ai-write-float.is-writing {
+      border-color: #c9d9ec;
+      box-shadow: 0 10px 30px rgba(74, 111, 165, 0.2);
+    }
+    .ai-write-float.is-writing .ai-write-input {
+      min-height: 76px;
+      color: #4a6fa5;
+      font-weight: 500;
+      background: #f5f8fc;
+      cursor: wait;
+    }
+    .ai-write-float.is-writing .aiw-foot {
+      justify-content: flex-end;
+    }
     .editor-content .sel-text { background: #e8eef6; }
     /* AI 撰写进度条 */
     .editor-progress {
@@ -4593,6 +4607,9 @@
     let lastSelRange = null;
     let aiRequirement = '';
     let aiPhase = 1;
+    let aiPanelWriting = false;
+    let aiPanelJobTimer = null;
+    let aiPanelJobToken = 0;
     /* 每个任务最多 10 次免费 AI 修正（AI撰写/重写/润色/扩写/缩写） */
     let aiCreditLeft = 10;
     let aiCreditToast = null;
@@ -7832,6 +7849,42 @@
         (b.place === 'right' ? right : left).appendChild(btn);
       });
     }
+    function setAiPanelWriting(writing) {
+      const panel = document.getElementById('aiWritePanel');
+      const input = document.getElementById('aiwInput');
+      const closeBtn = panel ? panel.querySelector('.aiw-close') : null;
+      if (!panel || !input) return;
+      aiPanelWriting = writing;
+      panel.classList.toggle('is-writing', writing);
+      input.disabled = writing;
+      if (writing) {
+        input.value = '\u0041\u0049\u64b0\u5199\u4e2d\uff0c\u8bf7\u7b49\u5f85\u002e\u002e\u002e';
+        input.placeholder = '';
+        if (closeBtn) closeBtn.style.display = 'none';
+        buildAiFoot([{ label: '\u53d6\u6d88', action: 'cancel', outline: true, place: 'right' }]);
+      } else {
+        if (closeBtn) closeBtn.style.display = '';
+        document.getElementById('aiwFootLeft').innerHTML = '';
+        document.getElementById('aiwFootRight').innerHTML = '';
+      }
+    }
+    function startAiPanelWriting(onComplete) {
+      clearTimeout(aiPanelJobTimer);
+      aiPanelJobToken += 1;
+      const token = aiPanelJobToken;
+      setAiPanelWriting(true);
+      aiPanelJobTimer = setTimeout(function () {
+        aiPanelJobTimer = null;
+        if (!aiPanelWriting || token !== aiPanelJobToken) return;
+        setAiPanelWriting(false);
+        onComplete();
+        const panel = document.getElementById('aiWritePanel');
+        const input = document.getElementById('aiwInput');
+        if (panel && panel.style.display !== 'none' && !panel.querySelector('.aiw-foot .btn')) {
+          setAiPanelState(2, aiMode === 'paragraph' ? aiRequirement : '', input.value, aiMode !== 'selection');
+        }
+      }, 3600);
+    }
     function setAiPanelState(phase, reqText, resultText, showReq) {
       aiPhase = phase;
       const req = document.getElementById('aiwReq');
@@ -7858,6 +7911,11 @@
     }
     function closeAiPanel() {
       const panel = document.getElementById('aiWritePanel');
+      clearTimeout(aiPanelJobTimer);
+      aiPanelJobTimer = null;
+      aiPanelJobToken += 1;
+      aiPanelWriting = false;
+      setAiPanelWriting(false);
       if (panel) panel.style.display = 'none';
       aiSelRange = null;
       aiMode = 'paragraph';
@@ -7878,7 +7936,7 @@
         genBtn.disabled = true;
         genBtn.textContent = '生成中…';
         const requirement = taText;
-        setTimeout(function () {
+        startAiPanelWriting(function () {
           const result = '（AI 生成）' + PAPER_SAMPLE_PARAS[Math.floor(Math.random() * PAPER_SAMPLE_PARAS.length)];
           if (aiMode === 'selection') {
             // 选中文字模式：结果写入对话框
@@ -7897,7 +7955,9 @@
             }
           }
           updateWordCount();
-        }, 1200);
+        });
+      } else if (action === 'cancel') {
+        closeAiPanel();
       } else if (action === 'replace') {
         if (aiMode === 'selection' && aiSelRange) {
           if (taText) {
@@ -8029,12 +8089,12 @@
       genBtn.disabled = true;
       genBtn.textContent = '生成中…';
       // 自动生成撰写结果到对话框
-      setTimeout(function () {
+      startAiPanelWriting(function () {
         const input = document.getElementById('aiwInput');
         input.value = '（' + action + '结果）' + PAPER_SAMPLE_PARAS[Math.floor(Math.random() * PAPER_SAMPLE_PARAS.length)];
         genBtn.disabled = false;
         genBtn.textContent = '重新生成';
-      }, 900);
+      });
       selMenu.style.display = 'none';
     }
 
