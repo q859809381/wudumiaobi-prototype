@@ -1413,23 +1413,7 @@
       font-style: italic;
       text-indent: 0;
     }
-    /* AI 撰写：段落悬浮按钮与撰写要求面板 */
-    .ai-write-btn {
-      display: none;
-      position: absolute;
-      left: 6px;
-      z-index: 6;
-      padding: 4px 10px;
-      font-size: 12px;
-      color: #fff;
-      background: #4a6fa5;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(74, 111, 165, 0.3);
-    }
-    .ai-write-btn:hover { background: #3d5f92; }
-    .paper p.hover-ai { background: #f0f6fe; border-radius: 4px; }
+    /* AI 撰写：撰写要求面板 */
     .paper p.ai-active { background: #e3effb; border-radius: 4px; }
     .ai-write-panel {
       border: 1px solid #d8e2f0;
@@ -3929,7 +3913,7 @@
                 <div class="anchor-value"><span class="dim-val">次</span></div>
               </div>
               <div class="anchor-row">
-                <div class="anchor-label">单价（元/计价单位）</div>
+                <div class="anchor-label">单价（<strong>万元</strong>/计价单位）</div>
                 <div class="anchor-value"><span class="dim-val">0.5</span></div>
               </div>
               <div class="anchor-row">
@@ -4599,11 +4583,10 @@
 
     let flowStage = 1;
     let aiPanelParagraph = null;
-    let aiHoverParagraph = null;
-    let aiWriteBtn = null;
     let aiGenerated = false;
     let aiSelRange = null;
     let aiMode = 'paragraph';
+    let aiPendingAction = '';
     let lastSelRange = null;
     let aiRequirement = '';
     let aiPhase = 1;
@@ -5392,7 +5375,7 @@
         items: [
           { label: '产品/服务名称', chapters: [3] },
           { label: '计价单位（吨、次、份等，根据实际情况填写）', chapters: [3] },
-          { label: '单价（元/计价单位）', chapters: [3, 7] },
+          { label: '单价（万元/计价单位）', chapters: [3, 7] },
           { label: '达产年产能', chapters: [3] },
           { label: '增值税率', chapters: [7] },
           { label: '直接成本占比（不含人工、折旧、利息）', chapters: [7] },
@@ -6032,7 +6015,7 @@
         + '<div class="product-service-fields">'
         + '<div class="anchor-row full"><div class="anchor-label">产品/服务名称</div><div class="anchor-value"><span class="dim-val">待填写</span></div></div>'
         + '<div class="anchor-row"><div class="anchor-label">计价单位（吨、次、份等，根据实际情况填写）</div><div class="anchor-value"><span class="dim-val">次</span></div></div>'
-        + '<div class="anchor-row"><div class="anchor-label">单价（元/计价单位）</div><div class="anchor-value"><span class="dim-val">0</span></div></div>'
+        + '<div class="anchor-row"><div class="anchor-label">单价（<strong>万元</strong>/计价单位）</div><div class="anchor-value"><span class="dim-val">0</span></div></div>'
         + '<div class="anchor-row"><div class="anchor-label">达产年产能</div><div class="anchor-value"><span class="dim-val">待填写</span></div></div>'
         + '<div class="anchor-row"><div class="anchor-label">增值税率</div><div class="anchor-value"><span class="dim-val" data-options="0%、3%、6%、9%、13%">6%</span></div></div>'
         + '<div class="anchor-row"><div class="anchor-label">直接成本占比（不含人工、折旧、利息）</div><div class="anchor-value"><span class="dim-val" data-numeric="true" data-percent="true">0%</span></div></div>'
@@ -7366,16 +7349,12 @@
     function snapshotPaperHtml() {
       const paper = document.getElementById('paper');
       if (!paper) return '';
-      const clone = paper.cloneNode(true);
-      const btn = clone.querySelector('.ai-write-btn');
-      if (btn) btn.remove();
-      return clone.innerHTML;
+      return paper.innerHTML;
     }
     function restorePaperHtml(html) {
       const paper = document.getElementById('paper');
       if (!paper) return;
       paper.innerHTML = html;
-      ensureAiWriteBtn();
       updateWordCount();
     }
     function fmtEditorVersionTime(d) {
@@ -7734,7 +7713,6 @@
         // 未开始撰写（pending）：暂不在纸面展示
       });
       paper.innerHTML = html;
-      ensureAiWriteBtn();
       updateWordCount();
     }
     function updateSaveTime(date) {
@@ -7797,44 +7775,7 @@
       document.getElementById('editorContent').scrollTop = 0;
     }
 
-    /* ==================== AI 撰写：段落悬浮按钮与撰写要求面板 ==================== */
-    function ensureAiWriteBtn() {
-      const paper = document.getElementById('paper');
-      if (!paper) return;
-      if (!aiWriteBtn) {
-        aiWriteBtn = document.createElement('button');
-        aiWriteBtn.className = 'ai-write-btn';
-        aiWriteBtn.textContent = 'AI 撰写';
-        aiWriteBtn.addEventListener('click', function () {
-          if (aiCreditLeft <= 0) {
-            showCreditToast('免费AI修正次数已用完');
-            return;
-          }
-          const p = aiHoverParagraph || aiPanelParagraph;
-          if (!p) return;
-          closeAiPanel();
-          p.classList.add('ai-active');
-          aiPanelParagraph = p;
-          aiGenerated = false;
-          aiMode = 'paragraph';
-          aiSelRange = null;
-          document.getElementById('aiwTitle').textContent = 'AI 撰写';
-          const panel = document.getElementById('aiWritePanel');
-          // 初始状态：仅撰写要求 + 开始生成
-          setAiPanelState(1);
-          // 悬浮定位到段落附近
-          const rect = p.getBoundingClientRect();
-          panel.style.display = 'flex';
-          panel.style.width = Math.round(rect.width) + 'px';
-          panel.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - rect.width - 8)) + 'px';
-          panel.style.top = Math.min(rect.bottom + 8, window.innerHeight - 240) + 'px';
-          if (aiWriteBtn) aiWriteBtn.style.display = 'none';
-          document.getElementById('aiwInput').focus();
-        });
-      }
-      if (!aiWriteBtn.isConnected) paper.appendChild(aiWriteBtn);
-      aiWriteBtn.style.left = '6px';
-    }
+    /* ==================== AI 撰写：撰写要求面板 ==================== */
     function buildAiFoot(items) {
       const left = document.getElementById('aiwFootLeft');
       const right = document.getElementById('aiwFootRight');
@@ -7893,7 +7834,8 @@
         // 初始状态：撰写要求输入 + 开始生成
         req.style.display = 'none';
         input.value = '';
-        input.placeholder = '请输入 AI 撰写要求，例如：补充项目背景、调整语气更正式、扩写具体数据等。';
+        const act = aiPendingAction || 'AI 撰写';
+        input.placeholder = '请输入' + act + '要求（选填），例如：语气更正式、突出数据支撑、面向政府评审等。不填写则按默认要求处理。';
         buildAiFoot([{ label: '开始生成', action: 'generate', primary: true, id: 'aiwGenBtn', place: 'right' }]);
       } else {
         // 生成完成：要求记录 + 结果显示 + 操作按钮
@@ -7920,8 +7862,9 @@
       aiSelRange = null;
       aiMode = 'paragraph';
       aiPhase = 1;
+      aiPendingAction = '';
       if (aiPanelParagraph) {
-        aiPanelParagraph.classList.remove('ai-active', 'hover-ai');
+        aiPanelParagraph.classList.remove('ai-active');
         aiPanelParagraph = null;
       }
     }
@@ -7935,14 +7878,15 @@
         if (!genBtn || genBtn.disabled) return;
         genBtn.disabled = true;
         genBtn.textContent = '生成中…';
-        const requirement = taText;
+        // 结果状态下点击「重新生成」沿用原要求；初始状态使用用户输入
+        const requirement = aiPhase === 2 ? aiRequirement : taText;
+        const actName = aiPendingAction || 'AI 撰写';
         startAiPanelWriting(function () {
-          const result = '（AI 生成）' + PAPER_SAMPLE_PARAS[Math.floor(Math.random() * PAPER_SAMPLE_PARAS.length)];
+          const result = '（' + actName + '结果）' + PAPER_SAMPLE_PARAS[Math.floor(Math.random() * PAPER_SAMPLE_PARAS.length)];
           if (aiMode === 'selection') {
-            // 选中文字模式：结果写入对话框
-            input.value = result;
-            genBtn.disabled = false;
-            genBtn.textContent = '重新生成';
+            // 选中文字模式：切换到结果状态（要求记录 + 结果 + 操作按钮）
+            aiRequirement = requirement;
+            setAiPanelState(2, requirement || '（默认要求）', result, true);
           } else if (aiPanelParagraph) {
             // 段落模式：初始状态 -> 生成完成状态（结果显示在输入框）
             if (aiPhase === 1) {
@@ -7986,33 +7930,6 @@
         }
       }
     }
-    function initAiHover() {
-      const paper = document.getElementById('paper');
-      if (!paper || paper._aiHoverBound) return;
-      paper._aiHoverBound = true;
-      paper.addEventListener('mouseover', function (e) {
-        const p = e.target.closest('p');
-        if (!p) return;
-        aiHoverParagraph = p;
-        document.querySelectorAll('.paper p.hover-ai').forEach(x => { if (x !== p) x.classList.remove('hover-ai'); });
-        p.classList.add('hover-ai');
-        if (p !== aiPanelParagraph) {
-          if (aiCreditLeft <= 0) {
-            if (aiWriteBtn) aiWriteBtn.style.display = 'none';
-            return;
-          }
-          ensureAiWriteBtn();
-          aiWriteBtn.style.display = 'flex';
-          aiWriteBtn.style.top = (p.offsetTop + 3) + 'px';
-        }
-      });
-      paper.addEventListener('mouseleave', function () {
-        if (aiWriteBtn) aiWriteBtn.style.display = 'none';
-        aiHoverParagraph = null;
-        paper.querySelectorAll('p.hover-ai').forEach(x => x.classList.remove('hover-ai'));
-      });
-    }
-    initAiHover();
     updateAiCreditUI();
 
     /* 撰写要求记录悬浮气泡：内容超长时展示完整信息 */
@@ -8056,7 +7973,6 @@
     });
 
     function aiAction(action) {
-      if (!consumeAiCredit()) return;
       const sel = window.getSelection();
       const text = sel.toString().trim();
       const range = (text.length > 0 && sel.rangeCount > 0) ? sel.getRangeAt(0).cloneRange() : lastSelRange;
@@ -8064,6 +7980,8 @@
       aiSelRange = range;
       aiMode = 'selection';
       aiPanelParagraph = null;
+      aiGenerated = false;
+      aiPendingAction = action;
       const panel = document.getElementById('aiWritePanel');
       document.getElementById('aiwTitle').textContent = action;
       // 位置紧邻选中文字（选区下方），宽度与段落一致
@@ -8083,18 +8001,9 @@
       const sel2 = window.getSelection();
       if (sel2.rangeCount) sel2.removeAllRanges();
       sel2.addRange(aiSelRange);
-      // 结果状态：输入框展示 AI 撰写结果，含操作按钮
-      setAiPanelState(2, '', '', false);
-      const genBtn = document.getElementById('aiwGenBtn');
-      genBtn.disabled = true;
-      genBtn.textContent = '生成中…';
-      // 自动生成撰写结果到对话框
-      startAiPanelWriting(function () {
-        const input = document.getElementById('aiwInput');
-        input.value = '（' + action + '结果）' + PAPER_SAMPLE_PARAS[Math.floor(Math.random() * PAPER_SAMPLE_PARAS.length)];
-        genBtn.disabled = false;
-        genBtn.textContent = '重新生成';
-      });
+      // 初始状态：用户输入改写/扩写等要求后，点击「开始生成」再执行 AI 撰写
+      setAiPanelState(1);
+      document.getElementById('aiwInput').focus();
       selMenu.style.display = 'none';
     }
 

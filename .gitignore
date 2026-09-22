@@ -2,3 +2,7 @@
 五度妙笔PRD文档*
 *PRD*.docx
 *PRD*.md
+
+# 本地工具与工作区缓存（不推送）
+.workbuddy/
+.playwright-cli/
