@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图片库 - 五度妙笔</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .page-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    /* 标题行 + 操作区 */
+    .content-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .content-head .page-title { margin-bottom: 0; }
+    .page-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+    /* 存储空间 */
+    .quota-box {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 176px;
+      padding: 6px 10px;
+      border: 1px solid #e8eef6;
+      border-radius: 8px;
+      background: #fbfcfe;
+    }
+    .quota-text { font-size: 12px; color: #888; white-space: nowrap; }
+    .quota-text b { color: #4a6fa5; font-weight: 600; }
+    .quota-bar { height: 4px; border-radius: 2px; background: #eef2f8; overflow: hidden; }
+    .quota-bar i { display: block; height: 100%; width: 0; background: #4a6fa5; transition: width .3s; }
+    .quota-box.warn .quota-text b { color: #c0392b; }
+    .quota-box.warn .quota-bar i { background: #c0392b; }
+    /* 面包屑 */
+    .img-breadcrumb {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 13px;
+      margin-bottom: 12px;
+      color: #888;
+    }
+    .bc-item { cursor: pointer; color: #4a6fa5; }
+    .bc-item:hover { text-decoration: underline; }
+    .bc-item.current { color: #333; font-weight: 500; cursor: default; text-decoration: none; }
+    .bc-sep { color: #ccc; }
+    .bc-level-tip { margin-left: 8px; font-size: 12px; color: #bbb; }
+    /* 搜索 */
+    .search-bar { display: flex; gap: 12px; margin-bottom: 16px; }
+    .search-bar .input { max-width: 360px; }
+    /* 批量操作栏 */
+    .batch-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding: 8px 12px;
+      border: 1px solid #d8e2f0;
+      border-radius: 8px;
+      background: #f0f6fd;
+    }
+    .batch-count { font-size: 13px; color: #555; }
+    .batch-count b { color: #4a6fa5; font-weight: 600; }
+    .batch-btn-danger { color: #c0392b; border-color: #e0b4ab; background: #fdf6f5; }
+    .batch-btn-danger:hover { color: #fff; border-color: #c0392b; background: #c0392b; }
+    /* 缩略图网格 */
+    .img-grid-wrap {
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      background: #fff;
+      overflow: hidden;
+    }
+    .img-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 14px;
+      padding: 16px;
+    }
+    .img-card {
+      position: relative;
+      border: 1px solid #eef0f4;
+      border-radius: 8px;
+      background: #fff;
+      overflow: hidden;
+      transition: box-shadow .15s, border-color .15s, transform .15s;
+    }
+    .img-card:hover { border-color: #c9d8ea; box-shadow: 0 6px 18px rgba(74, 111, 165, .14); }
+    .img-card.selected { border-color: #4a6fa5; box-shadow: 0 0 0 2px rgba(74, 111, 165, .18); }
+    .img-thumb {
+      position: relative;
+      height: 110px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f7f9fc;
+      overflow: hidden;
+      cursor: zoom-in;
+    }
+    .img-thumb img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+    .img-thumb.folder-thumb {
+      flex-direction: column;
+      gap: 4px;
+      cursor: pointer;
+      background: linear-gradient(180deg, #fdf8ea 0%, #fbf3dd 100%);
+      color: #b8860b;
+      font-size: 26px;
+    }
+    .img-thumb.folder-thumb .folder-count { font-size: 11px; color: #b08a3c; }
+    /* 勾选 */
+    .img-check {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      display: none;
+      padding: 2px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, .92);
+      cursor: pointer;
+      z-index: 2;
+    }
+    .img-card:hover .img-check,
+    .img-card.selected .img-check,
+    .img-grid.selecting .img-check { display: block; }
+    .img-check input { cursor: pointer; margin: 0; display: block; }
+    /* 更多操作 */
+    .img-more {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 22px;
+      height: 22px;
+      line-height: 20px;
+      text-align: center;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, .95);
+      color: #7a8fa6;
+      font-size: 13px;
+      cursor: pointer;
+      display: none;
+      z-index: 2;
+      padding: 0;
+    }
+    .img-card:hover .img-more { display: block; }
+    .img-more:hover { color: #4a6fa5; border-color: #bcd0e8; }
+    .img-name {
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #555;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      border-top: 1px solid #f2f4f8;
+    }
+    .img-meta { padding: 0 10px 8px; font-size: 11px; color: #bbb; }
+    .img-name-input {
+      width: 100%;
+      padding: 5px 8px;
+      font-size: 12px;
+      color: #333;
+      border: 1px solid #4a6fa5;
+      border-radius: 4px;
+      outline: none;
+    }
+    .img-empty { padding: 48px; text-align: center; color: #bbb; font-size: 13px; }
+    .upload-here {
+      padding: 12px;
+      text-align: center;
+      font-size: 13px;
+      color: #4a6fa5;
+      border-top: 1px dashed #e0e8f2;
+      cursor: pointer;
+      background: #fbfcfe;
+    }
+    .upload-here:hover { background: #f2f7fd; }
+    /* 悬浮放大预览 */
+    .zoom-preview {
+      position: fixed;
+      z-index: 1200;
+      display: none;
+      padding: 8px;
+      background: #fff;
+      border: 1px solid #dfe6ef;
+      border-radius: 10px;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, .18);
+      pointer-events: none;
+    }
+    .zoom-preview img { display: block; border-radius: 6px; background: #f7f9fc; }
+    .zoom-preview .zoom-cap {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #666;
+      max-width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .zoom-preview .zoom-size { float: right; color: #aaa; margin-left: 12px; }
+    /* 弹窗 */
+    .upload-target { margin-bottom: 14px; }
+    .upload-target label { display: block; font-size: 13px; color: #555; margin-bottom: 8px; }
+    .upload-target select { width: 100%; }
+    .upload-guide p { font-size: 13px; color: #555; line-height: 1.7; margin-bottom: 10px; }
+    .upload-guide li {
+      font-size: 13px;
+      color: #555;
+      line-height: 1.9;
+      padding-left: 14px;
+      position: relative;
+      list-style: none;
+    }
+    .upload-guide li::before { content: '•'; position: absolute; left: 0; color: #4a6fa5; }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 20px;
+      padding: 14px 24px;
+      border-top: 1px solid #f0f0f0;
+      background: #fafbfc;
+      border-radius: 0 0 12px 12px;
+    }
+    .modal-actions .left { margin-right: auto; }
+    /* 文件清单（不可上传提示） */
+    .file-issue-list { max-height: 240px; overflow-y: auto; border: 1px solid #eef0f4; border-radius: 6px; }
+    .file-issue-row { display: flex; gap: 10px; padding: 8px 10px; border-bottom: 1px solid #f4f6f9; font-size: 12px; }
+    .file-issue-row:last-child { border-bottom: none; }
+    .file-issue-row .n { flex: 1; min-width: 0; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-issue-row .r { color: #c0392b; flex-shrink: 0; }
+    .issue-title { font-size: 13px; font-weight: 600; color: #333; margin: 4px 0 8px; }
+    .issue-title.ok { color: #27804a; }
+    .issue-title.warn { color: #c0392b; }
+    /* 上传任务面板 */
+    .upload-panel {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: 320px;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, .12);
+      z-index: 600;
+      display: none;
+    }
+    .upload-panel.active { display: block; }
+    .upload-panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .upload-panel-close { cursor: pointer; color: #999; font-size: 15px; }
+    .upload-panel-body { padding: 10px 14px 14px; max-height: 220px; overflow-y: auto; }
+    .up-row { margin-bottom: 10px; }
+    .up-row:last-child { margin-bottom: 0; }
+    .up-row .up-name { font-size: 12px; color: #555; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .up-track { height: 5px; border-radius: 3px; background: #eef2f8; overflow: hidden; }
+    .up-track i { display: block; height: 100%; width: 0; background: #4a6fa5; transition: width .2s; }
+    .up-row.done .up-track i { background: #58a06e; }
+    /* 侧栏：新建报告 + 任务列表（与工作台一致） */
+    .sidebar { overflow: hidden; }
+    .sidebar-new-sec { flex-shrink: 0; }
+    .sidebar-new-report { width: auto; margin-bottom: 0; padding: 10px 14px; border: none; border-radius: 6px; background: transparent; color: #555; font-size: 14px; font-weight: 400; }
+    .sidebar-new-report:hover { background: #dfe9f4; color: #333; }
+    .sidebar-task-text { color: #222; font-weight: 500; }
+    .sidebar-tasks-sec { flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; }
+    .sidebar-task-scroll { flex: 1; min-height: 0; overflow-y: auto; }
+    .sidebar-task-item { position: relative; flex-wrap: wrap; row-gap: 2px; padding: 7px 48px 7px 14px; }
+    .task-actions { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: #dfe9f4; border-radius: 4px; padding: 1px; }
+    .sidebar-task-meta { flex-basis: 100%; font-size: 11px; color: #999; padding-left: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-tasks-toggle { margin-bottom: 2px; padding: 10px 12px; }
+    .sidebar-tasks-toggle .sidebar-icon { border-color: #b9cfe8; color: #4a6fa5; }
+    .sidebar-tasks-arrow {
+      margin-left: auto; width: 22px; height: 22px;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1px solid #b9cfe8; border-radius: 50%; background: #fff;
+      color: #4a6fa5; font-size: 12px; font-weight: 700; line-height: 1;
+      transition: transform 0.15s;
+    }
+    .sidebar-task-filter-row { padding: 0 12px 6px; }
+    .sidebar-task-filter { width: 100%; height: 26px; font-size: 12px; border: 1px solid #d8e2f0; border-radius: 4px; color: #555; background: #fff; cursor: pointer; }
+    body.tasks-collapsed .sidebar-task-scroll,
+    body.tasks-collapsed .sidebar-task-filter-row { display: none; }
+    body.tasks-collapsed .sidebar-tasks-toggle { margin-bottom: 0; }
+    body.tasks-collapsed .sidebar-tasks-arrow { transform: rotate(-90deg); }
+    body.tasks-collapsed .sidebar-tasks-sec { flex: 0 0 auto; }
+    .sidebar-bottom-nav { flex-shrink: 0; }
+    .sidebar-task-loading { text-align: center; font-size: 11px; color: #999; padding: 2px 0 4px; }
+    .task-view-dot { width: 6px; height: 6px; border-radius: 50%; background: #4a6fa5; flex-shrink: 0; display: inline-flex; }
+    .task-view-dot.hide { visibility: hidden; }
+    .task-load-ring {
+      position: absolute; right: 30px; top: 10px; width: 12px; height: 12px;
+      border: 2px solid #d9dde3; border-top-color: #4a6fa5; border-radius: 50%;
+      animation: taskSpin 0.8s linear infinite; flex-shrink: 0;
+    }
+    .sidebar-task-item:hover .task-load-ring { display: none; }
+    .sidebar-task-item.draft .sidebar-task-text { color: #999; }
+    /* Toast */
+    .task-toast {
+      position: fixed;
+      left: 50%;
+      top: 24px;
+      transform: translateX(-50%);
+      z-index: 2000;
+      min-width: 240px;
+      max-width: 420px;
+      padding: 12px 16px;
+      background: #fff;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+      display: none;
+    }
+    .task-toast-close { position: absolute; top: 8px; right: 10px; cursor: pointer; color: #999; font-size: 14px; line-height: 1; }
+    .task-toast-close:hover { color: #333; }
+    .task-toast-title { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 4px; }
+    .task-toast-desc { font-size: 12px; color: #777; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand" title="返回首页" onclick="window.location.href='home.html'">
+      <div class="sidebar-brand-logo">5</div>
+      <div class="sidebar-brand-name">5度易链<small>5 DEGREE EASY CHAIN</small></div>
+    </div>
+    <div class="sidebar-section sidebar-new-sec">
+      <div class="sidebar-item sidebar-new-report" onclick="window.location.href='report.html'">
+        <div class="sidebar-icon">✎</div>
+        <span>新建报告</span>
+      </div>
+    </div>
+    <div class="sidebar-section sidebar-tasks-sec">
+      <div class="sidebar-item sidebar-tasks-toggle" title="展开/收起任务列表" onclick="toggleTasksCollapse()">
+        <div class="sidebar-icon">☰</div>
+        <span>任务列表</span>
+        <span class="sidebar-tasks-arrow" id="tasksArrow">▾</span>
+      </div>
+      <div class="sidebar-task-filter-row" id="taskFilterRow">
+        <select class="sidebar-task-filter" id="taskFilter">
+          <option value="all">全部智能体</option>
+          <option value="可研专业版">可研专业版</option>
+          <option value="项目立项报告">项目立项报告</option>
+        </select>
+      </div>
+      <div class="sidebar-task-scroll" id="sidebarTaskScroll"></div>
+    </div>
+    <div class="sidebar-section sidebar-bottom-nav">
+      <div class="sidebar-item" onclick="window.location.href='assets.html'">
+        <div class="sidebar-icon">▤</div>
+        <span>报告资产</span>
+      </div>
+      <div class="sidebar-item" onclick="window.location.href='knowledge.html'">
+        <div class="sidebar-icon">○</div>
+        <span>知识库</span>
+      </div>
+      <div class="sidebar-item active" onclick="window.location.href='image-library.html'">
+        <div class="sidebar-icon">▧</div>
+        <span>图片库</span>
+      </div>
+    </div>
+
+    <!-- 侧栏底部：用户信息一行 -->
+    <div class="sidebar-footer">
+      <div class="sidebar-user" onclick="openUserMenu(event)">
+        <span class="user-avatar">5</span>
+        <span class="user-name">度小满</span>
+        <span class="user-bell" title="消息" onclick="event.stopPropagation();closeUserMenu();showToast('提示','暂无新消息（原型演示）')">🔔<span class="footer-dot"></span></span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main-content">
+    <div class="content-head">
+      <button class="sidebar-expand-btn" title="展开导航" onclick="toggleSidebar()">›</button>
+      <div class="page-title">图片库</div>
+      <div class="page-actions">
+        <div class="quota-box" id="quotaBox">
+          <span class="quota-text">存储空间 已用 <b id="quotaUsed">0.0MB</b> / 10G</span>
+          <div class="quota-bar"><i id="quotaBar"></i></div>
+        </div>
+        <button class="btn btn-outline" id="createFolderBtn" onclick="createFolder()">＋ 新建文件夹</button>
+        <button class="btn btn-primary" onclick="openUploadModal()">＋ 上传图片</button>
+      </div>
+    </div>
+
+    <!-- 文件夹路径导航 -->
+    <div class="img-breadcrumb" id="imgBreadcrumb"></div>
+
+    <!-- 搜索 -->
+    <div class="search-bar">
+      <input class="input" type="text" placeholder="输入图片或文件夹名称查询" id="searchInput" oninput="renderGrid()">
+      <button class="btn btn-outline" onclick="renderGrid()">🔍 搜索</button>
+    </div>
+
+    <!-- 批量操作栏 -->
+    <div class="batch-bar" id="batchBar" style="display:none;">
+      <span class="batch-count">已选 <b id="batchCount">0</b> 项</span>
+      <button class="btn btn-sm" onclick="openBatchMove()">➜ 移动到…</button>
+      <button class="btn btn-sm batch-btn-danger" onclick="openBatchDelete()">✕ 删除</button>
+      <button class="btn btn-sm btn-outline" onclick="clearSelection()">取消选择</button>
+    </div>
+
+    <!-- 缩略图网格 -->
+    <div class="img-grid-wrap">
+      <div class="img-grid" id="imgGrid"></div>
+      <div class="img-empty" id="imgEmpty" style="display:none;">当前文件夹为空，可新建文件夹或上传图片</div>
+      <div class="upload-here" onclick="openUploadModal()">＋ 上传图片 / 文件夹到此处</div>
+    </div>
+  </main>
+
+  <!-- 悬浮放大预览 -->
+  <div class="zoom-preview" id="zoomPreview">
+    <img id="zoomImg" src="" alt="">
+    <div class="zoom-cap"><span class="zoom-size" id="zoomSize"></span><span id="zoomName"></span></div>
+  </div>
+
+  <!-- 更多操作浮窗 -->
+  <div class="ctx-menu" id="ctxMenu">
+    <span class="ctx-item link-rename">✎ 重命名</span>
+    <span class="ctx-item link-move">➜ 移动到…</span>
+    <span class="ctx-item danger link-del">✕ 删除</span>
+  </div>
+
+  <!-- 上传弹窗 -->
+  <div class="modal-overlay" id="uploadModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title">上传图片</span>
+        <span class="modal-close" onclick="closeUploadModal()">×</span>
+      </div>
+      <div class="modal-body">
+        <div class="upload-target">
+          <label>上传到文件夹</label>
+          <select class="input" id="uploadTargetSelect"></select>
+        </div>
+        <div class="upload-guide">
+          <p>支持选择单张/多张图片上传，或选择整个本地文件夹（仅上传文件夹中的图片文件）。</p>
+          <ul>
+            <li>支持格式：JPG、PNG、GIF、WEBP、BMP、SVG</li>
+            <li>单张图片不超过 10M，个人总存储空间 10G</li>
+            <li>若所选内容中包含非图片文件，系统会先列出不可上传的文件清单</li>
+          </ul>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-outline left" onclick="closeUploadModal()">取消</button>
+          <button class="btn btn-outline" onclick="pickFolderFiles()">选择整个文件夹</button>
+          <button class="btn btn-primary" onclick="pickImageFiles()">选择图片上传</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 不可上传文件提示弹窗 -->
+  <div class="modal-overlay" id="issueModal">
+    <div class="modal-box" style="width:560px;">
+      <div class="modal-header">
+        <span class="modal-title">部分文件无法上传</span>
+        <span class="modal-close" onclick="closeIssueModal()">×</span>
+      </div>
+      <div class="modal-body">
+        <p class="issue-title warn" id="issueTitle">以下文件不能上传，请确认后继续</p>
+        <div class="file-issue-list" id="issueList"></div>
+        <p class="issue-title ok" id="issueOkTitle" style="margin-top:14px;">可上传的图片</p>
+        <div class="file-issue-list" id="issueOkList"></div>
+        <div class="modal-actions">
+          <button class="btn btn-outline left" onclick="closeIssueModal()">取消上传</button>
+          <button class="btn btn-primary" id="issueContinueBtn" onclick="continueUpload()">仍上传可上传的图片</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 移动到文件夹弹窗 -->
+  <div class="modal-overlay" id="moveModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title">移动到文件夹</span>
+        <span class="modal-close" onclick="closeMoveModal()">×</span>
+      </div>
+      <div class="modal-body">
+        <div class="upload-target">
+          <label>目标文件夹</label>
+          <select class="input" id="moveTargetSelect"></select>
+        </div>
+        <div style="margin-top:10px;font-size:12px;color:#999;" id="moveTip"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeMoveModal()">取消</button>
+        <button class="btn btn-primary" onclick="confirmMove()">移动</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 删除确认弹窗 -->
+  <div class="modal-overlay" id="delModal">
+    <div class="modal-box" style="width:440px;">
+      <div class="modal-header">
+        <span class="modal-title">确认删除</span>
+        <span class="modal-close" onclick="closeDelModal()">×</span>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:13px;color:#555;line-height:1.8;" id="delTip"></p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeDelModal()">取消</button>
+        <button class="btn btn-primary" style="background:#c0392b;border-color:#c0392b;" onclick="confirmDelete()">删除</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 用户二级悬浮窗 -->
+  <div class="ctx-menu user-menu" id="userMenu">
+    <div class="user-menu-head">👤 度小满</div>
+    <div class="user-menu-item" onclick="footerAction()">¥ 余额：998<span class="sub">充值 ›</span></div>
+    <div class="user-menu-item" onclick="footerAction()">💬 客服微信</div>
+    <div class="user-menu-divider"></div>
+    <div class="user-menu-title">更多操作</div>
+    <div class="user-menu-item" onclick="footerAction()">帮助中心</div>
+    <div class="user-menu-item" onclick="footerAction()">设置</div>
+    <div class="user-menu-item danger" onclick="footerAction()">退出登录</div>
+  </div>
+
+  <!-- 上传任务面板 -->
+  <div class="upload-panel" id="uploadPanel">
+    <div class="upload-panel-head">
+      <span>上传任务</span>
+      <span class="upload-panel-close" onclick="closeUploadPanel()">×</span>
+    </div>
+    <div class="upload-panel-body" id="uploadPanelBody"></div>
+  </div>
+
+  <!-- Toast -->
+  <div class="task-toast" id="actionToast">
+    <span class="task-toast-close" onclick="closeToast()">×</span>
+    <div class="task-toast-title" id="toastTitle">提示</div>
+    <div class="task-toast-desc" id="toastDesc">操作已触发（原型演示）</div>
+  </div>
+
+  <input type="file" id="imgFileInput" accept="image/*" multiple style="display:none">
+  <input type="file" id="imgFolderInput" webkitdirectory directory multiple style="display:none">
+
+  <script>
+    /* ==================== 侧栏展开/收起 ==================== */
+    function toggleSidebar() {
+      document.body.classList.toggle('sidebar-collapsed');
+      try { localStorage.setItem('wbdmSidebarCollapsed', document.body.classList.contains('sidebar-collapsed') ? '1' : '0'); } catch (e) {}
+    }
+    (function initSidebarCollapse() {
+      document.body.classList.remove('sidebar-collapsed');
+    })();
+    function toggleTasksCollapse() {
+      document.body.classList.toggle('tasks-collapsed');
+      try { localStorage.setItem('wbdmTasksCollapsed', document.body.classList.contains('tasks-collapsed') ? '1' : '0'); } catch (e) {}
+    }
+    (function initTasksCollapse() {
+      try { if (localStorage.getItem('wbdmTasksCollapsed') === '1') document.body.classList.add('tasks-collapsed'); } catch (e) {}
+    })();
+    function openUserMenu(e) {
+      e.stopPropagation();
+      const m = document.getElementById('userMenu');
+      const rect = e.currentTarget.getBoundingClientRect();
+      m.style.display = 'block';
+      m.style.left = Math.max(8, rect.left) + 'px';
+      const menuH = m.offsetHeight;
+      if (window.innerHeight - rect.bottom - 4 < menuH) m.style.top = Math.max(8, rect.top - menuH - 4) + 'px';
+      else m.style.top = (rect.bottom + 4) + 'px';
+    }
+    function closeUserMenu() { document.getElementById('userMenu').style.display = 'none'; }
+    function footerAction() { closeUserMenu(); showToast('提示', '该功能为原型演示'); }
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('#userMenu') && !e.target.closest('.sidebar-user')) closeUserMenu();
+    });
+
+    /* ==================== 侧栏：任务列表（与工作台一致） ==================== */
+    const SIDEBAR_TASKS = [
+      { name: '草稿 08-14 09:12', exec: 'draft', viewed: false, step: 1, agent: '可研专业版' },
+      { name: '草稿 08-14 10:05', exec: 'draft', viewed: false, step: 2, agent: '可研专业版' },
+      { name: '企查查科技_商业大数据可研', exec: 'running', viewed: true, agent: '可研专业版' },
+      { name: '某某集团_企业全景尽调分析', exec: 'running', viewed: true, agent: '企业全景分析' },
+      { name: '北京笃威尔_智能仓储立项报告', exec: 'done', viewed: false, agent: '项目立项报告' },
+      { name: '星云半导体_投前尽调报告', exec: 'done', viewed: false, agent: '投前咨询分析' },
+      { name: '园区管委会_招商策略初稿', exec: 'done', viewed: true, agent: '招商策略分析' },
+      { name: '华能集团_冷链项目立项报告', exec: 'done', viewed: true, agent: '项目立项报告' },
+      { name: '清源能源_新能源可研报告', exec: 'done', viewed: true, exported: true, agent: '可研专业版' },
+      { name: '宏远银行_数据治理立项', exec: 'done', viewed: true, exported: true, agent: '项目立项报告' },
+      { name: '芯测半导体_投前咨询报告', exec: 'done', viewed: true, agent: '投前咨询分析' },
+      { name: '城数集团_智慧城市数据中心立项', exec: 'done', viewed: true, exported: true, agent: '项目立项报告' },
+      { name: '光晟科技_光伏组件产线可研', exec: 'done', viewed: true, agent: '可研专业版' },
+      { name: '医联物流_医药物流园区立项', exec: 'done', viewed: true, agent: '项目立项报告' },
+      { name: '冷链云_冷链企业全景尽调', exec: 'done', viewed: true, agent: '企业全景分析' }
+    ];
+    const SIDEBAR_TASK_PAGE = 20;
+    let sidebarTaskPage = 0;
+    let sidebarTaskFilter = 'all';
+    let sidebarTaskLoading = false;
+    function sidebarTaskPriority(t) {
+      if (t.exec === 'draft') return 0;
+      if (t.exec === 'running') return 1;
+      if (t.exec === 'done' && !t.viewed) return 2;
+      return 3;
+    }
+    function sidebarTaskList() {
+      const list = sidebarTaskFilter === 'all'
+        ? SIDEBAR_TASKS
+        : SIDEBAR_TASKS.filter(t => t.agent === sidebarTaskFilter);
+      return list.slice().sort((a, b) => sidebarTaskPriority(a) - sidebarTaskPriority(b));
+    }
+    function renderSidebarTaskItem(t) {
+      const el = document.createElement('div');
+      el.className = 'sidebar-task-item' + (t.exec === 'draft' ? ' draft' : '');
+      el.dataset.agent = t.agent;
+      el.onclick = function () {
+        const dot = el.querySelector('.task-view-dot');
+        if (dot) dot.classList.add('hide');
+        window.location.href = 'report.html?taskId=' + SIDEBAR_TASKS.indexOf(t);
+      };
+      const unviewed = t.exec === 'done' && !t.viewed;
+      const viewDot = '<span class="task-view-dot' + (unviewed ? '' : ' hide') + '" title="未查看"></span>';
+      const ring = t.exec === 'running' ? '<span class="task-load-ring" title="报告生成中"></span>' : '';
+      el.innerHTML = viewDot
+        + '<span class="sidebar-task-text">' + t.name + '</span>'
+        + ring
+        + '<span class="sidebar-task-meta">' + t.agent + '</span>'
+        + '<span class="task-actions">'
+        + '<button class="task-act" title="编辑任务名称" onclick="event.stopPropagation();showToast(\'提示\',\'该功能为原型演示\')">✎</button>'
+        + '<button class="task-act danger" title="删除任务" onclick="event.stopPropagation();showToast(\'提示\',\'该功能为原型演示\')">✕</button>'
+        + '</span>';
+      return el;
+    }
+    function loadSidebarTasks() {
+      const scroll = document.getElementById('sidebarTaskScroll');
+      if (!scroll) return;
+      const list = sidebarTaskList();
+      const start = sidebarTaskPage * SIDEBAR_TASK_PAGE;
+      const batch = list.slice(start, start + SIDEBAR_TASK_PAGE);
+      batch.forEach(t => scroll.appendChild(renderSidebarTaskItem(t)));
+      sidebarTaskPage++;
+      let l = document.getElementById('sidebarTaskLoading');
+      if (!l) {
+        l = document.createElement('div');
+        l.id = 'sidebarTaskLoading';
+        l.className = 'sidebar-task-loading';
+        scroll.appendChild(l);
+      }
+      l.textContent = start + batch.length >= list.length ? '已全部加载' : '加载中…';
+      scroll.appendChild(l);
+      sidebarTaskLoading = false;
+    }
+    function initSidebarTasks() {
+      sidebarTaskPage = 0;
+      sidebarTaskLoading = false;
+      const scroll = document.getElementById('sidebarTaskScroll');
+      if (scroll) scroll.innerHTML = '';
+      loadSidebarTasks();
+    }
+    function filterSidebarTasks(sel) {
+      sidebarTaskFilter = sel.value;
+      initSidebarTasks();
+    }
+    document.getElementById('sidebarTaskScroll').addEventListener('scroll', function () {
+      if (this.scrollTop + this.clientHeight >= this.scrollHeight - 40) {
+        const list = sidebarTaskList();
+        if (sidebarTaskPage * SIDEBAR_TASK_PAGE < list.length && !sidebarTaskLoading) {
+          sidebarTaskLoading = true;
+          setTimeout(loadSidebarTasks, 400);
+        }
+      }
+    });
+    initSidebarTasks();
+
+    /* 任务名称悬浮气泡：仅当名称被截断时显示完整名称 */
+    (function initTaskTip() {
+      const tip = document.createElement('div');
+      tip.className = 'task-tip';
+      document.body.appendChild(tip);
+      document.querySelectorAll('.sidebar-task-text').forEach(el => {
+        const full = el.textContent.trim();
+        el.addEventListener('mouseenter', function () {
+          if (el.scrollWidth > el.clientWidth + 1) {
+            tip.textContent = full;
+            tip.style.display = 'block';
+          }
+        });
+        el.addEventListener('mousemove', function (e) {
+          if (tip.style.display === 'block') {
+            tip.style.left = Math.min(e.clientX + 12, window.innerWidth - 280) + 'px';
+            tip.style.top = (e.clientY + 12) + 'px';
+          }
+        });
+        el.addEventListener('mouseleave', function () { tip.style.display = 'none'; });
+      });
+    })();
+
+    /* ==================== 常量与工具 ==================== */
+    const QUOTA_TOTAL = 10 * 1024 * 1024 * 1024; // 个人总空间 10G
+    const MAX_IMG_SIZE = 10 * 1024 * 1024;       // 单张上限 10M
+    const MAX_FOLDER_LEVEL = 3;                  // 最多三层文件夹
+    const IMG_EXT = /\.(png|jpe?g|gif|webp|bmp|svg|ico|tiff?)$/i;
+    const STORE_KEY = 'wbdmImageLibrary';
+    const ZOOM_MAX_W = 460;
+    const ZOOM_MAX_H = 340;
+
+    function escHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+    function nowText() { return new Date().toISOString().replace('T', ' ').slice(0, 16); }
+    function fmtSize(bytes) {
+      if (bytes >= 1024 * 1024 * 1024) return (bytes / 1024 / 1024 / 1024).toFixed(2) + 'G';
+      if (bytes >= 1024 * 1024) return (bytes / 1024 / 1024).toFixed(2) + 'M';
+      if (bytes >= 1024) return (bytes / 1024).toFixed(1) + 'KB';
+      return bytes + 'B';
+    }
+    function showToast(title, desc) {
+      document.getElementById('toastTitle').textContent = title || '提示';
+      document.getElementById('toastDesc').textContent = desc || '操作已完成（原型演示）';
+      const t = document.getElementById('actionToast');
+      t.style.display = 'block';
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(closeToast, 2600);
+    }
+    function closeToast() { document.getElementById('actionToast').style.display = 'none'; }
+
+    /* ==================== 演示图片（SVG 占位图，真实可显示） ==================== */
+    function demoImg(label, w, h, c1, c2) {
+      const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">'
+        + '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">'
+        + '<stop offset="0" stop-color="' + c1 + '"/><stop offset="1" stop-color="' + c2 + '"/></linearGradient></defs>'
+        + '<rect width="' + w + '" height="' + h + '" fill="url(#g)"/>'
+        + '<circle cx="' + (w * .78) + '" cy="' + (h * .24) + '" r="' + (Math.min(w, h) * .16) + '" fill="#ffffff" fill-opacity=".22"/>'
+        + '<circle cx="' + (w * .24) + '" cy="' + (h * .78) + '" r="' + (Math.min(w, h) * .24) + '" fill="#ffffff" fill-opacity=".12"/>'
+        + '<text x="50%" y="52%" text-anchor="middle" font-family="Microsoft YaHei,Arial" font-size="' + Math.round(Math.min(w, h) * .12) + '" fill="#ffffff" fill-opacity=".95">' + label + '</text>'
+        + '</svg>';
+      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+    function demoItem(name, w, h, c1, c2, size) {
+      return {
+        type: 'image', name: name, src: demoImg(name.replace(/\.[^.]+$/, ''), w, h, c1, c2),
+        size: size, time: '2026-09-12 09:30', updateTime: '2026-09-12 09:30', w: w, h: h
+      };
+    }
+
+    function seedTree() {
+      return {
+        type: 'folder', name: '全部图片', time: '—', updateTime: '—', children: [
+          { type: 'folder', name: '项目现场照片', time: '2026-09-10 10:20', updateTime: '2026-09-19 16:40', children: [
+            demoItem('项目地块鸟瞰图.png', 1280, 860, '#4a6fa5', '#7aa5d2', 2.4 * 1024 * 1024),
+            demoItem('数据中心机房.jpg', 960, 1280, '#3f6b8f', '#6fa0c4', 1.8 * 1024 * 1024),
+            demoItem('施工现场全景.jpg', 1600, 900, '#5b7f9e', '#9dc0d8', 3.1 * 1024 * 1024),
+            { type: 'folder', name: '施工进展', time: '2026-09-11 14:05', updateTime: '2026-09-18 11:22', children: [
+              demoItem('主体结构封顶.png', 1440, 960, '#6b8f6f', '#a3c7a5', 2.0 * 1024 * 1024),
+              demoItem('园区道路施工.jpg', 320, 240, '#8f7f6b', '#c7b9a3', 260 * 1024),
+              { type: 'folder', name: '一期工程', time: '2026-09-11 15:30', updateTime: '2026-09-17 09:48', children: [
+                demoItem('研发楼外立面.jpg', 1100, 1400, '#7a6b8f', '#b3a3c7', 2.6 * 1024 * 1024),
+                demoItem('实验室平面图.png', 900, 620, '#4a6fa5', '#8ab0cf', 780 * 1024)
+              ]}
+            ]}
+          ]},
+          { type: 'folder', name: '图表素材', time: '2026-09-08 09:12', updateTime: '2026-09-20 10:05', children: [
+            demoItem('财务状况趋势图.png', 1200, 720, '#2f6f8f', '#67a9c8', 640 * 1024),
+            demoItem('技术路线示意图.png', 1000, 700, '#4a6fa5', '#86a8cf', 520 * 1024),
+            demoItem('组织架构图.png', 240, 180, '#6f8f4a', '#a8cf86', 120 * 1024)
+          ]},
+          { type: 'folder', name: '产品与资质', time: '2026-09-05 16:40', updateTime: '2026-09-15 15:12', children: [
+            demoItem('软件著作权证书.png', 900, 1250, '#8f4a4a', '#cf8686', 1.4 * 1024 * 1024),
+            demoItem('产品界面截图.png', 1440, 900, '#4a6f8f', '#8fb6cf', 1.1 * 1024 * 1024)
+          ]},
+          demoItem('企业logo.png', 400, 160, '#3d5f92', '#7fa3d0', 86 * 1024)
+        ]
+      };
+    }
+
+    /* ==================== 数据加载与持久化 ==================== */
+    let IMG_ROOT = seedTree();
+    (function loadLibrary() {
+      try {
+        const raw = localStorage.getItem(STORE_KEY);
+        if (raw) {
+          const data = JSON.parse(raw);
+          if (data && data.tree && data.tree.children) IMG_ROOT = data.tree;
+        }
+      } catch (e) { /* 读取失败则使用演示数据 */ }
+    })();
+    function saveLibrary() {
+      try {
+        localStorage.setItem(STORE_KEY, JSON.stringify({ tree: IMG_ROOT, savedAt: nowText() }));
+        return true;
+      } catch (e) {
+        return false; // 空间不足：仅本次会话内有效
+      }
+    }
+    function persist() {
+      if (!saveLibrary()) showToast('提示', '本地演示存储空间已满，本次上传内容仅在当前会话内有效');
+    }
+
+    let imgPath = [IMG_ROOT];
+    let imgFolderSeq = 1;
+    let imgSelected = [];
+    let imgVisible = [];
+    let curQuery = '';
+
+    /* 在指定文件夹子树内按关键词搜索（根目录即全库），并记录命中项的相对路径 */
+    function searchIn(node, q, prefix, out) {
+      node.children.forEach(c => {
+        if (c.name.toLowerCase().includes(q)) out.push({ it: c, path: prefix });
+        if (c.type === 'folder') searchIn(c, q, prefix ? prefix + ' / ' + c.name : c.name, out);
+      });
+      return out;
+    }
+    let ctxItem = null;
+    let moveItems = [];
+    let moveCandidates = [];
+    let uploadTarget = IMG_ROOT;
+    let pendingValidFiles = [];
+    let pendingFiles = [];
+    let pendingMode = 'image';
+
+    function currentFolder() { return imgPath[imgPath.length - 1]; }
+
+    /* 全部图片（递归） */
+    function allImages(node, out) {
+      out = out || [];
+      node.children.forEach(c => { if (c.type === 'image') out.push(c); else allImages(c, out); });
+      return out;
+    }
+    function usedBytes() {
+      return allImages(IMG_ROOT).reduce((s, it) => s + (it.size || 0), 0);
+    }
+    function updateQuota() {
+      const used = usedBytes();
+      const pct = Math.min(100, used / QUOTA_TOTAL * 100);
+      document.getElementById('quotaUsed').textContent = used >= 1024 * 1024 * 1024
+        ? (used / 1024 / 1024 / 1024).toFixed(2) + 'G'
+        : (used / 1024 / 1024).toFixed(1) + 'M';
+      document.getElementById('quotaBar').style.width = Math.max(pct, used ? 1.5 : 0) + '%';
+      document.getElementById('quotaBox').classList.toggle('warn', pct >= 90);
+    }
+
+    /* 文件夹层级工具 */
+    function collectFolders(node, level, prefix, out) {
+      node.children.filter(c => c.type === 'folder').forEach(f => {
+        out.push({ folder: f, level: level, label: prefix + f.name });
+        collectFolders(f, level + 1, prefix + f.name + '/', out);
+      });
+      return out;
+    }
+    function subtreeLevels(folder) {
+      const kids = folder.children.filter(c => c.type === 'folder');
+      if (!kids.length) return 1;
+      return 1 + Math.max.apply(null, kids.map(subtreeLevels));
+    }
+    function isDescendant(node, target) {
+      if (node === target) return true;
+      return node.children.some(c => c.type === 'folder' && isDescendant(c, target));
+    }
+
+    /* ==================== 渲染 ==================== */
+    function renderGrid() {
+      const bc = document.getElementById('imgBreadcrumb');
+      bc.innerHTML = '';
+      const crumbs = imgPath.slice(1);
+      if (!crumbs.length) {
+        bc.style.display = 'none';
+      } else {
+        bc.style.display = 'flex';
+        const home = document.createElement('span');
+        home.className = 'bc-item';
+        home.textContent = '默认列表';
+        home.onclick = () => { imgPath = [IMG_ROOT]; renderGrid(); };
+        bc.appendChild(home);
+        const sep0 = document.createElement('span');
+        sep0.className = 'bc-sep';
+        sep0.textContent = '/';
+        bc.appendChild(sep0);
+        crumbs.forEach((f, i) => {
+          const item = document.createElement('span');
+          item.className = 'bc-item' + (i === crumbs.length - 1 ? ' current' : '');
+          item.textContent = f.name;
+          item.onclick = () => { imgPath = imgPath.slice(0, i + 2); renderGrid(); };
+          bc.appendChild(item);
+          if (i < crumbs.length - 1) {
+            const sep = document.createElement('span');
+            sep.className = 'bc-sep';
+            sep.textContent = '/';
+            bc.appendChild(sep);
+          }
+        });
+        const tip = document.createElement('span');
+        tip.className = 'bc-level-tip';
+        tip.textContent = '当前第 ' + crumbs.length + ' 层 / 最多 ' + MAX_FOLDER_LEVEL + ' 层';
+        bc.appendChild(tip);
+      }
+
+      const createBtn = document.getElementById('createFolderBtn');
+      const level = imgPath.length - 1; // 根目录 0
+      const canCreate = level < MAX_FOLDER_LEVEL;
+      createBtn.style.display = canCreate ? '' : 'none';
+      createBtn.title = canCreate ? '在当前文件夹下新建文件夹' : '已达到三层文件夹上限，不能继续新建';
+
+      const q = document.getElementById('searchInput').value.trim().toLowerCase();
+      const grid = document.getElementById('imgGrid');
+      grid.innerHTML = '';
+      // 搜索范围为当前文件夹的整个子树：根目录时即全库检索
+      let items;
+      curQuery = q;
+      if (q) {
+        items = searchIn(currentFolder(), q, '', []).map(h => { h.it._sp = h.path; return h.it; });
+      } else {
+        items = currentFolder().children.slice();
+        currentFolder().children.forEach(it => { delete it._sp; });
+      }
+      items = items.slice().sort((a, b) => (a.type === b.type ? 0 : a.type === 'folder' ? -1 : 1));
+      document.getElementById('imgEmpty').style.display = items.length ? 'none' : 'block';
+      if (!items.length) document.getElementById('imgEmpty').textContent = q ? '未找到匹配的图片或文件夹' : '当前文件夹暂无内容';
+      imgVisible = items;
+      imgSelected = imgSelected.filter(it => items.indexOf(it) >= 0);
+      updateBatchBar();
+      grid.classList.toggle('selecting', imgSelected.length > 0);
+
+      items.forEach(it => grid.appendChild(buildCard(it)));
+      updateQuota();
+    }
+
+    function buildCard(it) {
+      const card = document.createElement('div');
+      card.className = 'img-card' + (imgSelected.indexOf(it) >= 0 ? ' selected' : '');
+      if (it.type === 'folder') {
+        const n = allImages(it).length;
+        card.innerHTML = '<div class="img-thumb folder-thumb"><span>📁</span><span class="folder-count">' + n + ' 张图片</span></div>'
+          + '<div class="img-name" title="' + escHtml(it.name) + '">' + escHtml(it.name) + '</div>'
+          + '<div class="img-meta">' + (it._sp ? '📁 ' + escHtml(it._sp) + ' · ' : '') + it.children.length + ' 个子项 · ' + (it.updateTime || it.time) + '</div>';
+      } else {
+        card.innerHTML = '<div class="img-thumb"><img src="' + it.src + '" alt="' + escHtml(it.name) + '"></div>'
+          + '<div class="img-name" title="' + escHtml(it.name) + '">' + escHtml(it.name) + '</div>'
+          + '<div class="img-meta">' + (it._sp ? '📁 ' + escHtml(it._sp) + ' · ' : '') + fmtSize(it.size || 0) + ' · ' + (it.updateTime || it.time) + '</div>';
+      }
+      // 勾选框
+      const check = document.createElement('label');
+      check.className = 'img-check';
+      check.innerHTML = '<input type="checkbox"' + (imgSelected.indexOf(it) >= 0 ? ' checked' : '') + '>';
+      check.title = '选择';
+      check.onclick = e => e.stopPropagation();
+      check.querySelector('input').onchange = function () {
+        const i = imgSelected.indexOf(it);
+        if (this.checked && i === -1) imgSelected.push(it);
+        if (!this.checked && i > -1) imgSelected.splice(i, 1);
+        renderGrid();
+      };
+      card.appendChild(check);
+      // 更多操作
+      const more = document.createElement('button');
+      more.className = 'img-more';
+      more.textContent = '⋯';
+      more.title = '更多操作';
+      more.onclick = e => { e.stopPropagation(); openMoreMenu(more, it); };
+      card.appendChild(more);
+
+      const thumb = card.querySelector('.img-thumb');
+      const nameEl = card.querySelector('.img-name');
+      if (it.type === 'folder') {
+        thumb.onclick = () => { imgPath.push(it); renderGrid(); };
+        thumb.ondblclick = null;
+      } else {
+        thumb.onmouseenter = () => showZoom(thumb, it);
+        thumb.onmouseleave = hideZoom;
+        thumb.onclick = e => {
+          if (e.target.closest('.img-check') || e.target.closest('.img-more')) return;
+          showZoom(thumb, it);
+        };
+      }
+      nameEl.ondblclick = e => { e.stopPropagation(); startRename(it, card); };
+      return card;
+    }
+
+    /* ==================== 悬浮放大预览 ==================== */
+    const zoomEl = document.getElementById('zoomPreview');
+    const zoomImg = document.getElementById('zoomImg');
+    function showZoom(anchor, it) {
+      const box = anchor.getBoundingClientRect();
+      const natW = it.w || 0, natH = it.h || 0;
+      let w = it.w, h = it.h;
+      if (natW && natH) {
+        // 未超过最大宽高则按 100% 展示，超过则等比压缩到最大宽高
+        const scale = Math.min(1, ZOOM_MAX_W / natW, ZOOM_MAX_H / natH);
+        w = Math.round(natW * scale);
+        h = Math.round(natH * scale);
+      } else {
+        w = ZOOM_MAX_W; h = ZOOM_MAX_H;
+      }
+      zoomImg.style.width = w + 'px';
+      zoomImg.style.height = h + 'px';
+      zoomImg.src = it.src;
+      document.getElementById('zoomName').textContent = it.name;
+      document.getElementById('zoomSize').textContent = fmtSize(it.size || 0) + (w < natW ? ' · 缩放预览' : ' · 原始大小');
+      zoomEl.style.display = 'block';
+      const pw = zoomEl.offsetWidth, ph = zoomEl.offsetHeight;
+      let left = box.right + 12;
+      if (left + pw > window.innerWidth - 8) left = Math.max(8, box.left - pw - 12);
+      let top = box.top + box.height / 2 - ph / 2;
+      top = Math.max(8, Math.min(top, window.innerHeight - ph - 8));
+      zoomEl.style.left = left + 'px';
+      zoomEl.style.top = top + 'px';
+    }
+    function hideZoom() { zoomEl.style.display = 'none'; }
+    document.addEventListener('scroll', hideZoom, true);
+
+    /* ==================== 选择 / 批量操作 ==================== */
+    function updateBatchBar() {
+      const bar = document.getElementById('batchBar');
+      document.getElementById('batchCount').textContent = imgSelected.length;
+      bar.style.display = imgSelected.length ? 'flex' : 'none';
+      const grid = document.getElementById('imgGrid');
+      if (grid) grid.classList.toggle('selecting', imgSelected.length > 0);
+    }
+    function clearSelection() { imgSelected = []; renderGrid(); }
+
+    /* ==================== 更多操作 / 重命名 / 移动 / 删除 ==================== */
+    const ctxMenu = document.getElementById('ctxMenu');
+    function openMoreMenu(btn, it) {
+      ctxItem = it;
+      ctxMenu.style.display = 'block';
+      const rect = btn.getBoundingClientRect();
+      ctxMenu.style.left = Math.max(8, rect.right - ctxMenu.offsetWidth) + 'px';
+      const menuH = ctxMenu.offsetHeight;
+      if (rect.top >= menuH + 8 || rect.top > window.innerHeight - rect.bottom) {
+        ctxMenu.style.top = Math.max(8, rect.top - menuH - 4) + 'px';
+      } else {
+        ctxMenu.style.top = (rect.bottom + 4) + 'px';
+      }
+      ctxMenu.querySelector('.link-rename').onclick = function () {
+        closeMoreMenu();
+        const card = btn.closest('.img-card');
+        if (card) startRename(it, card);
+      };
+      ctxMenu.querySelector('.link-move').onclick = function () {
+        closeMoreMenu();
+        openMoveModal([it], it.type === 'folder'
+          ? '文件夹移动：其内图片将批量移动到目标文件夹，原文件夹删除'
+          : '将图片移动到指定文件夹');
+      };
+      ctxMenu.querySelector('.link-del').onclick = function () { closeMoreMenu(); openDeleteModal([it]); };
+    }
+    function closeMoreMenu() { ctxMenu.style.display = 'none'; }
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.ctx-menu') && !e.target.closest('.img-more')) closeMoreMenu();
+    });
+    window.addEventListener('scroll', closeMoreMenu, true);
+
+    function startRename(item, card) {
+      const nameEl = card.querySelector('.img-name');
+      const input = document.createElement('input');
+      input.className = 'img-name-input';
+      input.value = item.name;
+      nameEl.replaceWith(input);
+      input.focus();
+      const dot = item.name.lastIndexOf('.');
+      if (item.type === 'image' && dot > 0) input.setSelectionRange(0, dot); else input.select();
+      let done = false;
+      function finish(save) {
+        if (done) return;
+        done = true;
+        const val = input.value.trim();
+        if (save && val && val !== item.name) {
+          const dup = currentFolder().children.some(x => x !== item && x.name === val);
+          if (dup) { showToast('重命名失败', '当前文件夹下已存在同名项目'); }
+          else {
+            item.name = val;
+            item.updateTime = nowText();
+            if (currentFolder() !== IMG_ROOT) currentFolder().updateTime = nowText();
+            persist();
+            showToast('已重命名', val);
+          }
+        }
+        renderGrid();
+      }
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+        else if (e.key === 'Escape') finish(false);
+        e.stopPropagation();
+      });
+      input.addEventListener('blur', function () { finish(true); });
+    }
+
+    function createFolder() {
+      const level = imgPath.length - 1;
+      if (level >= MAX_FOLDER_LEVEL) { showToast('无法新建', '最多支持三层文件夹'); return; }
+      const folder = { type: 'folder', name: '新建文件夹' + (imgFolderSeq++), time: nowText(), updateTime: nowText(), children: [] };
+      currentFolder().children.unshift(folder);
+      persist();
+      renderGrid();
+      const card = document.querySelector('#imgGrid .img-card');
+      if (card) startRename(folder, card);
+    }
+
+    function openBatchMove() {
+      if (!imgSelected.length) return;
+      const hasFolder = imgSelected.some(it => it.type === 'folder');
+      openMoveModal(imgSelected.slice(), hasFolder
+        ? '文件夹移动：其内图片将批量并入目标文件夹，原文件夹删除'
+        : '共 ' + imgSelected.length + ' 张图片将被移动');
+    }
+    function openMoveModal(items, tip) {
+      moveItems = items;
+      const exclude = items.filter(it => it.type === 'folder');
+      const folders = [];
+      collectFolders(IMG_ROOT, 1, '', folders);
+      const needLevels = exclude.length ? Math.max.apply(null, exclude.map(subtreeLevels)) : 1;
+      moveCandidates = [];
+      // 允许移动到根目录（默认列表）
+      if (currentFolder() !== IMG_ROOT) moveCandidates.push({ folder: IMG_ROOT, label: '根目录（默认列表）' });
+      folders.forEach(f => {
+        if (f.folder === currentFolder()) return;
+        if (exclude.some(e => isDescendant(e, f.folder))) return;              // 不能移动到自身或其子文件夹
+        if (f.level + needLevels > MAX_FOLDER_LEVEL) return;                    // 不能超过三层
+        moveCandidates.push(f);
+      });
+      const sel = document.getElementById('moveTargetSelect');
+      sel.innerHTML = moveCandidates.length
+        ? moveCandidates.map((f, i) => '<option value="' + i + '">' + f.label + '</option>').join('')
+        : '<option value="">暂无可移动的目标位置</option>';
+      document.getElementById('moveTip').textContent = tip || ('共 ' + items.length + ' 项');
+      document.getElementById('moveModal').classList.add('active');
+    }
+    function closeMoveModal() { document.getElementById('moveModal').classList.remove('active'); }
+    function confirmMove() {
+      const sel = document.getElementById('moveTargetSelect');
+      const target = moveCandidates[Number(sel.value)];
+      if (!target || !moveItems.length) { closeMoveModal(); return; }
+      const cur = currentFolder();
+      moveItems.forEach(item => {
+        const i = cur.children.indexOf(item);
+        if (i < 0) return;
+        if (item.type === 'folder') {
+          item.children.forEach(c => target.folder.children.push(c));
+          cur.children.splice(i, 1);
+        } else {
+          cur.children.splice(i, 1);
+          target.folder.children.push(item);
+        }
+      });
+      if (cur !== IMG_ROOT) cur.updateTime = nowText();
+      if (target.folder !== IMG_ROOT) target.folder.updateTime = nowText();
+      moveItems = [];
+      imgSelected = [];
+      persist();
+      closeMoveModal();
+      renderGrid();
+      showToast('已移动', '内容已移动到「' + target.folder.name + '」');
+    }
+
+    let delItems = [];
+    function openDeleteModal(items) {
+      delItems = items;
+      const n = items.length;
+      const hasFolder = items.some(it => it.type === 'folder');
+      const imgs = items.reduce((s, it) => s + (it.type === 'folder' ? allImages(it).length : 1), 0);
+      document.getElementById('delTip').innerHTML = hasFolder
+        ? '将删除所选 <b>' + n + '</b> 个文件夹（含其中共 ' + imgs + ' 张图片），删除后不可恢复，是否继续？'
+        : '将删除所选 <b>' + n + '</b> 张图片，删除后不可恢复，是否继续？';
+      document.getElementById('delModal').classList.add('active');
+    }
+    function openBatchDelete() { if (imgSelected.length) openDeleteModal(imgSelected.slice()); }
+    function closeDelModal() { document.getElementById('delModal').classList.remove('active'); }
+    function confirmDelete() {
+      const cur = currentFolder();
+      delItems.forEach(it => {
+        const i = cur.children.indexOf(it);
+        if (i > -1) cur.children.splice(i, 1);
+      });
+      if (cur !== IMG_ROOT) cur.updateTime = nowText();
+      delItems = [];
+      imgSelected = [];
+      persist();
+      closeDelModal();
+      renderGrid();
+      showToast('已删除', '所选内容已从图片库移除');
+    }
+
+    /* ==================== 上传 ==================== */
+    function openUploadModal() {
+      const folders = [];
+      collectFolders(IMG_ROOT, 1, '', folders);
+      const sel = document.getElementById('uploadTargetSelect');
+      const validTargets = folders.filter(f => f.level <= MAX_FOLDER_LEVEL - 1);
+      const curIdx = imgPath.length > 1 ? validTargets.findIndex(f => f.folder === currentFolder()) : -1;
+      sel.innerHTML = '<option value="root">根目录（默认列表）</option>'
+        + validTargets.map((f, i) => '<option value="' + i + '">' + f.label + '</option>').join('');
+      sel.value = curIdx === -1 ? 'root' : String(curIdx);
+      uploadTarget = curIdx === -1 ? IMG_ROOT : validTargets[curIdx].folder;
+      sel.onchange = function () {
+        uploadTarget = this.value === 'root' ? IMG_ROOT : validTargets[Number(this.value)].folder;
+      };
+      document.getElementById('uploadModal').classList.add('active');
+    }
+    function closeUploadModal() { document.getElementById('uploadModal').classList.remove('active'); }
+    function pickImageFiles() {
+      document.getElementById('imgFileInput').value = '';
+      document.getElementById('imgFileInput').click();
+      pendingMode = 'image';
+    }
+    function pickFolderFiles() {
+      document.getElementById('imgFolderInput').value = '';
+      document.getElementById('imgFolderInput').click();
+      pendingMode = 'folder';
+    }
+    document.getElementById('imgFileInput').addEventListener('change', function () { handlePicked(this.files, 'image'); });
+    document.getElementById('imgFolderInput').addEventListener('change', function () { handlePicked(this.files, 'folder'); });
+
+    function isImageFile(f) {
+      const byType = !!(f.type && /^image\//.test(f.type));
+      const byExt = IMG_EXT.test(f.name || '');
+      return byType || byExt;
+    }
+
+    function handlePicked(fileList, mode) {
+      const files = Array.prototype.slice.call(fileList || []);
+      if (!files.length) return;
+      closeUploadModal();
+      const invalid = [];
+      const valid = [];
+      files.forEach(f => {
+        const isImg = isImageFile(f);
+        if (!isImg) invalid.push({ name: f.name, reason: '非图片格式，当前仅支持 JPG / PNG / GIF / WEBP / BMP / SVG' });
+        else if (f.size > MAX_IMG_SIZE) invalid.push({ name: f.name, reason: '大小 ' + fmtSize(f.size) + '，超过单张 10M 上限' });
+        else valid.push(f);
+      });
+      // 总空间校验（按累计占用判断）
+      let remain = QUOTA_TOTAL - usedBytes();
+      const fit = [];
+      valid.forEach(f => {
+        if (f.size <= remain) { fit.push(f); remain -= f.size; }
+        else invalid.push({ name: f.name, reason: '剩余空间不足（剩余 ' + fmtSize(Math.max(remain, 0)) + '），请先调整存储内容' });
+      });
+      pendingFiles = files;
+      pendingValidFiles = fit;
+      if (invalid.length) {
+        showIssueModal(invalid, fit, mode);
+      } else {
+        startUpload(fit, mode);
+      }
+    }
+
+    function showIssueModal(invalid, fit, mode) {
+      document.getElementById('issueList').innerHTML = invalid.map(x =>
+        '<div class="file-issue-row"><span class="n" title="' + escHtml(x.name) + '">' + escHtml(x.name) + '</span><span class="r">' + escHtml(x.reason) + '</span></div>'
+      ).join('');
+      document.getElementById('issueOkList').innerHTML = fit.length
+        ? fit.map(f => '<div class="file-issue-row"><span class="n" title="' + escHtml(f.name) + '">' + escHtml(f.name) + '</span><span class="r" style="color:#27804a;">' + fmtSize(f.size) + '</span></div>').join('')
+        : '<div class="file-issue-row"><span class="n">无可上传的图片</span></div>';
+      document.getElementById('issueTitle').textContent = '以下 ' + invalid.length + ' 个文件不能上传，' + (mode === 'folder' ? '所选文件夹中已筛选出可上传的图片' : '请确认后继续');
+      const btn = document.getElementById('issueContinueBtn');
+      btn.disabled = !fit.length;
+      btn.textContent = fit.length ? '仍上传可上传的 ' + fit.length + ' 张图片' : '无可上传图片';
+      pendingMode = mode;
+      document.getElementById('issueModal').classList.add('active');
+    }
+    function closeIssueModal() { document.getElementById('issueModal').classList.remove('active'); }
+    function continueUpload() {
+      closeIssueModal();
+      if (!pendingValidFiles.length) return;
+      startUpload(pendingValidFiles, pendingMode);
+    }
+
+    function startUpload(files, mode) {
+      if (!files.length) return;
+      const panel = document.getElementById('uploadPanel');
+      const body = document.getElementById('uploadPanelBody');
+      panel.classList.add('active');
+      const rows = files.map(f => {
+        const row = document.createElement('div');
+        row.className = 'up-row';
+        row.innerHTML = '<div class="up-name" title="' + escHtml(f.name) + '">' + escHtml(f.name) + '</div>'
+          + '<div class="up-track"><i></i></div>';
+        body.appendChild(row);
+        return { file: f, row: row, bar: row.querySelector('i') };
+      });
+      // 逐个读取并加入图片库（模拟上传进度）
+      let seq = 0;
+      const images = [];
+      Promise.all(rows.map(r => readImageFile(r.file).then(src => {
+        images.push({ file: r.file, src: src });
+        r.row.classList.add('done');
+        r.bar.style.width = '100%';
+      }))).then(() => {
+        images.forEach(x => {
+          const f = x.file;
+          const item = {
+            type: 'image',
+            name: f.name,
+            src: x.src,
+            size: f.size,
+            time: nowText(),
+            updateTime: nowText(),
+            w: 0, h: 0
+          };
+          const probe = new Image();
+          probe.onload = function () {
+            item.w = probe.naturalWidth;
+            item.h = probe.naturalHeight;
+            persist();
+            if (currentFolder() === uploadTarget) renderGrid();
+          };
+          probe.src = x.src;
+          uploadTarget.children.unshift(item);
+        });
+        uploadTarget.updateTime = nowText();
+        imgSelected = [];
+        persist();
+        renderGrid();
+        updateQuota();
+        const skipped = pendingFiles.length - pendingValidFiles.length;
+        showToast('上传完成', '已上传 ' + images.length + ' 张图片到「' + uploadTarget.name + '」'
+          + (skipped > 0 ? '，另有 ' + skipped + ' 个文件未上传' : ''));
+        pendingFiles = [];
+        pendingValidFiles = [];
+        setTimeout(closeUploadPanel, 1200);
+      });
+      const total = rows.length;
+      const timer = setInterval(() => {
+        seq += 1;
+        if (seq > 24) { clearInterval(timer); return; }
+        rows.forEach((r, i) => {
+          if (r.row.classList.contains('done')) return;
+          const p = Math.min(96, Math.round((seq / 24) * 100 * ((i + 1) / total) + 20));
+          r.bar.style.width = p + '%';
+        });
+        if (seq >= 24) clearInterval(timer);
+      }, 60);
+    }
+    function closeUploadPanel() { document.getElementById('uploadPanel').classList.remove('active'); }
+
+    function readImageFile(file) {
+      return new Promise(resolve => {
+        const fr = new FileReader();
+        fr.onload = function () {
+          const dataUrl = fr.result;
+          const isSvg = /svg/i.test(file.type || '') || /\.svg$/i.test(file.name);
+          if (isSvg || file.size < 320 * 1024) { resolve(dataUrl); return; }
+          // 大图压缩为最长边 1600px 的 JPEG，便于原型内的存储与展示
+          const im = new Image();
+          im.onload = function () {
+            const maxSide = 1600;
+            let w = im.naturalWidth, h = im.naturalHeight;
+            const scale = Math.min(1, maxSide / Math.max(w, h));
+            w = Math.round(w * scale); h = Math.round(h * scale);
+            try {
+              const cv = document.createElement('canvas');
+              cv.width = w; cv.height = h;
+              cv.getContext('2d').drawImage(im, 0, 0, w, h);
+              resolve(cv.toDataURL('image/jpeg', 0.85));
+            } catch (e) { resolve(dataUrl); }
+          };
+          im.onerror = function () { resolve(dataUrl); };
+          im.src = dataUrl;
+        };
+        fr.onerror = function () { resolve(''); };
+        fr.readAsDataURL(file);
+      });
+    }
+
+    /* ==================== 初始化 ==================== */
+    renderGrid();
+    updateQuota();
+  </script>
+</body>
+</html>

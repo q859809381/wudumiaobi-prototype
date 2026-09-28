@@ -3566,6 +3566,189 @@
       color: #999;
       cursor: default;
     }
+
+    /* ==================== 图片库页签（复核面板） ==================== */
+    .lib-search { display: flex; gap: 6px; margin-bottom: 10px; }
+    .lib-search .input { flex: 1; min-width: 0; height: 30px; font-size: 12px; }
+    .lib-search .btn { flex-shrink: 0; padding: 5px 10px; font-size: 12px; }
+    .lib-toolbar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+      padding: 8px 10px;
+      border: 1px solid #eef2f8;
+      border-radius: 8px;
+      background: #fbfcfe;
+    }
+    .lib-toolbar select {
+      flex: 1 1 100%;
+      width: 100%;
+      min-width: 0;
+      height: 28px;
+      padding: 0 8px;
+      font-size: 12px;
+      line-height: 26px;
+      text-overflow: ellipsis;
+    }
+    .lib-toolbar .btn { flex: 1 1 100%; width: 100%; padding: 6px 10px; font-size: 12px; }
+    .lib-crumb {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 4px;
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 8px;
+    }
+    .lib-crumb .bc-item { cursor: pointer; color: #4a6fa5; }
+    .lib-crumb .bc-item.current { color: #333; cursor: default; }
+    .lib-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .lib-card {
+      position: relative;
+      border: 1px solid #eef0f4;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+      cursor: pointer;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .lib-card:hover { border-color: #a9c3e0; box-shadow: 0 4px 14px rgba(74, 111, 165, .16); }
+    .lib-thumb {
+      height: 74px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f7f9fc;
+      overflow: hidden;
+    }
+    .lib-thumb img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+    .lib-thumb.folder-thumb { flex-direction: column; gap: 2px; font-size: 20px; color: #b8860b; background: linear-gradient(180deg, #fdf8ea 0%, #fbf3dd 100%); }
+    .lib-thumb.folder-thumb .folder-count { font-size: 10px; color: #b08a3c; }
+    .lib-card-name {
+      padding: 6px 8px;
+      font-size: 11px;
+      color: #666;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      border-top: 1px solid #f4f6f9;
+    }
+    .lib-card-sub {
+      padding: 0 8px 6px;
+      font-size: 10px;
+      color: #9aa7b8;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .lib-empty { padding: 26px 10px; text-align: center; color: #bbb; font-size: 12px; }
+    .lib-foot-tip { margin-top: 10px; font-size: 11px; color: #aaa; line-height: 1.6; }
+    .lib-foot-tip a { color: #4a6fa5; text-decoration: none; }
+    .lib-foot-tip a:hover { text-decoration: underline; }
+    /* 图片库缩略图悬浮：插入提示 */
+    .lib-insert-tip {
+      position: fixed;
+      z-index: 1300;
+      display: none;
+      padding: 4px 10px;
+      font-size: 12px;
+      color: #fff;
+      background: rgba(35, 55, 80, .9);
+      border-radius: 4px;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    /* 悬浮放大预览（复用图片库的样式规则） */
+    .lib-zoom {
+      position: fixed;
+      z-index: 1250;
+      display: none;
+      padding: 8px;
+      background: #fff;
+      border: 1px solid #dfe6ef;
+      border-radius: 10px;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, .18);
+      pointer-events: none;
+    }
+    .lib-zoom img { display: block; border-radius: 6px; background: #f7f9fc; }
+    .lib-zoom .zoom-cap { margin-top: 6px; font-size: 12px; color: #666; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lib-zoom .zoom-size { float: right; color: #aaa; margin-left: 12px; }
+    /* ==================== 正文图片 ==================== */
+    .paper-img {
+      position: relative;
+      display: inline-block;
+      max-width: 100%;
+      margin: 6px 0;
+      line-height: 0;
+      vertical-align: top;
+      outline: 1px dashed transparent;
+    }
+    .paper-img:hover { outline-color: #b9cfe8; }
+    .paper-img img { display: block; width: 100%; height: 100%; border-radius: 4px; }
+    .paper-img .pi-actions {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      display: none;
+      gap: 4px;
+      z-index: 3;
+    }
+    .paper-img:hover .pi-actions { display: flex; }
+    .paper-img .pi-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 24px;
+      padding: 0;
+      font-size: 13px;
+      line-height: 1;
+      color: #fff;
+      background: rgba(35, 55, 80, .88);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .paper-img .pi-btn:hover { background: #2a4463; }
+    .paper-img .pi-btn.danger { background: rgba(176, 58, 44, .9); }
+    .paper-img .pi-btn.danger:hover { background: #96301f; }
+    .paper-img .pi-handle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #fff;
+      border: 1px solid #4a6fa5;
+      border-radius: 2px;
+      display: none;
+      z-index: 3;
+    }
+    .paper-img:hover .pi-handle { display: block; }
+    .paper-img .pi-handle.nw { left: -5px; top: -5px; cursor: nwse-resize; }
+    .paper-img .pi-handle.ne { right: -5px; top: -5px; cursor: nesw-resize; }
+    .paper-img .pi-handle.sw { left: -5px; bottom: -5px; cursor: nesw-resize; }
+    .paper-img .pi-handle.se { right: -5px; bottom: -5px; cursor: nwse-resize; }
+    /* 替换图片选择器 */
+    .pick-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; max-height: 320px; overflow-y: auto; }
+    .pick-card { border: 1px solid #eef0f4; border-radius: 8px; overflow: hidden; cursor: pointer; background: #fff; }
+    .pick-card:hover { border-color: #4a6fa5; box-shadow: 0 4px 14px rgba(74, 111, 165, .16); }
+    .pick-card .pick-thumb { height: 86px; display: flex; align-items: center; justify-content: center; background: #f7f9fc; overflow: hidden; }
+    .pick-card .pick-thumb img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .pick-card .pick-name { padding: 6px 8px; font-size: 11px; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-top: 1px solid #f4f6f9; }
+    /* 不可上传文件清单 */
+    .issue-title { font-size: 13px; font-weight: 600; color: #333; margin: 4px 0 8px; }
+    .issue-title.ok { color: #27804a; }
+    .issue-title.warn { color: #c0392b; }
+    .file-issue-list { max-height: 200px; overflow-y: auto; border: 1px solid #eef0f4; border-radius: 6px; margin-bottom: 14px; }
+    .file-issue-row { display: flex; gap: 10px; padding: 8px 10px; border-bottom: 1px solid #f4f6f9; font-size: 12px; }
+    .file-issue-row:last-child { border-bottom: none; }
+    .file-issue-row .n { flex: 1; min-width: 0; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-issue-row .r { color: #c0392b; flex-shrink: 0; }
   </style>
 </head>
 <body>
@@ -3604,6 +3787,10 @@
       <div class="sidebar-item" onclick="window.location.href='knowledge.html'">
         <div class="sidebar-icon">○</div>
         <span>知识库</span>
+      </div>
+      <div class="sidebar-item" onclick="window.location.href='image-library.html'">
+        <div class="sidebar-icon">▧</div>
+        <span>图片库</span>
       </div>
     </div>
 
@@ -4451,6 +4638,7 @@
           <div class="review-tabs">
             <div class="review-tab active" onclick="switchReviewTab(this,'issues')">问题</div>
             <div class="review-tab" onclick="switchReviewTab(this,'facts')">关键事实</div>
+            <div class="review-tab" onclick="switchReviewTab(this,'images')">图片库</div>
             <div class="review-tab" onclick="switchReviewTab(this,'sources')">来源汇总</div>
           </div>
           <div class="review-body" id="reviewIssues">
@@ -4477,6 +4665,21 @@
           <div class="review-body" id="reviewFacts" style="display:none;">
             <div class="review-group-title">关键事实</div>
             <div id="factCardList"></div>
+          </div>
+          <div class="review-body" id="reviewImages" style="display:none;">
+            <div class="review-group-title">图片库</div>
+            <div class="lib-search">
+              <input class="input" type="text" id="libSearchInput" placeholder="输入图片名称查询" oninput="renderLibGrid()">
+              <button class="btn btn-outline" onclick="renderLibGrid()">🔍</button>
+            </div>
+            <div class="lib-toolbar">
+              <select id="libUploadTarget" class="input" title="上传到指定文件夹"></select>
+              <button class="btn btn-primary" onclick="libPickUpload()">＋ 上传图片</button>
+            </div>
+            <div class="lib-crumb" id="libCrumb"></div>
+            <div class="lib-grid" id="libGrid"></div>
+            <div class="lib-empty" id="libEmpty" style="display:none;">当前文件夹暂无图片</div>
+            <div class="lib-foot-tip">点击图片即可插入到正文光标位置；<a href="image-library.html" target="_blank">管理图片库 ›</a></div>
           </div>
           <div class="review-body" id="reviewSources" style="display:none;">
             <div class="review-group-title">来源汇总</div>
@@ -4517,6 +4720,54 @@
     <div class="aiw-foot">
       <span class="aiw-foot-left" id="aiwFootLeft"></span>
       <span class="aiw-foot-right" id="aiwFootRight"></span>
+    </div>
+  </div>
+
+  <!-- 图片库：悬浮放大预览 + 插入提示 -->
+  <div class="lib-zoom" id="libZoom">
+    <img id="libZoomImg" src="" alt="">
+    <div class="zoom-cap"><span class="zoom-size" id="libZoomSize"></span><span id="libZoomName"></span></div>
+  </div>
+  <div class="lib-insert-tip" id="libInsertTip">插入图片</div>
+
+  <!-- 图片库：上传（上传到指定文件夹） -->
+  <input type="file" id="libFileInput" accept="image/*" multiple style="display:none">
+
+  <!-- 替换图片选择器 -->
+  <div class="modal-mask" id="replaceImgModal" style="display:none;">
+    <div class="modal-box" style="width:720px;">
+      <div class="modal-head">
+        <span class="modal-title">替换图片</span>
+        <span class="modal-close" onclick="closeReplacePicker()">✕</span>
+      </div>
+      <div class="modal-body">
+        <div class="lib-search" style="max-width:340px;">
+          <input class="input" type="text" id="pickSearchInput" placeholder="输入图片名称查询" oninput="renderPickGrid()">
+          <button class="btn btn-outline" onclick="renderPickGrid()">🔍 搜索</button>
+        </div>
+        <div class="pick-grid" id="pickGrid"></div>
+        <div class="lib-empty" id="pickEmpty" style="display:none;">未找到匹配的图片</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 图片库：不可上传文件提示 -->
+  <div class="modal-mask" id="libIssueModal" style="display:none;">
+    <div class="modal-box" style="width:560px;">
+      <div class="modal-head">
+        <span class="modal-title" id="libIssueModalTitle">部分文件无法上传</span>
+        <span class="modal-close" onclick="closeLibIssue()">✕</span>
+      </div>
+      <div class="modal-body">
+        <div class="issue-title warn" id="libIssueTitle"></div>
+        <div class="file-issue-list" id="libIssueList"></div>
+        <div class="issue-title ok" id="libIssueOkTitle">可上传的图片</div>
+        <div class="file-issue-list" id="libIssueOkList"></div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+          <button class="btn btn-outline" onclick="closeLibIssue()">取消上传</button>
+          <button class="btn btn-primary" id="libIssueContinue" onclick="continueLibUpload()">仍上传可上传的图片</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -7300,9 +7551,11 @@
     function switchReviewTab(el, panel) {
       document.querySelectorAll('.review-tab').forEach(t => t.classList.remove('active'));
       el.classList.add('active');
-      ['issues', 'facts', 'sources'].forEach(p => {
-        document.getElementById('review' + p.charAt(0).toUpperCase() + p.slice(1)).style.display = p === panel ? 'block' : 'none';
+      ['issues', 'facts', 'images', 'sources'].forEach(p => {
+        const body = document.getElementById('review' + p.charAt(0).toUpperCase() + p.slice(1));
+        if (body) body.style.display = p === panel ? 'block' : 'none';
       });
+      if (panel === 'images' && typeof renderLibGrid === 'function') renderLibGrid();
     }
 
     /* ==================== 问题页签：主动核查（定版 + 全文核查） ==================== */
@@ -8081,6 +8334,543 @@
         el.addEventListener('mouseleave', function () { tip.style.display = 'none'; });
       });
     })();
+  </script>
+
+  <!-- ==================== 图片库（右侧页签 + 正文图片） ==================== -->
+  <script>
+    /* ---------- 常量 ---------- */
+    const LIB_QUOTA_TOTAL = 10 * 1024 * 1024 * 1024;   // 个人总空间 10G
+    const LIB_MAX_IMG_SIZE = 10 * 1024 * 1024;         // 单张上限 10M
+    const LIB_MAX_FOLDER_LEVEL = 3;                    // 最多三层文件夹
+    const LIB_STORE_KEY = 'wbdmImageLibrary';
+    const LIB_ZOOM_MAX_W = 420;
+    const LIB_ZOOM_MAX_H = 320;
+    const LIB_IMG_EXT = /\.(png|jpe?g|gif|webp|bmp|svg|ico|tiff?)$/i;
+
+    function libEsc(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+    function libNow() { return new Date().toISOString().replace('T', ' ').slice(0, 16); }
+    function libFmtSize(bytes) {
+      if (bytes >= 1024 * 1024 * 1024) return (bytes / 1024 / 1024 / 1024).toFixed(2) + 'G';
+      if (bytes >= 1024 * 1024) return (bytes / 1024 / 1024).toFixed(2) + 'M';
+      if (bytes >= 1024) return (bytes / 1024).toFixed(1) + 'KB';
+      return bytes + 'B';
+    }
+    function libToast(msg) {
+      if (typeof showCreditToast === 'function') showCreditToast(msg);
+    }
+
+    /* ---------- 演示图片与数据结构（与图片库页面一致） ---------- */
+    function libDemoImg(label, w, h, c1, c2) {
+      const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">'
+        + '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">'
+        + '<stop offset="0" stop-color="' + c1 + '"/><stop offset="1" stop-color="' + c2 + '"/></linearGradient></defs>'
+        + '<rect width="' + w + '" height="' + h + '" fill="url(#g)"/>'
+        + '<circle cx="' + (w * .78) + '" cy="' + (h * .24) + '" r="' + (Math.min(w, h) * .16) + '" fill="#ffffff" fill-opacity=".22"/>'
+        + '<circle cx="' + (w * .24) + '" cy="' + (h * .78) + '" r="' + (Math.min(w, h) * .24) + '" fill="#ffffff" fill-opacity=".12"/>'
+        + '<text x="50%" y="52%" text-anchor="middle" font-family="Microsoft YaHei,Arial" font-size="' + Math.round(Math.min(w, h) * .12) + '" fill="#ffffff" fill-opacity=".95">' + label + '</text>'
+        + '</svg>';
+      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+    function libDemoItem(name, w, h, c1, c2, size) {
+      return {
+        type: 'image', name: name, src: libDemoImg(name.replace(/\.[^.]+$/, ''), w, h, c1, c2),
+        size: size, time: '2026-09-12 09:30', updateTime: '2026-09-12 09:30', w: w, h: h
+      };
+    }
+    function libSeedTree() {
+      return {
+        type: 'folder', name: '全部图片', time: '—', updateTime: '—', children: [
+          { type: 'folder', name: '项目现场照片', time: '2026-09-10 10:20', updateTime: '2026-09-19 16:40', children: [
+            libDemoItem('项目地块鸟瞰图.png', 1280, 860, '#4a6fa5', '#7aa5d2', 2.4 * 1024 * 1024),
+            libDemoItem('数据中心机房.jpg', 960, 1280, '#3f6b8f', '#6fa0c4', 1.8 * 1024 * 1024),
+            libDemoItem('施工现场全景.jpg', 1600, 900, '#5b7f9e', '#9dc0d8', 3.1 * 1024 * 1024),
+            { type: 'folder', name: '施工进展', time: '2026-09-11 14:05', updateTime: '2026-09-18 11:22', children: [
+              libDemoItem('主体结构封顶.png', 1440, 960, '#6b8f6f', '#a3c7a5', 2.0 * 1024 * 1024),
+              libDemoItem('园区道路施工.jpg', 320, 240, '#8f7f6b', '#c7b9a3', 260 * 1024),
+              { type: 'folder', name: '一期工程', time: '2026-09-11 15:30', updateTime: '2026-09-17 09:48', children: [
+                libDemoItem('研发楼外立面.jpg', 1100, 1400, '#7a6b8f', '#b3a3c7', 2.6 * 1024 * 1024),
+                libDemoItem('实验室平面图.png', 900, 620, '#4a6fa5', '#8ab0cf', 780 * 1024)
+              ]}
+            ]}
+          ]},
+          { type: 'folder', name: '图表素材', time: '2026-09-08 09:12', updateTime: '2026-09-20 10:05', children: [
+            libDemoItem('财务状况趋势图.png', 1200, 720, '#2f6f8f', '#67a9c8', 640 * 1024),
+            libDemoItem('技术路线示意图.png', 1000, 700, '#4a6fa5', '#86a8cf', 520 * 1024),
+            libDemoItem('组织架构图.png', 240, 180, '#6f8f4a', '#a8cf86', 120 * 1024)
+          ]},
+          { type: 'folder', name: '产品与资质', time: '2026-09-05 16:40', updateTime: '2026-09-15 15:12', children: [
+            libDemoItem('软件著作权证书.png', 900, 1250, '#8f4a4a', '#cf8686', 1.4 * 1024 * 1024),
+            libDemoItem('产品界面截图.png', 1440, 900, '#4a6f8f', '#8fb6cf', 1.1 * 1024 * 1024)
+          ]},
+          libDemoItem('企业logo.png', 400, 160, '#3d5f92', '#7fa3d0', 86 * 1024)
+        ]
+      };
+    }
+
+    let LIB_ROOT = libSeedTree();
+    (function () {
+      try {
+        const raw = localStorage.getItem(LIB_STORE_KEY);
+        if (raw) {
+          const data = JSON.parse(raw);
+          if (data && data.tree && data.tree.children) LIB_ROOT = data.tree;
+        }
+      } catch (e) { /* 使用演示数据 */ }
+    })();
+    function libSave() {
+      try {
+        localStorage.setItem(LIB_STORE_KEY, JSON.stringify({ tree: LIB_ROOT, savedAt: libNow() }));
+        return true;
+      } catch (e) { return false; }
+    }
+    function libAllImages(node, out) {
+      out = out || [];
+      node.children.forEach(c => { if (c.type === 'image') out.push(c); else libAllImages(c, out); });
+      return out;
+    }
+    function libUsedBytes() { return libAllImages(LIB_ROOT).reduce((s, it) => s + (it.size || 0), 0); }
+    function libCollectFolders(node, level, prefix, out) {
+      node.children.filter(c => c.type === 'folder').forEach(f => {
+        out.push({ folder: f, level: level, label: prefix + f.name });
+        libCollectFolders(f, level + 1, prefix + f.name + '/', out);
+      });
+      return out;
+    }
+
+    let libPath = [LIB_ROOT];
+    let libUploadTargetNode = LIB_ROOT;
+    let libCurrentPath = [];
+    let libReplaceWrap = null;
+    let libPendingValid = [];
+    let libPendingAll = [];
+
+    function libCurrentFolder() { return libPath[libPath.length - 1]; }
+
+    /* 在指定文件夹子树内按关键词搜索（根目录即全库），并记录命中项的相对路径 */
+    function libSearchIn(node, q, prefix, out) {
+      node.children.forEach(c => {
+        if (c.name.toLowerCase().includes(q)) out.push({ it: c, path: prefix });
+        if (c.type === 'folder') libSearchIn(c, q, prefix ? prefix + ' / ' + c.name : c.name, out);
+      });
+      return out;
+    }
+
+    /* ---------- 渲染图片库页签 ---------- */
+    function renderLibGrid() {
+      const root = document.getElementById('libGrid');
+      if (!root) return;
+      // 上传目标文件夹下拉
+      const sel = document.getElementById('libUploadTarget');
+      const folders = [];
+      libCollectFolders(LIB_ROOT, 1, '', folders);
+      const targets = folders.filter(f => f.level <= LIB_MAX_FOLDER_LEVEL - 1);
+      const curIdx = libPath.length > 1 ? targets.findIndex(f => f.folder === libCurrentFolder()) : -1;
+      sel.innerHTML = '<option value="root">上传到：根目录</option>'
+        + targets.map((f, i) => '<option value="' + i + '">上传到：' + f.label + '</option>').join('');
+      sel.value = curIdx >= 0 ? String(curIdx) : 'root';
+      libUploadTargetNode = curIdx >= 0 ? targets[curIdx].folder : LIB_ROOT;
+      sel.onchange = function () {
+        libUploadTargetNode = this.value === 'root' ? LIB_ROOT : targets[Number(this.value)].folder;
+      };
+
+      // 面包屑
+      const crumb = document.getElementById('libCrumb');
+      crumb.innerHTML = '';
+      if (libPath.length === 1) {
+        crumb.style.display = 'none';
+      } else {
+        crumb.style.display = 'flex';
+        const home = document.createElement('span');
+        home.className = 'bc-item';
+        home.textContent = '默认列表';
+        home.onclick = function () { libPath = [LIB_ROOT]; renderLibGrid(); };
+        crumb.appendChild(home);
+        libPath.slice(1).forEach((f, i) => {
+          const sep = document.createElement('span');
+          sep.textContent = '/';
+          crumb.appendChild(sep);
+          const it = document.createElement('span');
+          it.className = 'bc-item' + (i === libPath.length - 2 ? ' current' : '');
+          it.textContent = f.name;
+          it.onclick = function () { if (i !== libPath.length - 2) { libPath = libPath.slice(0, i + 2); renderLibGrid(); } };
+          crumb.appendChild(it);
+        });
+      }
+
+      // 列表（搜索范围为当前文件夹的整个子树：根目录时即全库检索）
+      const q = document.getElementById('libSearchInput').value.trim().toLowerCase();
+      let items, hitMap = null;
+      if (q) {
+        const hits = libSearchIn(libCurrentFolder(), q, '', []);
+        hitMap = new Map(hits.map(h => [h.it, h.path]));
+        items = hits.map(h => h.it);
+      } else {
+        items = libCurrentFolder().children.slice();
+      }
+      items = items.slice().sort((a, b) => (a.type === b.type ? 0 : a.type === 'folder' ? -1 : 1));
+      root.innerHTML = '';
+      const emptyTip = document.getElementById('libEmpty');
+      emptyTip.textContent = q ? '未找到匹配的图片或文件夹' : '当前文件夹暂无图片';
+      emptyTip.style.display = items.length ? 'none' : 'block';
+      items.forEach(it => {
+        const card = document.createElement('div');
+        card.className = 'lib-card';
+        const sp = hitMap ? (hitMap.get(it) || '') : '';
+        const pathTip = sp ? '（位于 ' + sp + '）' : '';
+        if (it.type === 'folder') {
+          card.innerHTML = '<div class="lib-thumb folder-thumb"><span>📁</span>'
+            + '<span class="folder-count">' + libAllImages(it).length + ' 张</span></div>'
+            + '<div class="lib-card-name" title="' + libEsc(it.name) + pathTip + '">' + libEsc(it.name) + '</div>'
+            + (sp ? '<div class="lib-card-sub">📁 ' + libEsc(sp) + '</div>' : '');
+          card.querySelector('.lib-thumb').onclick = function () { libPath.push(it); renderLibGrid(); };
+        } else {
+          card.innerHTML = '<div class="lib-thumb"><img src="' + it.src + '" alt="' + libEsc(it.name) + '"></div>'
+            + '<div class="lib-card-name" title="' + libEsc(it.name) + pathTip + '">' + libEsc(it.name) + '</div>'
+            + (sp ? '<div class="lib-card-sub">📁 ' + libEsc(sp) + '</div>' : '');
+          const thumb = card.querySelector('.lib-thumb');
+          thumb.onmouseenter = function () { libShowZoom(thumb, it); libShowInsertTip(thumb); };
+          thumb.onmouseleave = function () { libHideZoom(); libHideInsertTip(); };
+          thumb.onclick = function () { libHideInsertTip(); libInsertImage(it); };
+        }
+        root.appendChild(card);
+      });
+    }
+
+    /* ---------- 悬浮：放大预览 + 插入提示 ---------- */
+    function libShowZoom(anchor, it) {
+      const box = anchor.getBoundingClientRect();
+      const natW = it.w || 0, natH = it.h || 0;
+      let w, h;
+      if (natW && natH) {
+        const sc = Math.min(1, LIB_ZOOM_MAX_W / natW, LIB_ZOOM_MAX_H / natH);
+        w = Math.round(natW * sc);
+        h = Math.round(natH * sc);
+      } else { w = LIB_ZOOM_MAX_W; h = LIB_ZOOM_MAX_H; }
+      const el = document.getElementById('libZoom');
+      const img = document.getElementById('libZoomImg');
+      img.style.width = w + 'px';
+      img.style.height = h + 'px';
+      img.src = it.src;
+      document.getElementById('libZoomName').textContent = it.name;
+      document.getElementById('libZoomSize').textContent = libFmtSize(it.size || 0) + (w < natW ? ' · 缩放预览' : ' · 原始大小');
+      el.style.display = 'block';
+      const pw = el.offsetWidth, ph = el.offsetHeight;
+      // 页签面板位于页面右侧，优先展示在缩略图左侧
+      let left = box.left - pw - 12;
+      if (left < 8) left = Math.min(box.right + 12, window.innerWidth - pw - 8);
+      let top = box.top + box.height / 2 - ph / 2;
+      top = Math.max(8, Math.min(top, window.innerHeight - ph - 8));
+      el.style.left = left + 'px';
+      el.style.top = top + 'px';
+    }
+    function libHideZoom() { document.getElementById('libZoom').style.display = 'none'; }
+    function libShowInsertTip(anchor) {
+      const box = anchor.getBoundingClientRect();
+      const tip = document.getElementById('libInsertTip');
+      tip.style.display = 'block';
+      const tw = tip.offsetWidth, th = tip.offsetHeight;
+      let left = box.left + box.width / 2 - tw / 2;
+      left = Math.max(8, Math.min(left, window.innerWidth - tw - 8));
+      let top = box.top - th - 8;
+      if (top < 8) top = box.bottom + 8;
+      tip.style.left = left + 'px';
+      tip.style.top = top + 'px';
+    }
+    function libHideInsertTip() { document.getElementById('libInsertTip').style.display = 'none'; }
+    window.addEventListener('scroll', function () { libHideZoom(); libHideInsertTip(); }, true);
+
+    /* ---------- 上传（上传到页面内指定文件夹） ---------- */
+    function libPickUpload() {
+      const inp = document.getElementById('libFileInput');
+      inp.value = '';
+      inp.click();
+    }
+    document.getElementById('libFileInput').addEventListener('change', function () { libHandleFiles(this.files); });
+
+    function libIsImageFile(f) {
+      const byType = !!(f.type && /^image\//.test(f.type));
+      const byExt = LIB_IMG_EXT.test(f.name || '');
+      return byType || byExt;
+    }
+    function libHandleFiles(fileList) {
+      const files = Array.prototype.slice.call(fileList || []);
+      if (!files.length) return;
+      const invalid = [], valid = [];
+      files.forEach(f => {
+        if (!libIsImageFile(f)) invalid.push({ name: f.name, reason: '非图片格式，仅支持 JPG / PNG / GIF / WEBP / BMP / SVG' });
+        else if (f.size > LIB_MAX_IMG_SIZE) invalid.push({ name: f.name, reason: '大小 ' + libFmtSize(f.size) + '，超过单张 10M 上限' });
+        else valid.push(f);
+      });
+      let remain = LIB_QUOTA_TOTAL - libUsedBytes();
+      const fit = [];
+      valid.forEach(f => {
+        if (f.size <= remain) { fit.push(f); remain -= f.size; }
+        else invalid.push({ name: f.name, reason: '存储空间不足（剩余 ' + libFmtSize(Math.max(remain, 0)) + '），请先调整存储内容' });
+      });
+      libPendingAll = files;
+      libPendingValid = fit;
+      if (invalid.length) libShowIssue(invalid, fit); else libUploadFiles(fit);
+    }
+    function libShowIssue(invalid, fit) {
+      document.getElementById('libIssueTitle').textContent = '以下 ' + invalid.length + ' 个文件不能上传：';
+      document.getElementById('libIssueList').innerHTML = invalid.map(x =>
+        '<div class="file-issue-row"><span class="n" title="' + libEsc(x.name) + '">' + libEsc(x.name) + '</span><span class="r">' + libEsc(x.reason) + '</span></div>'
+      ).join('');
+      document.getElementById('libIssueOkList').innerHTML = fit.length
+        ? fit.map(f => '<div class="file-issue-row"><span class="n" title="' + libEsc(f.name) + '">' + libEsc(f.name) + '</span><span class="r" style="color:#27804a;">' + libFmtSize(f.size) + '</span></div>').join('')
+        : '<div class="file-issue-row"><span class="n">无可上传的图片</span></div>';
+      const btn = document.getElementById('libIssueContinue');
+      btn.disabled = !fit.length;
+      btn.textContent = fit.length ? '仍上传可上传的 ' + fit.length + ' 张图片' : '无可上传图片';
+      document.getElementById('libIssueModal').style.display = 'flex';
+    }
+    function closeLibIssue() { document.getElementById('libIssueModal').style.display = 'none'; }
+    function continueLibUpload() {
+      closeLibIssue();
+      if (!libPendingValid.length) return;
+      libUploadFiles(libPendingValid);
+    }
+    function libUploadFiles(files) {
+      if (!files.length) return;
+      Promise.all(files.map(f => libReadFile(f).then(src => ({ file: f, src: src })))).then(list => {
+        list.forEach(x => {
+          const item = {
+            type: 'image', name: x.file.name, src: x.src, size: x.file.size,
+            time: libNow(), updateTime: libNow(), w: 0, h: 0
+          };
+          const probe = new Image();
+          probe.onload = function () {
+            item.w = probe.naturalWidth;
+            item.h = probe.naturalHeight;
+            libSave();
+            renderLibGrid();
+          };
+          probe.src = x.src;
+          libUploadTargetNode.children.unshift(item);
+        });
+        libUploadTargetNode.updateTime = libNow();
+        if (!libSave()) libToast('本地演示存储已满，本次上传仅在当前会话内有效');
+        renderLibGrid();
+        const skipped = libPendingAll.length - libPendingValid.length;
+        libToast('已上传 ' + list.length + ' 张图片到「' + libUploadTargetNode.name + '」'
+          + (skipped > 0 ? '，另有 ' + skipped + ' 个文件未上传' : ''));
+        libPendingAll = [];
+        libPendingValid = [];
+      });
+    }
+    function libReadFile(file) {
+      return new Promise(resolve => {
+        const fr = new FileReader();
+        fr.onload = function () {
+          const dataUrl = fr.result;
+          const isSvg = /svg/i.test(file.type || '') || /\.svg$/i.test(file.name);
+          if (isSvg || file.size < 320 * 1024) { resolve(dataUrl); return; }
+          const im = new Image();
+          im.onload = function () {
+            const maxSide = 1600;
+            let w = im.naturalWidth, h = im.naturalHeight;
+            const sc = Math.min(1, maxSide / Math.max(w, h));
+            w = Math.round(w * sc); h = Math.round(h * sc);
+            try {
+              const cv = document.createElement('canvas');
+              cv.width = w; cv.height = h;
+              cv.getContext('2d').drawImage(im, 0, 0, w, h);
+              resolve(cv.toDataURL('image/jpeg', 0.85));
+            } catch (e) { resolve(dataUrl); }
+          };
+          im.onerror = function () { resolve(dataUrl); };
+          im.src = dataUrl;
+        };
+        fr.onerror = function () { resolve(''); };
+        fr.readAsDataURL(file);
+      });
+    }
+
+    /* ---------- 正文：插入图片 ---------- */
+    let libSavedRange = null;
+    document.addEventListener('selectionchange', function () {
+      const sel = window.getSelection();
+      const paper = document.getElementById('paper');
+      if (!sel || !sel.rangeCount || !paper) return;
+      const r = sel.getRangeAt(0);
+      if (paper.contains(r.startContainer)) libSavedRange = r.cloneRange();
+    });
+
+    function libPaperLimits() {
+      const paper = document.getElementById('paper');
+      const editor = document.getElementById('editorContent');
+      const cs = getComputedStyle(paper);
+      const contentW = paper.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      const availH = Math.max(220, (editor ? editor.clientHeight : 660) - 150);
+      return { maxW: Math.max(160, contentW), maxH: availH };
+    }
+    function libApplyImgSize(wrap, w, h) {
+      w = Math.max(40, Math.round(w));
+      h = Math.max(30, Math.round(h));
+      wrap.style.width = w + 'px';
+      wrap.style.height = h + 'px';
+      const img = wrap.querySelector('img');
+      if (img) { img.style.width = w + 'px'; img.style.height = h + 'px'; }
+    }
+    function libBindImageEvents(wrap) {
+      if (wrap.dataset.bound) return;
+      wrap.dataset.bound = '1';
+      const img = wrap.querySelector('img');
+      function applyDefault() {
+        const lim = libPaperLimits();
+        const natW = img.naturalWidth, natH = img.naturalHeight;
+        if (!natW || !natH) return;
+        // 默认按 100% 展示；若超过正文内容宽度或上下边界，则等比压缩
+        const sc = Math.min(1, lim.maxW / natW, lim.maxH / natH);
+        libApplyImgSize(wrap, natW * sc, natH * sc);
+      }
+      if (img.complete && img.naturalWidth) applyDefault(); else img.addEventListener('load', applyDefault);
+      wrap.querySelectorAll('.pi-handle').forEach(handle => {
+        handle.addEventListener('mousedown', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          const dir = handle.classList.contains('nw') ? 'nw' : handle.classList.contains('ne') ? 'ne' : handle.classList.contains('sw') ? 'sw' : 'se';
+          const startX = e.clientX, startY = e.clientY;
+          const startW = wrap.offsetWidth || img.naturalWidth;
+          const startH = wrap.offsetHeight || img.naturalHeight;
+          const ratio = startH / startW || 0.66;
+          wrap.classList.add('resizing');
+          function onMove(ev) {
+            let dx = ev.clientX - startX;
+            if (dir === 'nw' || dir === 'sw') dx = -dx;
+            const lim = libPaperLimits();
+            let w = Math.min(Math.max(60, startW + dx), lim.maxW);
+            let h = w * ratio;
+            if (h > lim.maxH) { h = lim.maxH; w = h / ratio; }
+            libApplyImgSize(wrap, w, h);
+          }
+          function onUp() {
+            wrap.classList.remove('resizing');
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onUp);
+            updateWordCount();
+          }
+          document.addEventListener('mousemove', onMove);
+          document.addEventListener('mouseup', onUp);
+        });
+      });
+    }
+
+    function libInsertImage(item) {
+      const paper = document.getElementById('paper');
+      if (!paper) return;
+      if (document.body.classList.contains('exported')) { libToast('报告已导出，不支持修改正文'); return; }
+      const wrap = document.createElement('span');
+      wrap.className = 'paper-img';
+      wrap.setAttribute('contenteditable', 'false');
+      wrap.dataset.imgName = item.name;
+      wrap.dataset.imgSrc = item.src;
+      wrap.innerHTML = '<img src="' + item.src + '" alt="' + libEsc(item.name) + '">'
+        + '<span class="pi-actions">'
+        + '<button type="button" class="pi-btn" data-act="replace" title="替换图片">🖼</button>'
+        + '<button type="button" class="pi-btn danger" data-act="delete" title="删除图片">🗑</button>'
+        + '</span>'
+        + '<span class="pi-handle nw"></span><span class="pi-handle ne"></span>'
+        + '<span class="pi-handle sw"></span><span class="pi-handle se"></span>';
+      libBindImageEvents(wrap);
+
+      const r = (libSavedRange && paper.contains(libSavedRange.startContainer)) ? libSavedRange : null;
+      if (r) {
+        r.deleteContents();
+        r.insertNode(wrap);
+        if (!wrap.nextSibling) {
+          const br = document.createElement('br');
+          wrap.parentNode.insertBefore(br, wrap.nextSibling);
+        }
+        const after = document.createRange();
+        after.setStartAfter(wrap);
+        after.collapse(true);
+        libSavedRange = after;
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(after);
+      } else {
+        // 未定位光标时，插入到正文末尾
+        paper.appendChild(wrap);
+        const p = document.createElement('p');
+        p.innerHTML = '<br>';
+        paper.appendChild(p);
+      }
+      updateWordCount();
+      libToast('已插入「' + item.name + '」');
+    }
+
+    /* ---------- 正文图片：替换 / 删除 ---------- */
+    document.addEventListener('click', function (e) {
+      const btn = e.target.closest('.paper-img .pi-btn');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (document.body.classList.contains('exported')) { libToast('报告已导出，不支持修改正文'); return; }
+      const wrap = btn.closest('.paper-img');
+      if (!wrap) return;
+      if (btn.dataset.act === 'delete') {
+        wrap.remove();
+        updateWordCount();
+        libToast('已删除正文中的图片');
+      } else if (btn.dataset.act === 'replace') {
+        libReplaceWrap = wrap;
+        openReplacePicker();
+      }
+    });
+
+    function openReplacePicker() {
+      const inp = document.getElementById('pickSearchInput');
+      if (inp) inp.value = '';
+      renderPickGrid();
+      document.getElementById('replaceImgModal').style.display = 'flex';
+    }
+    function closeReplacePicker() {
+      document.getElementById('replaceImgModal').style.display = 'none';
+      libReplaceWrap = null;
+    }
+    function renderPickGrid() {
+      const q = document.getElementById('pickSearchInput').value.trim().toLowerCase();
+      const imgs = libAllImages(LIB_ROOT).filter(it => !q || it.name.toLowerCase().includes(q));
+      const grid = document.getElementById('pickGrid');
+      grid.innerHTML = '';
+      document.getElementById('pickEmpty').style.display = imgs.length ? 'none' : 'block';
+      imgs.forEach(it => {
+        const card = document.createElement('div');
+        card.className = 'pick-card';
+        card.innerHTML = '<div class="pick-thumb"><img src="' + it.src + '" alt="' + libEsc(it.name) + '"></div>'
+          + '<div class="pick-name" title="' + libEsc(it.name) + '">' + libEsc(it.name) + '</div>';
+        card.onclick = function () { libApplyReplace(it); };
+        grid.appendChild(card);
+      });
+    }
+    function libApplyReplace(item) {
+      const wrap = libReplaceWrap;
+      if (!wrap) { closeReplacePicker(); return; }
+      const img = wrap.querySelector('img');
+      img.src = item.src;
+      wrap.dataset.imgName = item.name;
+      wrap.dataset.imgSrc = item.src;
+      // 替换后按新图尺寸重新判定占用的宽高：默认 100% 展示，超过正文上下边界/内容宽度则等比压缩
+      function reflow() {
+        const lim = libPaperLimits();
+        const natW = img.naturalWidth, natH = img.naturalHeight;
+        if (!natW || !natH) return;
+        let w = natW, h = natH;
+        if (w > lim.maxW) { w = lim.maxW; h = w * (natH / natW); }
+        if (h > lim.maxH) { h = lim.maxH; w = h * (natW / natH); }
+        libApplyImgSize(wrap, w, h);
+      }
+      if (img.complete && img.naturalWidth) reflow(); else img.addEventListener('load', reflow);
+      closeReplacePicker();
+      updateWordCount();
+      libToast('已替换为「' + item.name + '」');
+    }
+
+    /* ---------- 初始化 ---------- */
+    renderLibGrid();
   </script>
 </body>
 </html>
