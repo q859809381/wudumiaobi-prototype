@@ -45,6 +45,14 @@
   margin-bottom: 6px;
 }
 .af-form-field label .req { color: #c0392b; }
+.af-use-sample {
+  font-size: 12px;
+  font-weight: 400;
+  color: #4a6fa5;
+  cursor: pointer;
+  user-select: none;
+}
+.af-use-sample:hover { color: #35547f; text-decoration: underline; }
 .af-char-count {
   margin-left: auto;
   font-size: 12px;

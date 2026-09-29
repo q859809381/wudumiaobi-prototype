@@ -27,22 +27,23 @@
   function renderForm() {
     var f = cfg.form || {};
     var html = '<div class="af-card"><div class="af-form-section-title">' + (f.title || '项目基础信息') + '</div>';
-    (f.fields || []).forEach(function (fd) {
+    (f.fields || []).forEach(function (fd, fi) {
       var req = fd.required ? '<span class="req">*</span>' : '';
       var cc = fd.max ? '<span class="af-char-count">0/' + fd.max + '</span>' : '';
+      var sampleLink = fd.sample ? '<span class="af-use-sample" data-fi="' + fi + '" title="点击填入示例内容">使用示例</span>' : '';
       var hint = fd.hint ? '<div class="af-hint">' + fd.hint + '</div>' : '';
       if (fd.type === 'select') {
         var opts = (fd.options || []).map(function (o) {
           return '<option' + (o === fd.value ? ' selected' : '') + '>' + o + '</option>';
         }).join('');
-        html += '<div class="af-form-field"><label>' + fd.label + req + cc + '</label>'
+        html += '<div class="af-form-field"><label>' + fd.label + req + sampleLink + cc + '</label>'
           + '<select class="af-input">' + opts + '</select>' + hint + '</div>';
       } else if (fd.type === 'textarea') {
-        html += '<div class="af-form-field"><label>' + fd.label + req + cc + '</label>'
+        html += '<div class="af-form-field"><label>' + fd.label + req + sampleLink + cc + '</label>'
           + '<textarea class="af-input" rows="3"' + (fd.max ? ' maxlength="' + fd.max + '"' : '') + ' placeholder="' + (fd.placeholder || '') + '"></textarea>'
           + hint + '</div>';
       } else {
-        html += '<div class="af-form-field"><label>' + fd.label + req + cc + '</label>'
+        html += '<div class="af-form-field"><label>' + fd.label + req + sampleLink + cc + '</label>'
           + '<input class="af-input" type="text"' + (fd.max ? ' maxlength="' + fd.max + '"' : '') + ' placeholder="' + (fd.placeholder || '') + '">'
           + hint + '</div>';
       }
@@ -59,6 +60,33 @@
     }
     $('agentShellContent').innerHTML = html;
     $('agentShellContent').querySelectorAll('.af-input').forEach(bindCharCount);
+    bindSampleFill();
+  }
+
+  /* 使用示例：点击后把该字段的示例内容一键填入输入框，便于用户在此基础上调整 */
+  function bindSampleFill() {
+    $('agentShellContent').querySelectorAll('.af-use-sample').forEach(function (link) {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        var fi = Number(this.getAttribute('data-fi'));
+        var fd = ((cfg.form || {}).fields || [])[fi];
+        if (!fd || !fd.sample) return;
+        var field = this.closest('.af-form-field');
+        var el = field ? field.querySelector('.af-input') : null;
+        if (!el) return;
+        el.value = fd.sample;
+        if (el.getAttribute('maxlength')) el.value = el.value.slice(0, Number(el.getAttribute('maxlength')));
+        bindSampleCount(field, el);
+        el.focus();
+        try { el.setSelectionRange(el.value.length, el.value.length); } catch (err) { /* select 元素不支持 */ }
+        if (window.shellToast) window.shellToast('已填入示例内容，可直接修改');
+      });
+    });
+  }
+  function bindSampleCount(field, el) {
+    if (!field) return;
+    var cc = field.querySelector('.af-char-count');
+    if (cc) cc.textContent = el.value.length + '/' + (el.getAttribute('maxlength') || '');
   }
 
   function renderUpload() {

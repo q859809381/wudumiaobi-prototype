@@ -141,6 +141,14 @@
       margin-bottom: 6px;
     }
     .form-field label .req { color: #c0392b; }
+    .form-sample {
+      font-size: 12px;
+      font-weight: 400;
+      color: #4a6fa5;
+      cursor: pointer;
+      user-select: none;
+    }
+    .form-sample:hover { color: #35547f; text-decoration: underline; }
     .char-count {
       margin-left: auto;
       font-size: 12px;
@@ -3890,12 +3898,12 @@
             <input class="input char-limit" maxlength="80" placeholder="示例：笃威尔商业大数据人工智能研发建设项目">
           </div>
           <div class="form-field">
-            <label>项目总投资（总投资金额、资金来源及构成） <span class="req">*</span><span class="char-count"><span class="cur">0</span>/100</span></label>
-            <textarea class="input char-limit" maxlength="100" rows="3" placeholder="示例：本项目总投资500万元，自筹350万，贷款150万。其中设备购置费205万元、软件采购80万元、研发投入150万元、数据采购及标注25万元、云服务及算力租赁15万元、预备费25万元。"></textarea>
+            <label>项目总投资（总投资金额、资金来源及构成） <span class="req">*</span><span class="form-sample" data-target="fldInvest" title="点击填入示例内容">使用示例</span><span class="char-count"><span class="cur">0</span>/200</span></label>
+            <textarea class="input char-limit" id="fldInvest" maxlength="200" rows="3" placeholder="示例：本项目总投资500万元，自筹350万，贷款150万。其中设备购置费205万元、软件采购80万元、研发投入150万元、数据采购及标注25万元、云服务及算力租赁15万元、预备费25万元。"></textarea>
           </div>
           <div class="form-field">
-            <label>项目建设内容及规模 <span class="req">*</span><span class="char-count"><span class="cur">0</span>/400</span></label>
-            <textarea class="input char-limit" maxlength="400" rows="3" placeholder="示例：总建筑面积24000㎡，建设研发办公楼、数据中心机房等，达产年支撑10亿次商业数据智能查询及2万份企业风险评估报告输出。"></textarea>
+            <label>项目建设内容及规模 <span class="req">*</span><span class="form-sample" data-target="fldContent" title="点击填入示例内容">使用示例</span><span class="char-count"><span class="cur">0</span>/1000</span></label>
+            <textarea class="input char-limit" id="fldContent" maxlength="1000" rows="3" placeholder="示例：总建筑面积24000㎡，建设研发办公楼、数据中心机房等，达产年支撑10亿次商业数据智能查询及2万份企业风险评估报告输出。"></textarea>
           </div>
           <div class="form-field">
             <label>项目建设地点 <span class="req">*</span><span class="char-count"><span class="cur">0</span>/100</span></label>
@@ -3917,7 +3925,7 @@
         <div class="step1-right">
           <div class="req-card">
             <label class="req-card-title">📄 需求描述（可选）<span class="char-count"><span class="cur">0</span>/1500</span></label>
-            <textarea class="input char-limit" maxlength="1500" rows="3" placeholder="示例：本项目享受高新技术企业15%所得税优惠。运营期按15年计算。期望投资回收期控制在6年以内。"></textarea>
+            <textarea class="input char-limit" maxlength="1500" rows="3" placeholder="报告侧重点、目的，主要写作内容，或者需要规避的写作内容，以及其他需求"></textarea>
           </div>
           <div class="kb-panel">
           <div class="kb-panel-head">
@@ -6582,6 +6590,28 @@
         if (cur) cur.textContent = this.value.length;
       });
     });
+
+    /* ==================== 基础信息：使用示例一键填入 ==================== */
+    const FORM_SAMPLES = {
+      fldInvest: '本项目总投资500万元，自筹350万，贷款150万。其中设备购置费205万元、软件采购80万元、研发投入150万元、数据采购及标注25万元、云服务及算力租赁15万元、预备费25万元。',
+      fldContent: '总建筑面积24000㎡，建设研发办公楼、数据中心机房等，达产年支撑10亿次商业数据智能查询及2万份企业风险评估报告输出。'
+    };
+    (function initFormSamples() {
+      document.querySelectorAll('.form-sample').forEach(link => {
+        link.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          const el = document.getElementById(this.dataset.target);
+          if (!el) return;
+          const txt = FORM_SAMPLES[this.dataset.target] || '';
+          el.value = el.maxLength > 0 ? txt.slice(0, el.maxLength) : txt;
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+          el.focus();
+          try { el.setSelectionRange(el.value.length, el.value.length); } catch (err) { /* 忽略 */ }
+          libToast('已填入示例内容，可直接修改');
+        });
+      });
+    })();
 
     /* ==================== 步骤1：知识库 ==================== */
     /* 表格列宽拖拽调整 */
