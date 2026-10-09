@@ -1540,13 +1540,13 @@
       justify-content: flex-end;
     }
     .editor-content .sel-text { background: #e8eef6; }
-    /* AI 撰写进度条 */
+    /* AI 撰写进度条（位于格式工具栏下方） */
     .editor-progress {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 8px 16px;
-      border-top: 1px solid #f0f0f0;
+      padding: 7px 16px;
+      border-bottom: 1px solid #f0f0f0;
       background: #fafafa;
       flex-shrink: 0;
     }
@@ -1571,12 +1571,18 @@
       min-width: 36px;
       text-align: right;
     }
+    .ep-countdown {
+      font-size: 12px;
+      color: #8aa0bd;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
     /* 悬浮操作按钮组（桌面区域右侧） */
     .editor-main { position: relative; }
     .editor-float-btns {
       position: absolute;
       right: 12px;
-      top: 64px;
+      top: 100px;
       display: flex;
       flex-direction: column;
       gap: 8px;
@@ -3872,10 +3878,119 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+    /* 卡片悬浮管理操作：重命名 / 移动 / 删除 */
+    .lib-acts {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      display: none;
+      gap: 3px;
+      z-index: 3;
+    }
+    .lib-card:hover .lib-acts { display: flex; }
+    .lib-acts span {
+      width: 20px;
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: #5a708f;
+      background: rgba(255, 255, 255, .95);
+      border: 1px solid #d5dde8;
+      border-radius: 4px;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(30, 50, 80, .12);
+    }
+    .lib-acts span:hover { color: #1677ff; border-color: #1677ff; }
+    .lib-acts span.lib-act-del:hover { color: #d9534f; border-color: #d9534f; }
+    /* 多选：勾选框 + 选中态 + 批量操作栏 */
+    .lib-check {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      display: none;
+      padding: 2px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, .92);
+      cursor: pointer;
+      z-index: 4;
+      box-shadow: 0 1px 4px rgba(30, 50, 80, .12);
+    }
+    .lib-card:hover .lib-check,
+    .lib-card.selected .lib-check,
+    .lib-grid.selecting .lib-check { display: block; }
+    .lib-check input { cursor: pointer; margin: 0; display: block; }
+    .lib-card.selected { border-color: #4a6fa5; box-shadow: 0 0 0 2px rgba(74, 111, 165, .18); }
+    .lib-grid.selecting .lib-card:hover { border-color: #a9c3e0; box-shadow: 0 4px 14px rgba(74, 111, 165, .16); }
+    .lib-batch-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 10px;
+      margin-bottom: 10px;
+      border: 1px solid #c9dbf2;
+      border-radius: 8px;
+      background: #f2f7ff;
+    }
+    .lib-batch-count { font-size: 11px; color: #666; white-space: nowrap; }
+    .lib-batch-count b { color: #1677ff; font-weight: 600; }
+    .lib-batch-acts { display: flex; gap: 6px; }
+    .lib-batch-acts .bb-act {
+      font-size: 11px;
+      color: #4a6fa5;
+      cursor: pointer;
+      padding: 2px 8px;
+      border: 1px solid #c9dbf2;
+      border-radius: 4px;
+      background: #fff;
+      white-space: nowrap;
+    }
+    .lib-batch-acts .bb-act:hover { color: #1677ff; border-color: #1677ff; }
+    .lib-batch-acts .bb-act.danger { color: #c0392b; border-color: #e0b4ab; background: #fdf6f5; }
+    .lib-batch-acts .bb-act.danger:hover { color: #fff; border-color: #c0392b; background: #c0392b; }
     .lib-empty { padding: 26px 10px; text-align: center; color: #bbb; font-size: 12px; }
     .lib-foot-tip { margin-top: 10px; font-size: 11px; color: #aaa; line-height: 1.6; }
     .lib-foot-tip a { color: #4a6fa5; text-decoration: none; }
     .lib-foot-tip a:hover { text-decoration: underline; }
+    .lib-quota {
+      margin-top: 10px;
+      padding: 8px 10px;
+      border: 1px solid #e8eef6;
+      border-radius: 8px;
+      background: #fbfcfe;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    /* 图片库页签：内容滚动、存储空间常驻面板底部 */
+    #reviewImages.lib-body {
+      flex-direction: column;
+      padding: 0;
+      overflow: hidden;
+    }
+    .lib-body .lib-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 16px;
+    }
+    .lib-body .lib-quota {
+      flex-shrink: 0;
+      margin: 0;
+      padding: 8px 16px;
+      border: none;
+      border-top: 1px solid #e8eef6;
+      border-radius: 0;
+      background: #fff;
+    }
+    .lib-quota-text { font-size: 11px; color: #999; white-space: nowrap; }
+    .lib-quota-text b { color: #4a6fa5; font-weight: 600; }
+    .lib-quota-bar { height: 4px; border-radius: 2px; background: #eef2f8; overflow: hidden; }
+    .lib-quota-bar i { display: block; height: 100%; width: 0; background: #4a6fa5; transition: width .3s; }
+    .lib-quota.warn .lib-quota-text b { color: #c0392b; }
+    .lib-quota.warn .lib-quota-bar i { background: #c0392b; }
     /* 图片库缩略图悬浮：插入提示 */
     .lib-insert-tip {
       position: fixed;
@@ -4143,8 +4258,13 @@
         <!-- 右侧：需求描述 + 知识库资料 -->
         <div class="step1-right">
           <div class="req-card">
-            <label class="req-card-title">📄 需求描述<span class="title-note">（报告侧重点、目的，主要写作内容，或者需要规避的写作内容，以及其他需求）</span><span class="char-count"><span class="cur">0</span>/1500</span></label>
-            <textarea class="input char-limit" maxlength="1500" rows="3" placeholder=""></textarea>
+            <label class="req-card-title">📄 需求描述<span class="title-note">（报告侧重点、目的，主要写作内容，或者需要规避的写作内容，以及其他需求）</span><span class="form-sample" data-target="fldDemand" title="点击填入示例内容">使用示例</span><span class="char-count"><span class="cur">0</span>/1500</span></label>
+            <textarea class="input char-limit" id="fldDemand" maxlength="1500" rows="6" placeholder="报告目的：本报告用于项目立项论证，客观分析项目建设的必要性、实施可行性及主要风险。
+写作重点：围绕已填写的建设内容与规模，重点论证市场需求、产品或服务定位、技术路线、建设方案、实施进度及运营安排，说明各项建设投入如何支撑项目目标。
+主要内容：结合企业现有基础与提供的资料，分析项目实施条件、投资及资金来源、收入与成本、财务表现和风险应对措施；涉及技术方案时，写清实现路径、关键环节和验收目标，避免只作概念介绍。
+工程建设章节：结合项目实际，说明选址与场地条件、总平面布置、建筑与结构方案，以及给排水、供配电、暖通、消防等配套工程；明确工程规模、功能分区、建设标准、设备安装、施工组织与实施进度，说明工程方案与生产工艺或服务功能的衔接。无新增土建工程的，说明现有设施利用及必要改造安排，不套用厂房建设内容。
+规避内容：不编造企业资质、客户合同；不将拟建设内容写成已完成成果。
+其他需求：使用专业、客观的中文表述，统一全文名称、金额、单位及时间口径。对项目资料未明确的技术路线、工程方案及运营安排，可结合项目特点合理补充，保持与已填写的建设内容、规模及投资口径一致。"></textarea>
           </div>
           <div class="kb-panel">
           <div class="kb-panel-head">
@@ -4906,6 +5026,12 @@
             <span class="tool-wordcount" id="toolWordCount">字数：0</span>
             <span class="tool-ai-credit" id="toolAiCredit" title="每个任务最多 10 次免费 AI 修正" style="display:none;">剩余免费AI修正 10 次</span>
           </div>
+          <div class="editor-progress">
+            <span class="ep-label">AI 撰写进度</span>
+            <div class="ep-bar"><div class="ep-bar-inner" id="epBarInner"></div></div>
+            <span class="ep-pct" id="epPct">0%</span>
+            <span class="ep-countdown" id="epCountdown">预计剩余 00:12</span>
+          </div>
           <div class="editor-content" id="editorContent">
             <div class="paper" id="paper" contenteditable="true">
               <h3>（一）项目建设背景</h3>
@@ -4916,11 +5042,6 @@
               <p>2、提升海关监管智能化水平的现实需要。通过数据治理平台建设，可实现跨业务领域数据的融合共享，为风险研判、智能审单、精准监管等业务场景提供高质量数据支撑，切实提升监管的精准性和有效性。</p>
               <p>3、推动数据要素价值释放的内在要求。项目建设将有效盘活海关数据资产，推动数据资源向数据资本转化，为海关事业高质量发展注入新动能。</p>
             </div>
-          </div>
-          <div class="editor-progress">
-            <span class="ep-label">AI 撰写进度</span>
-            <div class="ep-bar"><div class="ep-bar-inner" id="epBarInner"></div></div>
-            <span class="ep-pct" id="epPct">0%</span>
           </div>
           <div class="editor-float-btns">
             <button class="float-btn" title="返回顶部" onclick="backToTop()">↑</button>
@@ -4960,20 +5081,34 @@
             <div class="review-group-title">关键事实</div>
             <div id="factCardList"></div>
           </div>
-          <div class="review-body" id="reviewImages" style="display:none;">
-            <div class="review-group-title">图片库</div>
-            <div class="lib-search">
-              <input class="input" type="text" id="libSearchInput" placeholder="输入图片名称查询" oninput="renderLibGrid()">
-              <button class="btn btn-outline" onclick="renderLibGrid()">🔍</button>
+          <div class="review-body lib-body" id="reviewImages" style="display:none;">
+            <div class="lib-scroll">
+              <div class="review-group-title">图片库</div>
+              <div class="lib-search">
+                <input class="input" type="text" id="libSearchInput" placeholder="输入图片名称查询" oninput="renderLibGrid()">
+                <button class="btn btn-outline" onclick="renderLibGrid()">🔍</button>
+              </div>
+              <div class="lib-toolbar">
+                <button class="btn btn-primary" onclick="libOpenUploadModal()">＋ 上传图片</button>
+                <button class="btn btn-outline" onclick="libOpenFolderCreate()">＋ 新建文件夹</button>
+              </div>
+              <div class="lib-batch-bar" id="libBatchBar" style="display:none;">
+                <span class="lib-batch-count">已选 <b id="libBatchCount">0</b> 项</span>
+                <span class="lib-batch-acts">
+                  <span class="bb-act" onclick="libOpenBatchMove()">移动</span>
+                  <span class="bb-act danger" onclick="libOpenBatchDelete()">删除</span>
+                  <span class="bb-act" onclick="libClearSelection()">取消</span>
+                </span>
+              </div>
+              <div class="lib-crumb" id="libCrumb"></div>
+              <div class="lib-grid" id="libGrid"></div>
+              <div class="lib-empty" id="libEmpty" style="display:none;">当前文件夹暂无图片</div>
+              <div class="lib-foot-tip">点击图片即可插入到正文光标位置；悬浮卡片可通过图标进行重命名、移动、删除等管理操作。</div>
             </div>
-            <div class="lib-toolbar">
-              <select id="libUploadTarget" class="input" title="上传到指定文件夹"></select>
-              <button class="btn btn-primary" onclick="libPickUpload()">＋ 上传图片</button>
+            <div class="lib-quota" id="libQuotaBox">
+              <span class="lib-quota-text">存储空间 已用 <b id="libQuotaUsed">0B</b> / 10G</span>
+              <div class="lib-quota-bar"><i id="libQuotaBar"></i></div>
             </div>
-            <div class="lib-crumb" id="libCrumb"></div>
-            <div class="lib-grid" id="libGrid"></div>
-            <div class="lib-empty" id="libEmpty" style="display:none;">当前文件夹暂无图片</div>
-            <div class="lib-foot-tip">点击图片即可插入到正文光标位置；<a href="image-library.html" target="_blank">管理图片库 ›</a></div>
           </div>
           <div class="review-body" id="reviewSources" style="display:none;">
             <div class="review-group-title">来源汇总</div>
@@ -5026,6 +5161,36 @@
 
   <!-- 图片库：上传（上传到指定文件夹） -->
   <input type="file" id="libFileInput" accept="image/*" multiple style="display:none">
+  <input type="file" id="libFolderInput" webkitdirectory style="display:none">
+
+  <!-- 图片库：上传图片弹窗 -->
+  <div class="modal-mask" id="libUploadModal" style="display:none;">
+    <div class="modal-box" style="width:520px;">
+      <div class="modal-head">
+        <span class="modal-title">上传图片</span>
+        <span class="modal-close" onclick="closeLibUploadModal()">✕</span>
+      </div>
+      <div class="modal-body">
+        <div class="upload-target">
+          <label>上传到文件夹</label>
+          <select class="input" id="libUploadTargetSelect" style="width:100%;"></select>
+        </div>
+        <div class="upload-guide">
+          <p>支持选择单张/多张图片上传，或选择整个本地文件夹（仅上传文件夹中的图片文件）。</p>
+          <ul>
+            <li>支持格式：JPG、PNG、GIF、WEBP、BMP、SVG</li>
+            <li>单张图片不超过 10M，个人总存储空间 10G</li>
+            <li>若所选内容中包含非图片文件，系统会先列出不可上传的文件清单</li>
+          </ul>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeLibUploadModal()">取消</button>
+          <button class="btn btn-outline" onclick="libPickFolderUpload()">选择整个文件夹</button>
+          <button class="btn btn-primary" onclick="libPickUpload()">选择图片上传</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- 替换图片选择器 -->
   <div class="modal-mask" id="replaceImgModal" style="display:none;">
@@ -5061,6 +5226,60 @@
           <button class="btn btn-outline" onclick="closeLibIssue()">取消上传</button>
           <button class="btn btn-primary" id="libIssueContinue" onclick="continueLibUpload()">仍上传可上传的图片</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 图片库：新建文件夹 / 重命名 -->
+  <div class="modal-mask" id="libNameModal" style="display:none;">
+    <div class="modal-box" style="width:420px;">
+      <div class="modal-head">
+        <span class="modal-title" id="libNameTitle">新建文件夹</span>
+        <span class="modal-close" onclick="closeLibNameModal()">✕</span>
+      </div>
+      <div class="modal-body">
+        <label style="display:block;font-size:13px;color:#555;margin-bottom:6px;" id="libNameLabel">文件夹名称</label>
+        <input class="input" id="libNameInput" maxlength="30" placeholder="请输入名称（不超过30字）" style="width:100%;" onkeydown="if(event.key==='Enter'){event.preventDefault();confirmLibName();}">
+        <div style="font-size:12px;color:#999;margin-top:8px;" id="libNameTip">新文件夹将创建在当前浏览的文件夹下。</div>
+      </div>
+      <div class="modal-actions" style="display:flex;gap:10px;justify-content:flex-end;padding:14px 24px;border-top:1px solid #f0f0f0;background:#fafbfc;border-radius:0 0 12px 12px;">
+        <button class="btn btn-outline" onclick="closeLibNameModal()">取消</button>
+        <button class="btn btn-primary" onclick="confirmLibName()">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 图片库：移动到指定文件夹 -->
+  <div class="modal-mask" id="libMoveModal" style="display:none;">
+    <div class="modal-box" style="width:440px;">
+      <div class="modal-head">
+        <span class="modal-title">移动到文件夹</span>
+        <span class="modal-close" onclick="closeLibMoveModal()">✕</span>
+      </div>
+      <div class="modal-body">
+        <div style="font-size:13px;color:#555;margin-bottom:6px;" id="libMoveTip"></div>
+        <select class="input" id="libMoveSelect" style="width:100%;height:34px;"></select>
+      </div>
+      <div class="modal-actions" style="display:flex;gap:10px;justify-content:flex-end;padding:14px 24px;border-top:1px solid #f0f0f0;background:#fafbfc;border-radius:0 0 12px 12px;">
+        <button class="btn btn-outline" onclick="closeLibMoveModal()">取消</button>
+        <button class="btn btn-primary" onclick="confirmLibMove()">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 图片库：删除确认 -->
+  <div class="modal-mask" id="libDelModal" style="display:none;">
+    <div class="modal-box" style="width:440px;">
+      <div class="modal-head">
+        <span class="modal-title">删除确认</span>
+        <span class="modal-close" onclick="closeLibDelModal()">✕</span>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:13px;color:#555;line-height:1.7;margin:0;" id="libDelTip"></p>
+      </div>
+      <div class="modal-actions" style="display:flex;gap:10px;justify-content:flex-end;padding:14px 24px;border-top:1px solid #f0f0f0;background:#fafbfc;border-radius:0 0 12px 12px;">
+        <button class="btn btn-outline" onclick="closeLibDelModal()">取消</button>
+        <button class="btn btn-primary" style="background:#d9534f;border-color:#d9534f;" onclick="confirmLibDelete()">确认删除</button>
       </div>
     </div>
   </div>
@@ -6846,6 +7065,9 @@
           if (def) el.value = def.value;
         });
         panel1.querySelectorAll('.char-count .cur').forEach(el => { el.textContent = '0'; });
+        // 需求描述输入框高度恢复为占位提示所需的最小高度
+        const demandEl = document.getElementById('fldDemand');
+        if (demandEl) demandEl.dispatchEvent(new Event('input', { bubbles: true }));
       }
       // 第二步知识库引用恢复默认（清空选择与大纲指定）
       if (typeof clearKbRef === 'function') clearKbRef();
@@ -7289,7 +7511,8 @@
     /* ==================== 基础信息：使用示例一键填入 ==================== */
     const FORM_SAMPLES = {
       fldInvest: '68259.35',
-      fldContent: '总建筑面积24000㎡，建设研发办公楼、数据中心机房等，达产年支撑10亿次商业数据智能查询及2万份企业风险评估报告输出。'
+      fldContent: '总建筑面积24000㎡，建设研发办公楼、数据中心机房等，达产年支撑10亿次商业数据智能查询及2万份企业风险评估报告输出。',
+      fldDemand: '报告目的：本报告用于项目立项论证，客观分析项目建设的必要性、实施可行性及主要风险。\n写作重点：围绕已填写的建设内容与规模，重点论证市场需求、产品或服务定位、技术路线、建设方案、实施进度及运营安排，说明各项建设投入如何支撑项目目标。\n主要内容：结合企业现有基础与提供的资料，分析项目实施条件、投资及资金来源、收入与成本、财务表现和风险应对措施；涉及技术方案时，写清实现路径、关键环节和验收目标，避免只作概念介绍。\n工程建设章节：结合项目实际，说明选址与场地条件、总平面布置、建筑与结构方案，以及给排水、供配电、暖通、消防等配套工程；明确工程规模、功能分区、建设标准、设备安装、施工组织与实施进度，说明工程方案与生产工艺或服务功能的衔接。无新增土建工程的，说明现有设施利用及必要改造安排，不套用厂房建设内容。\n规避内容：不编造企业资质、客户合同；不将拟建设内容写成已完成成果。\n其他需求：使用专业、客观的中文表述，统一全文名称、金额、单位及时间口径。对项目资料未明确的技术路线、工程方案及运营安排，可结合项目特点合理补充，保持与已填写的建设内容、规模及投资口径一致。'
     };
     (function initFormSamples() {
       document.querySelectorAll('.form-sample').forEach(link => {
@@ -7306,6 +7529,25 @@
           libToast('已填入示例内容，可直接修改');
         });
       });
+    })();
+
+    /* ==================== 需求描述输入框：高度自适应 ==================== */
+    (function initDemandAutofit() {
+      const el = document.getElementById('fldDemand');
+      if (!el) return;
+      // 以占位文字渲染所需高度作为最小高度，保证默认状态完整展示提示文字
+      const cur = el.value;
+      el.value = el.placeholder || '';
+      const minH = el.scrollHeight;
+      el.value = cur;
+      el.style.minHeight = minH + 'px';
+      el.style.overflowY = 'hidden';
+      const fit = function () {
+        el.style.height = 'auto';
+        el.style.height = Math.max(minH, el.scrollHeight) + 'px';
+      };
+      el.addEventListener('input', fit);
+      fit();
     })();
 
     /* ==================== 步骤1：知识库 ==================== */
@@ -8299,7 +8541,7 @@
       el.classList.add('active');
       ['issues', 'facts', 'images', 'sources'].forEach(p => {
         const body = document.getElementById('review' + p.charAt(0).toUpperCase() + p.slice(1));
-        if (body) body.style.display = p === panel ? 'block' : 'none';
+        if (body) body.style.display = p === panel ? (p === 'images' ? 'flex' : 'block') : 'none';
       });
       if (panel === 'images' && typeof renderLibGrid === 'function') renderLibGrid();
     }
@@ -8745,15 +8987,21 @@
     let aiWriting = false;
     let aiProgress = 0;
     let aiTimer = null;
+    let aiWriteStart = 0;
+    const AI_WRITE_MS = 12000; // 原型演示约12秒（实际业务约5~8分钟）
     function updateAiProgress() {
       const p = Math.floor(aiProgress);
       document.getElementById('epBarInner').style.width = p + '%';
       document.getElementById('epPct').textContent = p + '%';
     }
     function startAiTimer() {
+      aiWriteStart = Date.now();
       aiTimer = setInterval(() => {
-        aiProgress = Math.min(100, aiProgress + 0.8 + Math.random() * 1.5);
+        const elapsed = Date.now() - aiWriteStart;
+        aiProgress = Math.min(100, elapsed / AI_WRITE_MS * 100);
         updateAiProgress();
+        const cd = document.getElementById('epCountdown');
+        if (cd) cd.textContent = '预计剩余 ' + fmtCountdown(Math.max(0, AI_WRITE_MS - elapsed));
         if (aiProgress >= 100) {
           clearInterval(aiTimer);
           aiTimer = null;
@@ -8767,6 +9015,8 @@
       aiProgress = 0;
       aiWriting = true;
       updateAiProgress();
+      const cd = document.getElementById('epCountdown');
+      if (cd) cd.textContent = '预计剩余 ' + fmtCountdown(AI_WRITE_MS);
       startAiTimer();
       backToTop();
     }
@@ -9191,6 +9441,7 @@
     let libReplaceWrap = null;
     let libPendingValid = [];
     let libPendingAll = [];
+    let libSelected = [];
 
     function libCurrentFolder() { return libPath[libPath.length - 1]; }
 
@@ -9207,19 +9458,15 @@
     function renderLibGrid() {
       const root = document.getElementById('libGrid');
       if (!root) return;
-      // 上传目标文件夹下拉
-      const sel = document.getElementById('libUploadTarget');
-      const folders = [];
-      libCollectFolders(LIB_ROOT, 1, '', folders);
-      const targets = folders.filter(f => f.level <= LIB_MAX_FOLDER_LEVEL - 1);
-      const curIdx = libPath.length > 1 ? targets.findIndex(f => f.folder === libCurrentFolder()) : -1;
-      sel.innerHTML = '<option value="root">上传到：根目录</option>'
-        + targets.map((f, i) => '<option value="' + i + '">上传到：' + f.label + '</option>').join('');
-      sel.value = curIdx >= 0 ? String(curIdx) : 'root';
-      libUploadTargetNode = curIdx >= 0 ? targets[curIdx].folder : LIB_ROOT;
-      sel.onchange = function () {
-        libUploadTargetNode = this.value === 'root' ? LIB_ROOT : targets[Number(this.value)].folder;
-      };
+      // 存储空间用量（面板底部）
+      const qBox = document.getElementById('libQuotaBox');
+      if (qBox) {
+        const used = libUsedBytes();
+        document.getElementById('libQuotaUsed').textContent = libFmtSize(used);
+        const pct = Math.min(100, used / LIB_QUOTA_TOTAL * 100);
+        document.getElementById('libQuotaBar').style.width = pct.toFixed(2) + '%';
+        qBox.classList.toggle('warn', pct >= 90);
+      }
 
       // 面包屑
       const crumb = document.getElementById('libCrumb');
@@ -9260,9 +9507,10 @@
       const emptyTip = document.getElementById('libEmpty');
       emptyTip.textContent = q ? '未找到匹配的图片或文件夹' : '当前文件夹暂无图片';
       emptyTip.style.display = items.length ? 'none' : 'block';
+      libUpdateBatch(items);
       items.forEach(it => {
         const card = document.createElement('div');
-        card.className = 'lib-card';
+        card.className = 'lib-card' + (libSelected.indexOf(it) >= 0 ? ' selected' : '');
         const sp = hitMap ? (hitMap.get(it) || '') : '';
         const pathTip = sp ? '（位于 ' + sp + '）' : '';
         if (it.type === 'folder') {
@@ -9270,7 +9518,10 @@
             + '<span class="folder-count">' + libAllImages(it).length + ' 张</span></div>'
             + '<div class="lib-card-name" title="' + libEsc(it.name) + pathTip + '">' + libEsc(it.name) + '</div>'
             + (sp ? '<div class="lib-card-sub">📁 ' + libEsc(sp) + '</div>' : '');
-          card.querySelector('.lib-thumb').onclick = function () { libPath.push(it); renderLibGrid(); };
+          card.querySelector('.lib-thumb').onclick = function () {
+            if (libSelected.length) { libToggleSelect(it, libSelected.indexOf(it) === -1); return; }
+            libPath.push(it); renderLibGrid();
+          };
         } else {
           card.innerHTML = '<div class="lib-thumb"><img src="' + it.src + '" alt="' + libEsc(it.name) + '"></div>'
             + '<div class="lib-card-name" title="' + libEsc(it.name) + pathTip + '">' + libEsc(it.name) + '</div>'
@@ -9278,10 +9529,235 @@
           const thumb = card.querySelector('.lib-thumb');
           thumb.onmouseenter = function () { libShowZoom(thumb, it); libShowInsertTip(thumb); };
           thumb.onmouseleave = function () { libHideZoom(); libHideInsertTip(); };
-          thumb.onclick = function () { libHideInsertTip(); libInsertImage(it); };
+          thumb.onclick = function () {
+            if (libSelected.length) { libToggleSelect(it, libSelected.indexOf(it) === -1); return; }
+            libHideInsertTip(); libInsertImage(it);
+          };
         }
+        libBuildActs(card, it);
+        libBuildCheck(card, it);
         root.appendChild(card);
       });
+    }
+
+    /* ---------- 多选：勾选与批量操作 ---------- */
+    function libUpdateBatch(rendered) {
+      libSelected = libSelected.filter(it => rendered.indexOf(it) >= 0);
+      const grid = document.getElementById('libGrid');
+      grid.classList.toggle('selecting', libSelected.length > 0);
+      const bar = document.getElementById('libBatchBar');
+      document.getElementById('libBatchCount').textContent = libSelected.length;
+      bar.style.display = libSelected.length ? 'flex' : 'none';
+    }
+    function libToggleSelect(it, on) {
+      const i = libSelected.indexOf(it);
+      if (on && i === -1) libSelected.push(it);
+      if (!on && i > -1) libSelected.splice(i, 1);
+      renderLibGrid();
+    }
+    function libClearSelection() { libSelected = []; renderLibGrid(); }
+    function libBuildCheck(card, it) {
+      const check = document.createElement('label');
+      check.className = 'lib-check';
+      check.title = '选择';
+      check.innerHTML = '<input type="checkbox"' + (libSelected.indexOf(it) >= 0 ? ' checked' : '') + '>';
+      check.onclick = function (e) { e.stopPropagation(); };
+      check.querySelector('input').onchange = function () { libToggleSelect(it, this.checked); };
+      card.appendChild(check);
+    }
+
+    /* ---------- 卡片悬浮管理操作：重命名 / 移动 / 删除 ---------- */
+    function libBuildActs(card, it) {
+      const bar = document.createElement('div');
+      bar.className = 'lib-acts';
+      bar.innerHTML = '<span class="lib-act-ren" title="重命名">✎</span>'
+        + '<span class="lib-act-mv" title="移动">⇄</span>'
+        + '<span class="lib-act-del" title="删除">🗑</span>';
+      bar.querySelector('.lib-act-ren').onclick = function (e) { e.stopPropagation(); libOpenRename(it); };
+      bar.querySelector('.lib-act-mv').onclick = function (e) { e.stopPropagation(); libOpenMove(it); };
+      bar.querySelector('.lib-act-del').onclick = function (e) { e.stopPropagation(); libOpenDelete(it); };
+      card.appendChild(bar);
+    }
+    function libFindParent(node, root) {
+      root = root || LIB_ROOT;
+      if (root.children.indexOf(node) >= 0) return root;
+      for (let i = 0; i < root.children.length; i++) {
+        const c = root.children[i];
+        if (c.type === 'folder') {
+          const p = libFindParent(node, c);
+          if (p) return p;
+        }
+      }
+      return null;
+    }
+    function libIsDesc(node, target) {
+      if (!node || node.type !== 'folder') return false;
+      for (let i = 0; i < node.children.length; i++) {
+        const c = node.children[i];
+        if (c === target) return true;
+        if (c.type === 'folder' && libIsDesc(c, target)) return true;
+      }
+      return false;
+    }
+    function libCountFolders(node) {
+      let n = 0;
+      node.children.forEach(c => { if (c.type === 'folder') { n++; n += libCountFolders(c); } });
+      return n;
+    }
+
+    /* ---------- 新建文件夹 / 重命名 ---------- */
+    let libNameMode = 'folder-new';
+    let libNameTarget = null;
+    function libOpenFolderCreate() {
+      if (libPath.length > LIB_MAX_FOLDER_LEVEL) {
+        libToast('文件夹最多支持 ' + LIB_MAX_FOLDER_LEVEL + ' 层，无法在当前文件夹下继续新建');
+        return;
+      }
+      libNameMode = 'folder-new';
+      libNameTarget = null;
+      document.getElementById('libNameTitle').textContent = '新建文件夹';
+      document.getElementById('libNameLabel').textContent = '文件夹名称';
+      document.getElementById('libNameTip').textContent = '新文件夹将创建在「' + libCurrentFolder().name + '」下。';
+      document.getElementById('libNameInput').value = '';
+      document.getElementById('libNameModal').style.display = 'flex';
+      setTimeout(function () { document.getElementById('libNameInput').focus(); }, 50);
+    }
+    function libOpenRename(it) {
+      libNameMode = 'rename';
+      libNameTarget = it;
+      document.getElementById('libNameTitle').textContent = it.type === 'folder' ? '重命名文件夹' : '重命名图片';
+      document.getElementById('libNameLabel').textContent = it.type === 'folder' ? '文件夹名称' : '图片名称';
+      document.getElementById('libNameTip').textContent = '';
+      document.getElementById('libNameInput').value = it.name;
+      document.getElementById('libNameModal').style.display = 'flex';
+      const inp = document.getElementById('libNameInput');
+      setTimeout(function () { inp.focus(); inp.select(); }, 50);
+    }
+    function closeLibNameModal() { document.getElementById('libNameModal').style.display = 'none'; }
+    function confirmLibName() {
+      const input = document.getElementById('libNameInput');
+      const name = (input.value || '').trim();
+      if (!name) { libToast('请输入名称'); input.focus(); return; }
+      if (libNameMode === 'rename') {
+        const parent = libFindParent(libNameTarget);
+        if (!parent) { closeLibNameModal(); return; }
+        if (parent.children.some(c => c !== libNameTarget && c.name === name)) { libToast('同级已存在同名项，请更换名称'); return; }
+        libNameTarget.name = name;
+        libNameTarget.updateTime = libNow();
+        libSave();
+        closeLibNameModal();
+        renderLibGrid();
+        libToast('已重命名为「' + name + '」');
+      } else {
+        const parent = libCurrentFolder();
+        if (parent.children.some(c => c.name === name)) { libToast('已存在同名文件夹，请更换名称'); return; }
+        parent.children.unshift({ type: 'folder', name: name, time: libNow(), updateTime: libNow(), children: [] });
+        parent.updateTime = libNow();
+        libSave();
+        closeLibNameModal();
+        renderLibGrid();
+        libToast('已创建文件夹「' + name + '」');
+      }
+    }
+
+    /* ---------- 移动到指定文件夹（支持单个 / 批量） ---------- */
+    let libMoveItems = [];
+    let libMoveCandidates = [];
+    function libOpenMove(it) { libOpenMoveFor([it]); }
+    function libOpenBatchMove() {
+      if (!libSelected.length) return;
+      libOpenMoveFor(libSelected.slice());
+    }
+    function libOpenMoveFor(items) {
+      const parents = items.map(it => libFindParent(it));
+      const candidates = [];
+      if (parents.some(p => p !== LIB_ROOT)) candidates.push({ folder: LIB_ROOT, label: '默认列表（根目录）' });
+      const folders = [];
+      libCollectFolders(LIB_ROOT, 1, '', folders);
+      const hasFolder = items.some(it => it.type === 'folder');
+      folders.forEach(f => {
+        if (items.some((it, i) => f.folder === it || f.folder === parents[i])) return;  // 不能移入自身或原所在文件夹
+        if (items.some(it => libIsDesc(it, f.folder))) return;               // 不能移入自身子树
+        if (hasFolder && f.level >= LIB_MAX_FOLDER_LEVEL) return;            // 文件夹移入后超过三层
+        candidates.push({ folder: f.folder, label: f.label });
+      });
+      if (!candidates.length) { libToast('暂无可移动的目标文件夹'); return; }
+      libMoveItems = items;
+      libMoveCandidates = candidates;
+      document.getElementById('libMoveTip').textContent = items.length === 1
+        ? '将「' + items[0].name + '」移动到：'
+        : '将所选 ' + items.length + ' 项移动到：';
+      const sel = document.getElementById('libMoveSelect');
+      sel.innerHTML = candidates.map((f, i) => '<option value="' + i + '">' + libEsc(f.label) + '</option>').join('');
+      sel.value = '0';
+      document.getElementById('libMoveModal').style.display = 'flex';
+    }
+    function closeLibMoveModal() { document.getElementById('libMoveModal').style.display = 'none'; }
+    function confirmLibMove() {
+      const sel = document.getElementById('libMoveSelect');
+      const t = libMoveCandidates[Number(sel.value)];
+      if (!t || !libMoveItems.length) { closeLibMoveModal(); return; }
+      let moved = 0;
+      libMoveItems.forEach(it => {
+        const parent = libFindParent(it);
+        const i = parent ? parent.children.indexOf(it) : -1;
+        if (i >= 0) parent.children.splice(i, 1);
+        t.folder.children.unshift(it);
+        if (parent) parent.updateTime = libNow();
+        if (libPath.indexOf(it) >= 0) libPath = [LIB_ROOT];
+        moved++;
+      });
+      t.folder.updateTime = libNow();
+      libSave();
+      closeLibMoveModal();
+      libSelected = [];
+      renderLibGrid();
+      libToast(moved === 1
+        ? '已移动「' + libMoveItems[0].name + '」到「' + t.folder.name + '」'
+        : '已移动 ' + moved + ' 项到「' + t.folder.name + '」');
+      libMoveItems = [];
+    }
+
+    /* ---------- 删除（含确认，支持单个 / 批量） ---------- */
+    let libDelItems = [];
+    function libOpenDelete(it) { libOpenDeleteFor([it]); }
+    function libOpenBatchDelete() {
+      if (!libSelected.length) return;
+      libOpenDeleteFor(libSelected.slice());
+    }
+    function libOpenDeleteFor(items) {
+      libDelItems = items;
+      if (items.length === 1) {
+        const it = items[0];
+        document.getElementById('libDelTip').textContent = it.type === 'folder'
+          ? '确定删除文件夹「' + it.name + '」吗？其中包含 ' + libAllImages(it).length + ' 张图片'
+            + (libCountFolders(it) ? '及 ' + libCountFolders(it) + ' 个子文件夹' : '')
+            + '，删除后不可恢复。'
+          : '确定删除图片「' + it.name + '」吗？删除后不可恢复。';
+      } else {
+        const imgs = items.reduce((s, it) => s + (it.type === 'folder' ? libAllImages(it).length : 1), 0);
+        const folders = items.filter(it => it.type === 'folder').length;
+        document.getElementById('libDelTip').textContent = '确定删除所选 ' + items.length + ' 项吗？其中包含 '
+          + imgs + ' 张图片' + (folders ? '及 ' + folders + ' 个文件夹' : '') + '，删除后不可恢复。';
+      }
+      document.getElementById('libDelModal').style.display = 'flex';
+    }
+    function closeLibDelModal() { document.getElementById('libDelModal').style.display = 'none'; }
+    function confirmLibDelete() {
+      const items = libDelItems;
+      libDelItems = [];
+      if (!items.length) { closeLibDelModal(); return; }
+      items.forEach(it => {
+        const parent = libFindParent(it);
+        const i = parent ? parent.children.indexOf(it) : -1;
+        if (i >= 0) parent.children.splice(i, 1);
+        if (libPath.indexOf(it) >= 0) libPath = [LIB_ROOT];
+      });
+      libSave();
+      closeLibDelModal();
+      libSelected = [];
+      renderLibGrid();
+      libToast(items.length === 1 ? '已删除「' + items[0].name + '」' : '已删除 ' + items.length + ' 项');
     }
 
     /* ---------- 悬浮：放大预览 + 插入提示 ---------- */
@@ -9327,13 +9803,35 @@
     function libHideInsertTip() { document.getElementById('libInsertTip').style.display = 'none'; }
     window.addEventListener('scroll', function () { libHideZoom(); libHideInsertTip(); }, true);
 
-    /* ---------- 上传（上传到页面内指定文件夹） ---------- */
+    /* ---------- 上传（弹窗内选择目标文件夹） ---------- */
+    function libOpenUploadModal() {
+      const folders = [];
+      libCollectFolders(LIB_ROOT, 1, '', folders);
+      const sel = document.getElementById('libUploadTargetSelect');
+      const targets = folders.filter(f => f.level <= LIB_MAX_FOLDER_LEVEL - 1);
+      const curIdx = libPath.length > 1 ? targets.findIndex(f => f.folder === libCurrentFolder()) : -1;
+      sel.innerHTML = '<option value="root">根目录（默认列表）</option>'
+        + targets.map((f, i) => '<option value="' + i + '">' + f.label + '</option>').join('');
+      sel.value = curIdx === -1 ? 'root' : String(curIdx);
+      libUploadTargetNode = curIdx === -1 ? LIB_ROOT : targets[curIdx].folder;
+      sel.onchange = function () {
+        libUploadTargetNode = this.value === 'root' ? LIB_ROOT : targets[Number(this.value)].folder;
+      };
+      document.getElementById('libUploadModal').style.display = 'flex';
+    }
+    function closeLibUploadModal() { document.getElementById('libUploadModal').style.display = 'none'; }
     function libPickUpload() {
       const inp = document.getElementById('libFileInput');
       inp.value = '';
       inp.click();
     }
+    function libPickFolderUpload() {
+      const inp = document.getElementById('libFolderInput');
+      inp.value = '';
+      inp.click();
+    }
     document.getElementById('libFileInput').addEventListener('change', function () { libHandleFiles(this.files); });
+    document.getElementById('libFolderInput').addEventListener('change', function () { libHandleFiles(this.files); });
 
     function libIsImageFile(f) {
       const byType = !!(f.type && /^image\//.test(f.type));
@@ -9343,6 +9841,7 @@
     function libHandleFiles(fileList) {
       const files = Array.prototype.slice.call(fileList || []);
       if (!files.length) return;
+      closeLibUploadModal();
       const invalid = [], valid = [];
       files.forEach(f => {
         if (!libIsImageFile(f)) invalid.push({ name: f.name, reason: '非图片格式，仅支持 JPG / PNG / GIF / WEBP / BMP / SVG' });

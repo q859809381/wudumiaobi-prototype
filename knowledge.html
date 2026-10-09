@@ -87,6 +87,30 @@
       color: #bbb;
       font-size: 13px;
     }
+    /* 拖拽移动：手柄、拖拽态与放置高亮 */
+    .kb-drag-handle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px;
+      margin-right: 4px;
+      color: #b8c4d4;
+      font-size: 12px;
+      cursor: grab;
+      opacity: 0;
+      transition: opacity .15s;
+      flex-shrink: 0;
+      user-select: none;
+    }
+    #fileTable tr:hover .kb-drag-handle { opacity: 1; }
+    #fileTable tr[draggable="true"] .file-name-cell { cursor: grab; }
+    #fileTable tr.dragging { opacity: .45; }
+    #fileTable tr.drop-target td {
+      background: #eef5ff;
+    }
+    #fileTable tr.drop-target td:first-child {
+      box-shadow: inset 3px 0 0 #1677ff;
+    }
     /* 批量操作栏 */
     .batch-bar {
       display: flex;
@@ -644,7 +668,7 @@
   <div class="task-toast" id="actionToast">
     <span class="task-toast-close" onclick="closeToast()">×</span>
     <div class="task-toast-title">提示</div>
-    <div class="task-toast-desc">操作已触发（原型演示）</div>
+    <div class="task-toast-desc" id="actionToastText">操作已触发（原型演示）</div>
   </div>
 
   <script>
@@ -726,6 +750,7 @@
     let kbSelected = [];
     let kbVisibleItems = [];
     let kbMoveItems = [];
+    let kbDragItem = null;
     let kbMoveCandidates = [];
     function parseBytes(str) {
       const m = String(str || '').match(/^([\d.]+)\s*(KB|MB|GB|K|M)$/i);
@@ -844,13 +869,16 @@
         const icon = it.type === 'folder'
           ? '<span class="file-icon folder">📁</span>'
           : '<span class="file-icon ' + it.icon + '">' + it.iconLetter + '</span>';
+        const dragHandle = it.type === 'folder'
+          ? ''
+          : '<span class="kb-drag-handle" title="拖动到文件夹以移动">⠿</span>';
         const size = it.type === 'folder' ? (it.children.length + ' 项') : it.size;
         const primaryLabel = it.type === 'folder' ? '打开' : '下载';
         const primaryIcon = it.type === 'folder' ? '📂' : '⬇';
         const ops = '<button class="row-act link-primary" title="' + primaryLabel + '">' + primaryIcon + '</button>'
           + '<button class="row-act more-btn" title="更多操作">⋯</button>';
         tr.innerHTML = '<td><input type="checkbox" class="kb-row-check" title="选择"></td>'
-          + '<td><span class="file-name-cell">' + icon + '<span>' + escHtml(it.name) + '</span></span></td>'
+          + '<td><span class="file-name-cell">' + dragHandle + icon + '<span>' + escHtml(it.name) + '</span></span></td>'
           + '<td>' + size + '</td>'
           + '<td>' + it.time + '</td>'
           + '<td>' + (it.updateTime || it.time) + '</td>'
@@ -870,6 +898,47 @@
           e.stopPropagation();
           openMoreMenu(moreBtn, it, tr);
         };
+        if (it.type === 'folder') {
+          // 文件夹作为拖放目标：文件拖入即移动
+          tr.addEventListener('dragover', function (e) {
+            if (!kbDragItem || kbDragItem === it) return;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            tr.classList.add('drop-target');
+          });
+          tr.addEventListener('dragleave', function () { tr.classList.remove('drop-target'); });
+          tr.addEventListener('drop', function (e) {
+            e.preventDefault();
+            tr.classList.remove('drop-target');
+            const item = kbDragItem;
+            kbDragItem = null;
+            if (!item || item === it) return;
+            const cur = currentFolder();
+            const i = cur.children.indexOf(item);
+            if (i < 0) return;
+            cur.children.splice(i, 1);
+            it.children.push(item);
+            it.updateTime = nowText();
+            if (cur !== KB_ROOT) cur.updateTime = nowText();
+            kbSelected = kbSelected.filter(s => s !== item);
+            renderList();
+            showToast('已将“' + item.name + '”移动到文件夹“' + it.name + '”');
+          });
+        } else {
+          // 文件行可拖拽（拖动标识：悬浮显示 ⠿ 手柄）
+          tr.draggable = true;
+          tr.addEventListener('dragstart', function (e) {
+            kbDragItem = it;
+            tr.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            try { e.dataTransfer.setData('text/plain', it.name); } catch (err) { /* 忽略 */ }
+          });
+          tr.addEventListener('dragend', function () {
+            tr.classList.remove('dragging');
+            kbDragItem = null;
+            document.querySelectorAll('#fileTable tr.drop-target').forEach(r => r.classList.remove('drop-target'));
+          });
+        }
         tbody.appendChild(tr);
       });
     }
@@ -1226,7 +1295,9 @@
     }
 
     renderList();
-    function showToast() {
+    function showToast(msg) {
+      const textEl = document.getElementById('actionToastText');
+      if (textEl && msg) textEl.textContent = msg;
       document.getElementById('actionToast').classList.add('active');
       setTimeout(() => {
         document.getElementById('actionToast').classList.remove('active');
