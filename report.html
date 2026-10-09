@@ -709,6 +709,14 @@
       filter: blur(3px);
       pointer-events: none;
     }
+    /* 可编辑维度：编辑图标常驻展示在数据前方，点击即进入编辑态 */
+    .anchor-value.has-edit {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    /* 编辑中隐藏图标，避免与输入框重复 */
+    .anchor-value.has-edit.editing .edit-icon { display: none; }
     /* 数据行编辑 */
     .edit-icon {
       display: inline-flex;
@@ -716,23 +724,18 @@
       justify-content: center;
       width: 18px;
       height: 18px;
-      margin-left: 8px;
-      opacity: 0;
-      transition: opacity 0.15s;
-      border: 1px solid #d5dde8;
+      margin-left: 0;
+      opacity: 1;
+      border: 1px solid #cdd9ea;
       border-radius: 4px;
-      color: #8aa0bd;
+      color: #7d95b5;
       font-size: 11px;
       cursor: pointer;
       vertical-align: middle;
-      background: #fff;
+      background: #f6f9fd;
       flex-shrink: 0;
     }
-    .edit-icon:hover { border-color: #4a6fa5; color: #4a6fa5; }
-    /* 鼠标悬浮到数据项上时才展示编辑图标 */
-    .anchor-row:hover .edit-icon {
-      opacity: 1;
-    }
+    .edit-icon:hover { border-color: #4a6fa5; color: #4a6fa5; background: #eef3fb; }
     .confirm-edit-input {
       width: calc(100% - 12px);
       max-width: 240px;
@@ -853,9 +856,29 @@
       background: #fff;
       border: 1px solid #e8e8e8;
       border-radius: 10px;
-      padding: 20px;
+      padding: 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    /* 面板顶部操作栏：固定不随目录滚动 */
+    .outline-ops-bar {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      background: #fff;
+    }
+    /* 目录树滚动区 */
+    .outline-tree-scroll {
+      flex: 1;
       min-height: 0;
       overflow-y: auto;
+      padding: 20px;
     }
     .outline-left-col {
       flex: 1.2;
@@ -1994,6 +2017,29 @@
     .stage-step.active .num { border-color: #fff; }
     .stage-step.done { color: #27804a; border-color: #bfe3cd; background: #f0faf4; }
     .stage-step.done .num { border-color: #27804a; }
+    /* 可点击回溯：已完成的步骤标记可点击态 */
+    .stage-step.clickable { cursor: pointer; transition: all .15s; }
+    .stage-step.clickable:hover { border-color: #4a6fa5; color: #4a6fa5; background: #f2f6fc; }
+    .stage-step.done.clickable:hover { border-color: #27804a; color: #27804a; background: #e9f7ef; }
+    .stage-step.active.clickable:hover { color: #fff; border-color: #4a6fa5; background: #4a6fa5; }
+    /* 当前步骤之后仍可点击查看的步骤：蓝色可点击态（区别于灰显禁用） */
+    .stage-step.ahead { color: #4a6fa5; border-color: #c9d8ec; background: #fff; cursor: pointer; }
+    .stage-step.ahead .num { border-color: #7d9cc5; color: #4a6fa5; }
+    .stage-step.ahead:hover { border-color: #4a6fa5; background: #f2f6fc; }
+    /* 失效：前面步骤信息已变更，需重新生成 */
+    .stage-step.invalid { cursor: not-allowed; color: #b6bcc6; border-style: dashed; border-color: #dfe3ea; background: #fbfcfd; }
+    .stage-step.invalid .num { border-color: #dfe3ea; color: #b6bcc6; }
+    .stage-dirty-note {
+      display: inline-flex;
+      align-items: center;
+      font-size: 12px;
+      color: #c07a00;
+      background: #fff7e6;
+      border: 1px solid #ffe0a3;
+      border-radius: 14px;
+      padding: 4px 12px;
+      margin-left: 2px;
+    }
     .stage-close {
       cursor: pointer;
       color: #999;
@@ -2148,7 +2194,150 @@
       display: flex;
       flex-direction: column;
     }
+    .gen-think.parse-log { padding: 10px 14px; }
+    .parse-line {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: #555;
+      line-height: 1.9;
+    }
+    .parse-line .pi {
+      flex: none;
+      width: 12px;
+      height: 12px;
+      margin-top: 8px;
+      border: 1.5px solid #4a6fa5;
+      border-radius: 2px;
+      position: relative;
+    }
+    .parse-line.done .pi::after {
+      content: '';
+      position: absolute;
+      inset: 1.5px;
+      background: #4a6fa5;
+      border-radius: 1px;
+    }
+    .parse-line.cur { color: #333; font-weight: 500; }
+    .parse-line.cur .pi::after {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      background: #4a6fa5;
+      border-radius: 1px;
+    }
+
     .gen-title { font-size: 17px; font-weight: 700; color: #333; }
+    /* 大纲模板选择弹窗 */
+    .tpl-pick-box { width: 800px; max-width: 94vw; height: 560px; }
+    .tpl-pick-body {
+      display: flex;
+      gap: 14px;
+      flex: 1;
+      min-height: 0;
+      margin-top: 4px;
+    }
+    .tpl-pick-list {
+      width: 225px;
+      flex: none;
+      border: 1px solid #eef1f5;
+      border-radius: 8px;
+      overflow-y: auto;
+      background: #fff;
+    }
+    .tpl-pick-item {
+      padding: 11px 12px;
+      border-bottom: 1px solid #f2f5f9;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #444;
+    }
+    .tpl-pick-item:last-child { border-bottom: none; }
+    .tpl-pick-item:hover { background: #f7fafd; }
+    .tpl-pick-item.sel { background: #eef3fb; color: #4a6fa5; font-weight: 500; }
+    .tpl-pick-item.fixed { cursor: default; background: #fafbfd; color: #555; }
+    .tpl-pick-item.fixed:hover { background: #fafbfd; }
+    .tpl-pick-item .checkbox {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      border: 1.5px solid #c4ccd8;
+      flex: none;
+      position: relative;
+      background: #fff;
+    }
+    .tpl-pick-item .checkbox.checked { background: #4a6fa5; border-color: #4a6fa5; }
+    .tpl-pick-item .checkbox.checked::after {
+      content: '';
+      position: absolute;
+      left: 3.5px;
+      top: 0.5px;
+      width: 4px;
+      height: 8px;
+      border-right: 2px solid #fff;
+      border-bottom: 2px solid #fff;
+      transform: rotate(45deg);
+    }
+    .tpl-pick-item .radio {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1.5px solid #c4ccd8;
+      flex: none;
+      position: relative;
+    }
+    .tpl-pick-item.sel .radio { border-color: #4a6fa5; }
+    .tpl-pick-item.sel .radio::after {
+      content: '';
+      position: absolute;
+      inset: 2.5px;
+      background: #4a6fa5;
+      border-radius: 50%;
+    }
+    .tpl-pick-item .lock-tag {
+      margin-left: auto;
+      font-size: 10px;
+      color: #4a6fa5;
+      background: #e8f0fc;
+      border-radius: 3px;
+      padding: 1px 5px;
+      flex: none;
+    }
+    .tpl-group-label {
+      padding: 9px 12px 4px;
+      font-size: 11px;
+      color: #999;
+    }
+    .tpl-group-label.req { color: #b07500; font-weight: 500; }
+    .tpl-preview-guide {
+      text-align: center;
+      color: #666;
+      font-size: 13px;
+      padding-top: 80px;
+      line-height: 1.9;
+    }
+    .tpl-preview-guide .ico { font-size: 26px; color: #c4ccd8; margin-bottom: 6px; }
+    .tpl-preview-guide span { font-size: 12px; color: #999; }
+    .tpl-pick-preview {
+      flex: 1;
+      min-width: 0;
+      border: 1px solid #eef1f5;
+      border-radius: 8px;
+      background: #fbfcfe;
+      overflow-y: auto;
+      padding: 12px 16px;
+    }
+    .tpl-preview-title { font-size: 13px; font-weight: 600; color: #333; margin-bottom: 6px; }
+    .tpl-ch { font-size: 13px; color: #333; line-height: 2.1; display: flex; align-items: center; gap: 6px; }
+    .tpl-ch .caret { color: #999; font-size: 9px; width: 10px; flex: none; }
+    .tpl-sec { font-size: 12px; color: #777; line-height: 1.9; padding-left: 28px; }
+    .tpl-pick-foot { display: flex; align-items: center; gap: 10px; margin-top: 14px; flex: none; }
+    .tpl-pick-hint { font-size: 12px; color: #b07500; }
+    .tpl-pick-hint.ok { color: #27804a; }
     .gen-sub {
       font-size: 13px;
       color: #888;
@@ -2169,10 +2358,16 @@
       transition: width 0.12s linear;
     }
     .gen-status {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       font-size: 12px;
       color: #999;
-      text-align: right;
       margin-top: 6px;
+    }
+    .gen-countdown {
+      font-variant-numeric: tabular-nums;
+      color: #8aa0bd;
     }
     .gen-think {
       margin-top: 16px;
@@ -2391,6 +2586,22 @@
       margin-bottom: 6px;
     }
     .upload-target select { max-width: 320px; }
+    .kb-target-row { display: flex; align-items: center; gap: 12px; }
+    .kb-target-row select { max-width: 320px; flex: none; }
+    .kb-new-folder-btn {
+      font-size: 12px;
+      color: #4a6fa5;
+      cursor: pointer;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .kb-new-folder-btn:hover { text-decoration: underline; }
+    .kb-new-folder-tip {
+      font-size: 12px;
+      color: #999;
+      margin: 8px 0 0;
+      line-height: 1.5;
+    }
     .upload-guide {
       font-size: 13px;
       color: #555;
@@ -3899,13 +4110,15 @@
               </select>
             </div>
           </div>
-          <div class="form-field">
-            <label>项目名称 <span class="req">*</span><span class="char-count"><span class="cur">0</span>/80</span></label>
-            <input class="input char-limit" maxlength="80" placeholder="示例：笃威尔商业大数据人工智能研发建设项目">
-          </div>
-          <div class="form-field">
-            <label>项目总投资（总投资金额、资金来源及构成） <span class="req">*</span><span class="form-sample" data-target="fldInvest" title="点击填入示例内容">使用示例</span><span class="char-count"><span class="cur">0</span>/200</span></label>
-            <textarea class="input char-limit" id="fldInvest" maxlength="200" rows="3" placeholder="示例：本项目总投资500万元，自筹350万，贷款150万。其中设备购置费205万元、软件采购80万元、研发投入150万元、数据采购及标注25万元、云服务及算力租赁15万元、预备费25万元。"></textarea>
+          <div class="date-row">
+            <div class="form-field">
+              <label>项目名称 <span class="req">*</span><span class="char-count"><span class="cur">0</span>/80</span></label>
+              <input class="input char-limit" maxlength="80" placeholder="示例：笃威尔商业大数据人工智能研发建设项目">
+            </div>
+            <div class="form-field">
+              <label>项目总投资（万元） <span class="req">*</span><span class="form-sample" data-target="fldInvest" title="点击填入示例内容">使用示例</span></label>
+              <input class="input" id="fldInvest" placeholder="示例：68259.35">
+            </div>
           </div>
           <div class="form-field">
             <label>项目建设内容及规模 <span class="req">*</span><span class="form-sample" data-target="fldContent" title="点击填入示例内容">使用示例</span><span class="char-count"><span class="cur">0</span>/1000</span></label>
@@ -4014,6 +4227,7 @@
                 <div class="kb-ref-title">引用知识库</div>
                 <button class="btn btn-primary" onclick="openKbUploadGuide()">＋ 上传文件</button>
                 <input type="file" id="kbUploadInput" style="display:none" multiple onchange="onKbUploaded()">
+                <input type="file" id="kbFolderInput" webkitdirectory directory multiple style="display:none" onchange="onKbFolderUploaded()">
               </div>
               <div class="kb-ref-desc">从知识库中选择引用资料，也可以在当前步骤直接上传文件，无需退出后重新填写报告信息。</div>
               <div class="kb-folder-select">
@@ -4055,7 +4269,7 @@
           </div>
           <div class="stage-panel confirm-step" id="stagePanel3">
           <div class="confirm-note">
-        以下数据为系统根据您输入的信息及知识库整理，请确认以下核心数据，所有数据均可修改。确认后，若数据为空或财务数据不平衡，模型将自行推理补充。
+        以下数据为系统根据您输入的信息及知识库整理，请确认以下核心数据，点击每项数据前的 ✎ 图标即可修改。确认后，若数据为空或财务数据不平衡，模型将自行推理补充。
       </div>
 
             <div class="step2-groups">
@@ -4221,7 +4435,7 @@
             <div class="anchor-value"><span class="dim-val" data-numeric="true" data-percent="true">3.85%</span></div></div>
           <div class="anchor-row">
             <div class="anchor-label">政府补助（万元）</div>
-            <div class="anchor-value"><span class="dim-val" data-amount="5459.95">5,459.95（8.00%）</span></div></div>
+            <div class="anchor-value"><span class="dim-val" data-amount="6825.93">6,825.93（10.00%）</span></div></div>
           <div class="anchor-row full anchor-summary" id="fundSummaryRow">
             <div class="anchor-label">差额</div>
             <div class="anchor-value">0.00 万元（各来源之和 = 总投资68,259.35万元）</div></div>
@@ -4235,23 +4449,7 @@
           <div class="stage-panel" id="stagePanel4"></div>
         </div>
         <div class="stage-foot">
-          <div class="stage-foot-left">
-            <span class="stage-foot-outline" id="stageFootOutline">
-              <button class="btn btn-sm" onclick="addChapter()">＋ 添加章节</button>
-              <button class="btn btn-sm btn-outline" id="outlineCheckBtn" onclick="toggleCheckAll()">取消全选</button>
-              <button class="btn btn-sm btn-outline" id="outlineDescBtn" onclick="toggleOutlineDesc()">隐藏描述</button>
-              <select class="btn btn-sm btn-outline word-count-select" id="wordCountSelect" onchange="onWordCountSelect(this)">
-                <option value="2-4">2-4万字报告</option>
-                <option value="4-6" selected>4-6万字报告</option>
-                <option value="6-10">6-10万字报告</option>
-                <option value="custom">自定义字数</option>
-              </select>
-              <span class="word-count-custom" id="wordCountCustom" style="display:none;">
-                <input class="input word-count-input" id="wordCountInput" type="number" min="1" max="100000" step="1" placeholder="20000-100000" oninput="onWordCountInput(this)" onchange="onWordCountChange(this)">
-                <span>字</span>
-              </span>
-            </span>
-          </div>
+          <div class="stage-foot-left"></div>
           <div class="stage-foot-right">
             <button class="btn btn-outline stage-save-draft" onclick="saveDraft()">保存草稿</button>
             <button class="btn btn-outline" id="stagePrevBtn" onclick="prevStage()" style="display:none;">上一步</button>
@@ -4268,13 +4466,53 @@
     <!-- 正在生成大纲（过渡弹窗） -->
     <div class="gen-mask" id="genMask">
       <div class="gen-box">
-        <div class="gen-title">正在生成大纲</div>
+        <div class="gen-title" id="genTitle">正在生成大纲</div>
         <div class="gen-sub">AI 大模型正在分析引用资料并构建报告目录结构，请稍候…</div>
         <div class="gen-progress">
           <div class="gen-progress-bar" id="genProgressBar"></div>
         </div>
-        <div class="gen-status" id="genStatus">0%</div>
+        <div class="gen-status">
+          <span id="genStatus">0%</span>
+          <span class="gen-countdown" id="genCountdown">预计剩余 00:24</span>
+        </div>
         <div class="gen-think" id="genThink"></div>
+      </div>
+    </div>
+
+    <!-- 大纲模板选择（第3步→第4步） -->
+    <div class="gen-mask" id="tplPickModal">
+      <div class="gen-box tpl-pick-box">
+        <div class="gen-title">选择大纲模板</div>
+        <div class="gen-sub">"系统生成大纲"为默认必选，请再选择一个行业大纲，系统将按选择生成两份大纲</div>
+        <div class="tpl-pick-body">
+          <div class="tpl-pick-list" id="tplPickList"></div>
+          <div class="tpl-pick-preview">
+            <div class="tpl-preview-title" id="tplPreviewTitle">大纲结构预览</div>
+            <div class="tpl-preview-tree" id="tplPreviewTree"></div>
+          </div>
+        </div>
+        <div class="tpl-pick-foot">
+          <span class="tpl-pick-hint" id="tplPickHint">请选择一个行业大纲</span>
+          <span style="flex:1;"></span>
+          <button class="btn" onclick="closeTplPickModal()">取消</button>
+          <button class="btn btn-primary" id="tplPickConfirmBtn" onclick="confirmTplPick()" disabled>开始生成</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 正在解析资料（第2步→第3步过渡弹窗） -->
+    <div class="gen-mask" id="parseMask">
+      <div class="gen-box">
+        <div class="gen-title">正在解析资料</div>
+        <div class="gen-sub">AI大模型正在分析输入的资料获取基本信息，请稍候…</div>
+        <div class="gen-progress">
+          <div class="gen-progress-bar" id="parseProgressBar"></div>
+        </div>
+        <div class="gen-status">
+          <span id="parseStatus">0%</span>
+          <span class="gen-countdown" id="parseCountdown">预计剩余 00:08</span>
+        </div>
+        <div class="gen-think parse-log" id="parseLog"></div>
       </div>
     </div>
 
@@ -4289,18 +4527,43 @@
         <div class="modal-body">
           <div class="upload-target">
             <label>上传到文件夹</label>
-            <select class="input" id="kbUploadTargetSelect"></select>
+            <div class="kb-target-row">
+              <select class="input" id="kbUploadTargetSelect"></select>
+              <span class="kb-new-folder-btn" onclick="openKbNewFolderModal()">＋ 新建文件夹</span>
+            </div>
           </div>
           <div class="upload-guide">
             <p>将资料上传至知识库后，将作为本次报告的引用材料，上传完成后自动加入引用范围。</p>
             <ul>
-              <li>可一次选择多个文件</li>
+              <li>可一次选择多个文件，也可选择整个文件夹批量上传</li>
               <li>上传后文件进入解析队列，解析完成后可引用</li>
             </ul>
           </div>
           <div class="modal-actions">
             <button class="btn btn-outline" onclick="closeKbUploadGuide()">取消</button>
+            <button class="btn btn-outline" onclick="chooseKbFolderUpload()">选择整个文件夹</button>
             <button class="btn btn-primary" onclick="chooseKbUpload()">选择文件上传</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 新建文件夹弹窗（叠加在上传说明弹窗之上） -->
+    <div class="modal-mask" id="kbNewFolderModal" style="display:none;z-index:1100;">
+      <div class="modal-box" style="width:420px;">
+        <div class="modal-head">
+          <span class="modal-title">新建文件夹</span>
+          <span class="modal-close" onclick="closeKbNewFolderModal()">✕</span>
+        </div>
+        <div class="modal-body">
+          <div class="upload-target" style="margin-bottom:0;">
+            <label>文件夹名称</label>
+            <input class="input" id="kbNewFolderName" maxlength="30" style="width:100%;" placeholder="请输入文件夹名称（不超过30字）" onkeydown="if(event.key==='Enter'){event.preventDefault();confirmKbNewFolder();}">
+            <p class="kb-new-folder-tip">新文件夹将创建在知识库根目录下，用于归类本次上传的资料。</p>
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeKbNewFolderModal()">取消</button>
+            <button class="btn btn-primary" onclick="confirmKbNewFolder()">确定</button>
           </div>
         </div>
       </div>
@@ -4377,6 +4640,22 @@
             <button class="btn btn-sm btn-outline" onclick="saveOutlineVersion()">保存版本</button>
           </div>
           <div class="outline-tree-panel">
+          <div class="outline-ops-bar">
+            <button class="btn btn-sm" onclick="addChapter()">＋ 添加章节</button>
+            <button class="btn btn-sm btn-outline" id="outlineCheckBtn" onclick="toggleCheckAll()">取消全选</button>
+            <button class="btn btn-sm btn-outline" id="outlineDescBtn" onclick="toggleOutlineDesc()">隐藏描述</button>
+            <select class="btn btn-sm btn-outline word-count-select" id="wordCountSelect" onchange="onWordCountSelect(this)">
+              <option value="2-4">2-4万字报告</option>
+              <option value="4-6" selected>4-6万字报告</option>
+              <option value="6-10">6-10万字报告</option>
+              <option value="custom">自定义字数</option>
+            </select>
+            <span class="word-count-custom" id="wordCountCustom" style="display:none;">
+              <input class="input word-count-input" id="wordCountInput" type="number" min="1" max="100000" step="1" placeholder="20000-100000" oninput="onWordCountInput(this)" onchange="onWordCountChange(this)">
+              <span>字</span>
+            </span>
+          </div>
+          <div class="outline-tree-scroll">
           <div class="tree-node chapter">
             <div class="tree-node-row selected" onclick="selectNode(this)">
               <span class="drag-handle" title="拖动调整章节顺序">⋮⋮</span>
@@ -4518,6 +4797,7 @@
             </div>
             <div class="node-desc">总结项目可行性研究的主要结论，并提出实施建议与风险提示。</div>
           </div>
+          </div><!-- /outline-tree-scroll -->
         </div>
         </div>
 
@@ -4806,12 +5086,18 @@
   <script>
     /* 弹窗移出主内容区：避免被正文编辑区的模糊效果波及 */
     const genMaskEl = document.getElementById('genMask');
+    const parseMaskEl = document.getElementById('parseMask');
     const kbUpModalEl = document.getElementById('kbUploadGuideModal');
     const kbUpPanelEl = document.getElementById('kbUploadPanel');
     const exportModalEl = document.getElementById('exportModal');
     const rampPlanModalEl = document.getElementById('rampPlanModal');
     if (genMaskEl) document.body.appendChild(genMaskEl);
+    if (parseMaskEl) document.body.appendChild(parseMaskEl);
+    const tplPickModalEl = document.getElementById('tplPickModal');
+    if (tplPickModalEl) document.body.appendChild(tplPickModalEl);
     if (kbUpModalEl) document.body.appendChild(kbUpModalEl);
+    const kbNewFolderModalEl = document.getElementById('kbNewFolderModal');
+    if (kbNewFolderModalEl) document.body.appendChild(kbNewFolderModalEl);
     if (kbUpPanelEl) document.body.appendChild(kbUpPanelEl);
     if (exportModalEl) document.body.appendChild(exportModalEl);
     if (rampPlanModalEl) document.body.appendChild(rampPlanModalEl);
@@ -5088,6 +5374,18 @@
       if (hint) panel4.appendChild(hint);
       if (layout) panel4.appendChild(layout);
     document.getElementById('flowSteps').style.display = 'none';
+    /* 记录第 3/4 步初始内容：点击"新建"开新任务时恢复默认状态 */
+    const STAGE3_INITIAL_HTML = document.getElementById('stagePanel3').innerHTML;
+    const STAGE4_INITIAL_HTML = document.getElementById('stagePanel4').innerHTML;
+    const outlineTreeCache = {}; // 大纲模板缓存（需在 enterWorkspace 初始调用前声明）
+    const generatedTpls = [];    // 已生成的大纲模板（第3步确认后由用户选择生成两份）
+    let pickedTpl = null;        // 用户选定的行业大纲
+    let tplPickSel = null;       // 选择弹窗当前选中的模板
+    let currentOutlineTpl = '系统生成大纲';
+    const outlineVersionsByTpl = {};
+    const activeVersionByTpl = {};
+    const outlineUndoByTpl = {};
+    const outlineRedoByTpl = {};
 
     /* ==================== 第二步：知识库引用及设置 ==================== */
     const KB_FOLDERS = [
@@ -5452,13 +5750,51 @@
       const modal = document.getElementById('kbUploadGuideModal');
       if (modal) modal.style.display = 'none';
     }
+    /* 弹窗内新建文件夹：在独立弹窗中输入名称，创建后自动选为上传目标 */
+    function openKbNewFolderModal() {
+      const modal = document.getElementById('kbNewFolderModal');
+      const input = document.getElementById('kbNewFolderName');
+      input.value = '';
+      modal.style.display = 'flex';
+      setTimeout(() => input.focus(), 50);
+    }
+    function closeKbNewFolderModal() {
+      const modal = document.getElementById('kbNewFolderModal');
+      if (modal) modal.style.display = 'none';
+    }
+    function confirmKbNewFolder() {
+      const input = document.getElementById('kbNewFolderName');
+      const name = (input.value || '').trim();
+      if (!name) { libToast('请输入文件夹名称'); input.focus(); return; }
+      if (KB_FOLDERS.some(f => f.name === name)) { libToast('已存在同名文件夹，请更换名称'); input.focus(); return; }
+      KB_FOLDERS.push({ name: name, files: [] });
+      const idx = KB_FOLDERS.length - 1;
+      buildKbMsLeft();
+      const sel = document.getElementById('kbUploadTargetSelect');
+      if (sel) {
+        sel.innerHTML = '<option value="root">根目录（默认列表）</option>'
+          + KB_FOLDERS.map((f, i) => '<option value="' + i + '">' + kbEscapeHtml(f.name) + '</option>').join('');
+        sel.value = String(idx);
+      }
+      closeKbNewFolderModal();
+      libToast('已创建文件夹"' + name + '"，上传的文件将放入该文件夹');
+    }
     function chooseKbUpload() {
       const sel = document.getElementById('kbUploadTargetSelect');
       const v = sel ? sel.value : 'root';
       kbUploadTargetFiles = v === 'root' ? KB_ROOT_FILES : KB_FOLDERS[Number(v)].files;
-      closeKbUploadGuide();
+      // 上传说明弹窗保持展示，待用户在系统文件选择框中完成/取消选择后再处理
       const input = document.getElementById('kbUploadInput');
-      if (input) input.click();
+      if (input) { input.value = ''; input.click(); }
+    }
+    /* 选择整个文件夹上传（文件夹内所有文件批量加入引用范围） */
+    function chooseKbFolderUpload() {
+      const sel = document.getElementById('kbUploadTargetSelect');
+      const v = sel ? sel.value : 'root';
+      kbUploadTargetFiles = v === 'root' ? KB_ROOT_FILES : KB_FOLDERS[Number(v)].files;
+      // 上传说明弹窗保持展示，待用户在系统文件选择框中完成/取消选择后再处理
+      const input = document.getElementById('kbFolderInput');
+      if (input) { input.value = ''; input.click(); }
     }
     function kbNowText() {
       const d = new Date();
@@ -5475,6 +5811,23 @@
     function onKbUploaded() {
       const input = document.getElementById('kbUploadInput');
       const files = Array.from(input.files || []);
+      // 用户已在文件选择框完成选择：先隐藏上传说明弹窗，再展示上传任务
+      if (files.length) closeKbUploadGuide();
+      addKbFilesToUpload(files);
+      input.value = '';
+    }
+    function onKbFolderUploaded() {
+      const input = document.getElementById('kbFolderInput');
+      const files = Array.from(input.files || []);
+      // 用户已在文件选择框完成选择：先隐藏上传说明弹窗，再展示上传任务
+      if (files.length) closeKbUploadGuide();
+      addKbFilesToUpload(files);
+      input.value = '';
+    }
+    function addKbFilesToUpload(files) {
+      if (!files.length) return;
+      // 固化本次上传的目标文件夹：解析完成后文件才落入该列表
+      const targetFiles = kbUploadTargetFiles;
       files.forEach(file => {
         const ext = (file.name.split('.').pop() || '').toLowerCase();
         let type = 'docx';
@@ -5488,25 +5841,19 @@
           type: type,
           outline: false
         };
-        kbUploadTargetFiles.unshift(kbitem);
-        // 上传后的文件自动加入引用范围
-        if (kbSelUids.indexOf(kbitem.uid) === -1) kbSelUids.push(kbitem.uid);
-        addKbUploadItem(file, kbitem);
+        addKbUploadItem(file, kbitem, targetFiles);
       });
-      input.value = '';
-      buildKbMsLeft();
-      updateKbMsLabel();
-      renderKbFiles();
     }
     /* 上传任务面板（右下角）：名称、大小、状态、删除 */
     const kbUploadItems = [];
     function closeKbUploadPanel() {
       document.getElementById('kbUploadPanel').classList.remove('active');
     }
-    function addKbUploadItem(file, kbitem) {
+    function addKbUploadItem(file, kbitem, targetFiles) {
       const panel = document.getElementById('kbUploadPanel');
       const body = document.getElementById('kbUploadPanelBody');
       panel.classList.add('active');
+      const target = targetFiles || kbUploadTargetFiles;
       const item = document.createElement('div');
       item.className = 'upload-item';
       item.innerHTML =
@@ -5542,7 +5889,7 @@
       };
       body.appendChild(item);
       kbUploadItems.push(entry);
-      // 模拟上传流程：上传中 → 上传完成 → 解析中 → 已完成
+      // 模拟上传流程：上传中 → 上传完成 → 解析中 → 已完成（完成后才落入引用知识库列表）
       entry.timer = setTimeout(function () {
         statusEl.innerHTML = '上传完成';
         entry.timer = setTimeout(function () {
@@ -5551,6 +5898,12 @@
             statusEl.innerHTML = '✓ 已完成';
             statusEl.classList.add('done');
             entry.done = true;
+            // 解析完成：文件正式展示在引用知识库列表中并自动加入引用范围
+            target.unshift(kbitem);
+            if (kbSelUids.indexOf(kbitem.uid) === -1) kbSelUids.push(kbitem.uid);
+            buildKbMsLeft();
+            updateKbMsLabel();
+            renderKbFiles();
           }, 1200);
         }, 900);
       }, 1200);
@@ -5879,6 +6232,7 @@
         const nr = document.querySelector('.sidebar-new-report');
         if (nr) nr.classList.remove('active');
         document.getElementById('stageMask').classList.add('active');
+        resetNewTaskState(); // 新建任务：表单与各步骤内容重置为默认状态
         showStage(1);
       } else {
         document.getElementById('agentSelectView').classList.add('hidden');
@@ -5958,7 +6312,7 @@
       // 内联步骤模式：返回由“上一步”处理
     }
     function confirmOutline() {
-      startOutlineGeneration(function () { showStage(4); }); // 确认后生成大纲并进入第4步（目录生成及管理）
+      openTplPickModal(); // 先选择大纲模板，再按选择依次生成两份大纲
     }
 
     let rampPlanEditingValue = null;
@@ -6155,15 +6509,17 @@
       attachConfirmEditIcons();
     }
 
-    /* 信息确认弹窗：数据直接编辑 */
+    /* 信息确认弹窗：数据直接编辑（编辑图标常驻展示在数值前方） */
     function attachConfirmEditIcons() {
       document.querySelectorAll('.confirm-step .anchor-value .dim-val').forEach(v => {
-        if (v.querySelector('.edit-icon')) return;
+        const host = v.closest('.anchor-value');
+        if (!host || host.querySelector(':scope > .edit-icon')) return;
+        host.classList.add('has-edit');
         const icon = document.createElement('span');
         icon.className = 'edit-icon';
-        icon.title = '编辑该数据';
+        icon.title = '点击编辑该数据';
         icon.textContent = '✎';
-        v.appendChild(icon);
+        host.insertBefore(icon, v); // 放到数值前面
         icon.addEventListener('click', function (e) {
           e.stopPropagation();
           if (v.hasAttribute('data-ramp-plan')) openRampPlanModal(v);
@@ -6189,6 +6545,9 @@
     }
     function editConfirmValue(v) {
       if (v.querySelector('input') || v.querySelector('select')) return;
+      const host = v.closest('.anchor-value');
+      if (host && host.classList.contains('editing')) return;
+      if (host) host.classList.add('editing'); // 编辑态：隐藏编辑图标
       const oldText = v.textContent.replace('✎', '').trim();
       const amountOnly = v.hasAttribute('data-amount');
       const numericOnly = v.hasAttribute('data-numeric');
@@ -6217,6 +6576,7 @@
           const val = sel.value;
           v.textContent = val || oldText;
           if (save && val && val !== oldText) v.classList.add('edited');
+          if (host) host.classList.remove('editing');
           attachConfirmEditIcons();
           recalcConfirmBalances();
         }
@@ -6255,6 +6615,7 @@
           v.textContent = percentOnly ? (percentDisplayFromFraction(label, cleanValue) || oldText) : (numericOnly ? cleanValue : (label.indexOf('回收期') >= 0 ? formatNumberText(label, val || oldText) : (val || oldText)));
         }
         if (save && val && (percentOnly ? sanitizeNumeric(val) !== oldNumericText : val !== oldText)) v.classList.add('edited');
+        if (host) host.classList.remove('editing');
         attachConfirmEditIcons();
         recalcConfirmBalances();
       }
@@ -6453,6 +6814,139 @@
     }
 
     /* ==================== 生成流程：四步向导（内联展示） ==================== */
+    /* ==================== 步骤状态：可回溯查看 + 变更失效 ====================
+       - maxStageReached：已到达过的最远步骤
+       - stageInvalidFrom：因前面步骤信息变更而失效的起始步骤（0 表示全部有效）
+       - stage3Computed / stage4Computed：第 3 步数据、第 4 步目录是否已有可用结果（有则直接复用，不重新加载计算）
+    */
+    /* 状态变量用 var 声明，避免页面初始化阶段（脚本自上而下执行）出现暂时性死区 */
+    var maxStageReached = 1;
+    var stageInvalidFrom = 0;
+    var stage3Computed = false;
+    var stage4Computed = false;
+    var stageNoteDismissed = false; // 提示条：完成一次重新生成后不再重复提示
+
+    function resetStageFlow() {
+      maxStageReached = 1;
+      stageInvalidFrom = 0;
+      stage3Computed = false;
+      stage4Computed = false;
+      renderStageTabs();
+    }
+    /* 新建任务：全部内容重置为默认状态（表单、知识库引用、锚定数据、目录） */
+    function resetNewTaskState() {
+      resetStageFlow();
+      stageNoteDismissed = false;
+      // 第一步表单恢复默认
+      const panel1 = document.getElementById('stagePanel1');
+      if (panel1) {
+        panel1.querySelectorAll('input.input, textarea.input').forEach(el => { el.value = ''; });
+        panel1.querySelectorAll('select.input').forEach(el => {
+          const def = el.querySelector('option[selected]') || el.querySelector('option');
+          if (def) el.value = def.value;
+        });
+        panel1.querySelectorAll('.char-count .cur').forEach(el => { el.textContent = '0'; });
+      }
+      // 第二步知识库引用恢复默认（清空选择与大纲指定）
+      if (typeof clearKbRef === 'function') clearKbRef();
+      const kbUploadInput = document.getElementById('kbUploadInput');
+      if (kbUploadInput) kbUploadInput.value = '';
+      // 第三步锚定数据、第四步目录恢复初始
+      document.getElementById('stagePanel3').innerHTML = STAGE3_INITIAL_HTML;
+      document.getElementById('stagePanel4').innerHTML = STAGE4_INITIAL_HTML;
+      Object.keys(outlineTreeCache).forEach(k => { delete outlineTreeCache[k]; });
+      // 大纲模板选择与版本状态复位（不在此处调用 UI 刷新：OUTLINE_TEMPLATES 等尚未求值，
+      // 且 STAGE4_INITIAL_HTML 恢复已还原下拉按钮/面板初始显示，下拉面板每次展开时会重新渲染）
+      generatedTpls.length = 0;
+      pickedTpl = null;
+      tplPickSel = null;
+      currentOutlineTpl = '系统生成大纲';
+      Object.keys(outlineVersionsByTpl).forEach(k => { delete outlineVersionsByTpl[k]; });
+      Object.keys(activeVersionByTpl).forEach(k => { delete activeVersionByTpl[k]; });
+      Object.keys(outlineUndoByTpl).forEach(k => { delete outlineUndoByTpl[k]; });
+      Object.keys(outlineRedoByTpl).forEach(k => { delete outlineRedoByTpl[k]; });
+      // 若此前已导出锁定，恢复编辑态
+      if (typeof resetExportedState === 'function') resetExportedState();
+    }
+
+    function renderStageTabs() {
+      for (let i = 1; i <= 4; i++) {
+        const tag = document.getElementById('stageTag' + i);
+        if (!tag) continue;
+        const reached = i <= maxStageReached;
+        const invalid = reached && stageInvalidFrom > 0 && i >= stageInvalidFrom;
+        const clickable = reached && !invalid;
+        tag.classList.toggle('clickable', clickable);
+        // 当前步骤之后、仍可点击回看的步骤：用蓝色可点击样式（区别于灰显禁用）
+        tag.classList.toggle('ahead', clickable && i > flowStage);
+        tag.classList.toggle('invalid', invalid);
+        tag.title = !reached
+          ? '请先按顺序完成前面的步骤'
+          : (invalid ? '信息已修改，需按顺序重新生成该步骤后才能查看' : '点击查看该步骤');
+      }
+      // 顶部提示：告知哪些步骤需要重新生成（完成一次重新生成后不再提示）
+      const box = document.querySelector('.stage-steps');
+      if (!box) return;
+      let note = document.getElementById('stageDirtyNote');
+      if (!stageInvalidFrom || stageNoteDismissed) { if (note) note.remove(); return; }
+      if (!note) {
+        note = document.createElement('span');
+        note.id = 'stageDirtyNote';
+        note.className = 'stage-dirty-note';
+        box.appendChild(note);
+      }
+      note.textContent = '信息已修改，第 ' + stageInvalidFrom + ' 步及之后需按顺序重新生成';
+    }
+
+    function jumpToStage(i) {
+      if (i === flowStage) return;
+      const mask = document.getElementById('genMask');
+      if (mask && mask.classList.contains('active')) { showCreditToast('正在生成中，请稍候'); return; }
+      const pmask = document.getElementById('parseMask');
+      if (pmask && pmask.classList.contains('active')) { showCreditToast('正在解析资料，请稍候'); return; }
+      if (i > maxStageReached) { showCreditToast('请先按顺序完成前面的步骤'); return; }
+      if (stageInvalidFrom && i >= stageInvalidFrom) {
+        showCreditToast('前面步骤的信息已修改，请按顺序重新生成第 ' + stageInvalidFrom + ' 步');
+        return;
+      }
+      showStage(i);
+    }
+
+    (function initStageTabs() {
+      for (let i = 1; i <= 4; i++) {
+        const tag = document.getElementById('stageTag' + i);
+        if (tag) tag.addEventListener('click', function () { jumpToStage(i); });
+      }
+      renderStageTabs();
+    })();
+
+    /* 变更监测：第 1、2 步信息变更 → 第 3、4 步失效；第 3 步数据变更 → 第 4 步失效 */
+    function markStageDirty(src) {
+      if (src >= 3) {
+        // 第 3 步数据变更 → 第 4 步（目录）失效；第 4 步尚未生成过时无需提示
+        if (!stage4Computed && !(stageInvalidFrom && stageInvalidFrom >= 4)) { renderStageTabs(); return; }
+        stageInvalidFrom = stageInvalidFrom ? Math.min(stageInvalidFrom, 4) : 4;
+        stage4Computed = false;
+      } else {
+        // 第 1、2 步变更 → 第 3、4 步失效；后续步骤尚未生成过时属于首次填写，不算修改
+        if (!stage3Computed && !stage4Computed && !(stageInvalidFrom && stageInvalidFrom >= 3)) { renderStageTabs(); return; }
+        stageInvalidFrom = stageInvalidFrom ? Math.min(stageInvalidFrom, 3) : 3;
+        stage3Computed = false;
+        stage4Computed = false;
+      }
+      stageNoteDismissed = false; // 新的变更：重新开始提示
+      renderStageTabs();
+    }
+    (function initStageDirtyWatch() {
+      [1, 2, 3].forEach(function (n) {
+        const panel = document.getElementById('stagePanel' + n);
+        if (!panel) return;
+        ['input', 'change'].forEach(function (evt) {
+          panel.addEventListener(evt, function () { markStageDirty(n); }, true);
+        });
+      });
+    })();
+
     function showStage(n) {
       flowStage = n;
       document.querySelectorAll('.stage-panel').forEach(p => p.classList.remove('active'));
@@ -6466,22 +6960,44 @@
       document.getElementById('stageNextBtn').style.display = n < 4 ? '' : 'none';
       document.getElementById('stageFinishBtn').style.display = n === 4 ? '' : 'none';
       document.getElementById('stageNextBtn').textContent = n === 3 ? '确认，生成大纲 →' : '下一步';
-      // 目录操作按钮仅在第四步显示（保存草稿始终显示）
-      document.getElementById('stageFootOutline').style.display = n === 4 ? '' : 'none';
+      // 目录操作按钮已移入目录结构面板（随第四步面板整体显示/隐藏），无需单独切换
       // 第四步：页面不滚动，左侧列表内部滚动
       document.querySelector('.stage-body').classList.toggle('no-scroll', n === 4);
-      // 进入第3步（信息确认与锚定）时刷新校验数据与编辑图标
+      // 记录已到达的最远步骤，并刷新页签可点击状态
+      if (n > maxStageReached) maxStageReached = n;
+      // 进入第3步（信息确认与锚定）：仅在首次进入或数据变更后播放"解析资料"并重新加载计算，否则复用上次结果
       if (n === 3) {
-        recalcConfirmBalances();
-        attachConfirmEditIcons();
+        if (!stage3Computed || stageInvalidFrom === 3) {
+          startParseGeneration(function () {
+            recalcConfirmBalances();
+            attachConfirmEditIcons();
+            stage3Computed = true;
+            // 第3步重新计算完成 → 第3步恢复有效，第4步仍需重新生成
+            if (stageInvalidFrom === 3) { stageInvalidFrom = 4; stage4Computed = false; }
+            // 本次重新生成已完成：不再重复提示后续步骤
+            stageNoteDismissed = true;
+            renderStageTabs();
+          });
+        }
       }
+      renderStageTabs();
       document.querySelector('.main-content').scrollTop = 0;
       window.scrollTo(0, 0);
     }
     function nextStage() {
       if (flowStage === 1) { showStage(2); return; } // 基础信息录入完成 → 知识库引用及设置
       if (flowStage === 2) { showStage(3); return; } // 知识库引用完成 → 信息确认与锚定（第3步）
-      if (flowStage === 3) { confirmOutline(); return; } // 确认锚定 → 生成大纲 → 目录生成及管理（第4步）
+      if (flowStage === 3) {
+        // 信息未变更且有已生成的目录 → 直接复用，不重新生成
+        if (stage4Computed && stageInvalidFrom === 0) { showStage(4); return; }
+        // 配平校验：从第二步进入时默认配平（差额为0），用户改动后差额不为0时提示配平后再进入
+        recalcConfirmBalances();
+        if (document.querySelector('#investSummaryRow.warn, #fundSummaryRow.warn')) {
+          showCreditToast('总投资构成或资金来源尚未配平（差额不为 0），请调整金额配平后再进入下一步');
+          return;
+        }
+        confirmOutline(); return; // 确认锚定 → 生成大纲 → 目录生成及管理（第4步）
+      }
       if (flowStage < 4) showStage(flowStage + 1);
     }
     function prevStage() {
@@ -6544,14 +7060,29 @@
       '大纲构建完成，即将进入目录生成及管理…'
     ];
     let genTimer = null;
-    function startOutlineGeneration(onComplete) {
+    /* 倒计时格式化：分:秒（不足两位补零），如 00:24 / 04:32 */
+    function fmtCountdown(ms) {
+      const totalSec = Math.ceil(ms / 1000);
+      const m = Math.floor(totalSec / 60);
+      const s = totalSec % 60;
+      return (m < 10 ? '0' + m : '' + m) + ':' + (s < 10 ? '0' + s : '' + s);
+    }
+    /* opts: { durationMs: 总时长（默认 OUTLINE_GEN_MS）, titleChanges: [{t: 距开始的毫秒, text: 新标题}] } */
+    function startOutlineGeneration(onComplete, titleText, opts) {
+      opts = opts || {};
+      const totalMs = opts.durationMs || OUTLINE_GEN_MS;
+      const titleChanges = (opts.titleChanges || []).slice().sort((a, b) => a.t - b.t);
+      const titleEl = document.getElementById('genTitle');
       const mask = document.getElementById('genMask');
       const bar = document.getElementById('genProgressBar');
       const status = document.getElementById('genStatus');
+      const countdownEl = document.getElementById('genCountdown');
       const think = document.getElementById('genThink');
+      if (titleText) titleEl.textContent = titleText;
       mask.classList.add('active');
       bar.style.width = '0%';
       status.textContent = '0%';
+      countdownEl.textContent = '预计剩余 ' + fmtCountdown(totalMs);
       think.innerHTML = '';
       const start = Date.now();
       let stepIdx = 0;
@@ -6574,9 +7105,17 @@
       }, 450);
       // 进度条
       genTimer = setInterval(() => {
-        const progress = Math.min(100, Math.round((Date.now() - start) / OUTLINE_GEN_MS * 100));
+        const elapsed = Date.now() - start;
+        // 阶段切换：更换标题并重启思考文字流（如两份大纲依次生成共用一条进度条）
+        while (titleChanges.length && elapsed >= titleChanges[0].t) {
+          titleEl.textContent = titleChanges.shift().text;
+          stepIdx = 0;
+          think.innerHTML = '';
+        }
+        const progress = Math.min(100, Math.round(elapsed / totalMs * 100));
         bar.style.width = progress + '%';
         status.textContent = progress + '%';
+        countdownEl.textContent = '预计剩余 ' + fmtCountdown(Math.max(0, totalMs - elapsed));
         if (progress >= 100) {
           clearInterval(genTimer);
           clearInterval(stepTimer);
@@ -6589,6 +7128,156 @@
       }, 120);
     }
 
+    /* ==================== 正在解析资料（第2步→第3步过渡） ==================== */
+    const PARSE_MS = 8000; // 原型演示约8秒（实际业务按解析数据量而定）
+    const PARSE_STEPS = [
+      '已开始处理项目资料',
+      '已读取当前处理进度，正在核对项目信息',
+      '项目信息已核对，正在读取所选知识库资料',
+      '正在解析知识库引用文件的正文内容与关键数据',
+      '正在确认需要使用的项目资料',
+      '所选资料范围已确认，正在准备查找所需信息',
+      '正在将项目信息与引用资料进行关联匹配',
+      '正在提取总投资、建设内容及规模等关键要素',
+      '资料解析完成，即将进入信息确认与锚定'
+    ];
+    let parseTimer = null;
+    let parseStepTimer = null;
+    function startParseGeneration(onComplete) {
+      const mask = document.getElementById('parseMask');
+      const bar = document.getElementById('parseProgressBar');
+      const status = document.getElementById('parseStatus');
+      const pCountdown = document.getElementById('parseCountdown');
+      const log = document.getElementById('parseLog');
+      mask.classList.add('active');
+      bar.style.width = '0%';
+      status.textContent = '0.00%';
+      pCountdown.textContent = '预计剩余 ' + fmtCountdown(PARSE_MS);
+      log.innerHTML = '';
+      const start = Date.now();
+      let stepIdx = 0;
+      const stepCount = PARSE_STEPS.length;
+      // 解析日志逐条展示：每条按时间点出现，当前条高亮
+      parseStepTimer = setInterval(() => {
+        if (stepIdx < stepCount) {
+          log.querySelectorAll('.parse-line.cur').forEach(l => { l.classList.remove('cur'); l.classList.add('done'); });
+          const line = document.createElement('div');
+          line.className = 'parse-line cur';
+          line.innerHTML = '<span class="pi"></span><span class="pt"></span>';
+          line.querySelector('.pt').textContent = PARSE_STEPS[stepIdx];
+          log.appendChild(line);
+          log.scrollTop = log.scrollHeight;
+          stepIdx++;
+        }
+      }, PARSE_MS / stepCount);
+      // 进度条（两位小数，如 10.00%）
+      parseTimer = setInterval(() => {
+        const progress = Math.min(100, (Date.now() - start) / PARSE_MS * 100);
+        bar.style.width = progress + '%';
+        status.textContent = progress.toFixed(2) + '%';
+        pCountdown.textContent = '预计剩余 ' + fmtCountdown(Math.max(0, PARSE_MS - (Date.now() - start)));
+        if (progress >= 100) {
+          clearInterval(parseTimer);
+          clearInterval(parseStepTimer);
+          log.querySelectorAll('.parse-line.cur').forEach(l => { l.classList.remove('cur'); l.classList.add('done'); });
+          setTimeout(() => {
+            mask.classList.remove('active');
+            if (typeof onComplete === 'function') onComplete();
+          }, 500);
+        }
+      }, 100);
+    }
+
+    /* ==================== 大纲模板选择弹窗（第3步→第4步） ==================== */
+    /* tplPickSel / pickedTpl / generatedTpls 已在文件前部声明 */
+    function openTplPickModal() {
+      // 重新生成时默认带上次选择（系统生成大纲不可作为行业大纲，需过滤）
+      tplPickSel = (pickedTpl && pickedTpl !== '系统生成大纲') ? pickedTpl : null;
+      renderTplPickList();
+      if (tplPickSel) renderTplPreview(tplPickSel);
+      else renderTplPreviewGuide(); // 未选行业大纲时显示引导态，避免误以为已选择完成
+      const btn = document.getElementById('tplPickConfirmBtn');
+      btn.disabled = !tplPickSel;
+      updateTplPickHint();
+      document.getElementById('tplPickModal').classList.add('active');
+    }
+    function closeTplPickModal() {
+      document.getElementById('tplPickModal').classList.remove('active');
+    }
+    function updateTplPickHint() {
+      const hint = document.getElementById('tplPickHint');
+      if (!tplPickSel) {
+        hint.textContent = '请选择一个行业大纲';
+        hint.classList.remove('ok');
+      } else {
+        hint.textContent = '将生成：系统生成大纲 + ' + tplPickSel;
+        hint.classList.add('ok');
+      }
+    }
+    function renderTplPickList() {
+      const list = document.getElementById('tplPickList');
+      let html = '<div class="tpl-group-label">默认生成</div>'
+        + '<div class="tpl-pick-item fixed" data-tpl="系统生成大纲">'
+        + '<span class="checkbox checked"></span><span>系统生成大纲</span>'
+        + '<span class="lock-tag">默认必选</span></div>'
+        + '<div class="tpl-group-label req">行业大纲 · 请选择一项</div>';
+      html += Object.keys(OUTLINE_TEMPLATES).filter(n => n !== '系统生成大纲').map(n => {
+        return '<div class="tpl-pick-item' + (n === tplPickSel ? ' sel' : '') + '" data-tpl="' + n + '" onclick="pickTplSel(\'' + n + '\')">'
+          + '<span class="radio"></span><span>' + n + '</span>'
+          + '</div>';
+      }).join('');
+      list.innerHTML = html;
+    }
+    function pickTplSel(name) {
+      if (name === '系统生成大纲') return; // 系统大纲固定生成，不可作为行业大纲重复选择
+      tplPickSel = name;
+      document.querySelectorAll('#tplPickList .tpl-pick-item').forEach(el => {
+        el.classList.toggle('sel', el.dataset.tpl === name);
+      });
+      renderTplPreview(name);
+      document.getElementById('tplPickConfirmBtn').disabled = false;
+      updateTplPickHint();
+    }
+    function renderTplPreviewGuide() {
+      document.getElementById('tplPreviewTitle').textContent = '大纲结构预览';
+      document.getElementById('tplPreviewTree').innerHTML =
+        '<div class="tpl-preview-guide"><div class="ico">☰</div>请在左侧选择一个行业大纲<br><span>系统生成大纲已默认勾选，选择后此处将展示所选大纲的结构预览</span></div>';
+    }
+    function renderTplPreview(name) {
+      document.getElementById('tplPreviewTitle').textContent = name + ' · 结构预览';
+      const tree = document.getElementById('tplPreviewTree');
+      tree.innerHTML = OUTLINE_TEMPLATES[name].map(ch => {
+        if (typeof ch === 'string') return '<div class="tpl-ch"><span class="caret"></span>' + ch + '</div>';
+        let html = '<div class="tpl-ch"><span class="caret">▼</span>' + ch.t + '</div>';
+        (ch.s || []).forEach(s => { html += '<div class="tpl-sec">' + s + '</div>'; });
+        return html;
+      }).join('');
+    }
+    function confirmTplPick() {
+      if (!tplPickSel || tplPickSel === '系统生成大纲') return;
+      pickedTpl = tplPickSel;
+      const picked = pickedTpl;
+      closeTplPickModal();
+      // 一条进度条贯穿两份大纲：前半程生成系统大纲，后半程生成所选行业大纲，到100%即两份全部完成
+      startOutlineGeneration(function () {
+        // 两份大纲生成完成：第 4 步结果已就绪，失效标记清除
+        generatedTpls.length = 0;
+        generatedTpls.push('系统生成大纲', picked);
+        currentOutlineTpl = '系统生成大纲';
+        stage4Computed = true;
+        stageInvalidFrom = 0;
+        if (maxStageReached < 4) maxStageReached = 4;
+        renderOutlineTemplate('系统生成大纲');
+        updateOutlineTplButton();
+        renderOutlineTplPanel();
+        updateOutlineUndoButtons();
+        showStage(4);
+      }, '正在生成系统生成大纲', {
+        durationMs: OUTLINE_GEN_MS * 2,
+        titleChanges: [{ t: OUTLINE_GEN_MS, text: '正在生成' + picked }]
+      });
+    }
+
     /* ==================== 字数统计 ==================== */
     document.querySelectorAll('.char-limit').forEach(el => {
       el.addEventListener('input', function () {
@@ -6599,7 +7288,7 @@
 
     /* ==================== 基础信息：使用示例一键填入 ==================== */
     const FORM_SAMPLES = {
-      fldInvest: '本项目总投资500万元，自筹350万，贷款150万。其中设备购置费205万元、软件采购80万元、研发投入150万元、数据采购及标注25万元、云服务及算力租赁15万元、预备费25万元。',
+      fldInvest: '68259.35',
       fldContent: '总建筑面积24000㎡，建设研发办公楼、数据中心机房等，达产年支撑10亿次商业数据智能查询及2万份企业风险评估报告输出。'
     };
     (function initFormSamples() {
@@ -7032,9 +7721,15 @@
         && !s.classList.contains('node-actions') && !s.classList.contains('node-desc')
         && s.textContent.trim());
     }
+    /* 目录树滚动容器：操作栏固定在面板顶部，树的增删/缓存/版本均针对此容器 */
+    function outlineTreeEl() {
+      const p = document.querySelector('.outline-tree-panel');
+      if (!p) return null;
+      return p.querySelector(':scope > .outline-tree-scroll') || p;
+    }
     /* 全层级自动重编号：章(第X章) / 节(章序.序号 或 第X节) / 子节(章序.节序.子序) */
     function renumberChapters() {
-      const panel = document.querySelector('.outline-tree-panel');
+      const panel = outlineTreeEl();
       if (!panel) return;
       panel.querySelectorAll(':scope > .tree-node.chapter').forEach((ch, ci) => {
         const chTitle = nodeTitleSpan(ch);
@@ -7073,7 +7768,7 @@
       if (sel) updateSettings(sel);
     }
     function addChapter() {
-      const panel = document.querySelector('.outline-tree-panel');
+      const panel = outlineTreeEl();
       if (!panel) { showTaskToast(); return; }
       pushOutlineSnapshot();
       const node = document.createElement('div');
@@ -7225,12 +7920,12 @@
         '研究结论'
       ]
     };
-    let currentOutlineTpl = '系统生成大纲';
-    const outlineTreeCache = {};
-
+    /* 各类大纲在进入第四步前由用户选择生成（见"大纲模板选择"），切换仅展示已生成的大纲 */
     function renderOutlineTplPanel() {
       const panel = document.getElementById('outlineTplPanel');
-      panel.innerHTML = Object.keys(OUTLINE_TEMPLATES).map(name => {
+      // 仅展示已生成的大纲（系统生成大纲 + 用户选定的一份行业大纲），去重防止出现同名项
+      const names = generatedTpls.length ? Array.from(new Set(generatedTpls)) : Object.keys(OUTLINE_TEMPLATES);
+      panel.innerHTML = names.map(name => {
         const active = name === currentOutlineTpl ? ' active' : '';
         return '<div class="outline-tpl-item' + active + '" onclick="selectOutlineTpl(\'' + name + '\')"><span>' + name + '</span></div>';
       }).join('');
@@ -7262,12 +7957,29 @@
       updateOutlineUndoButtons();
     }
     function cacheCurrentOutline() {
-      const panel = document.querySelector('.outline-tree-panel');
+      const panel = outlineTreeEl();
       if (panel) outlineTreeCache[currentOutlineTpl] = panel.innerHTML;
+    }
+    /* 进入第四步：为最末级章节补充默认写作方向（已有写作方向的不覆盖） */
+    function ensureLeafDescs() {
+      const panel = outlineTreeEl();
+      if (!panel) return;
+      panel.querySelectorAll('.tree-node').forEach(node => {
+        const kids = node.querySelector(':scope > .tree-children');
+        if (kids && kids.querySelectorAll(':scope > .tree-node').length) return; // 非末级
+        if (node.querySelector(':scope > .node-desc')) return; // 已有写作方向
+        const row = node.querySelector(':scope > .tree-node-row');
+        if (!row) return;
+        const info = readNodeInfo(row);
+        const desc = document.createElement('div');
+        desc.className = 'node-desc';
+        desc.textContent = '围绕' + (info.name || info.title) + '展开撰写，结合引用资料梳理关键要点并补充数据支撑，生成本节正文内容。';
+        row.insertAdjacentElement('afterend', desc);
+      });
     }
     function renderOutlineTemplate(name) {
       const tpl = OUTLINE_TEMPLATES[name];
-      const panel = document.querySelector('.outline-tree-panel');
+      const panel = outlineTreeEl();
       if (!panel) return;
       if (outlineTreeCache[name]) {
         // 已编辑过的大纲：原样恢复，保留写作方向等修改
@@ -7318,6 +8030,8 @@
         panel.appendChild(node);
         });
       }
+      // 进入第四步：为最末级章节补充默认写作方向（在版本快照与选中联动之前）
+      ensureLeafDescs();
       panel.querySelectorAll('.tree-node-row').forEach(r => {
         r.onclick = () => selectNode(r);
         attachNodeActions(r);
@@ -7332,15 +8046,11 @@
       renderOutlineVersionSelect();
     }
     /* ==================== 大纲版本管理（按大纲类型独立） ==================== */
-    const outlineVersionsByTpl = {};
-    const activeVersionByTpl = {};
-    /* 大纲操作回退/恢复：按大纲类型独立记录（最近新版本的操作） */
-    const outlineUndoByTpl = {};
-    const outlineRedoByTpl = {};
+    /* outlineVersionsByTpl / activeVersionByTpl / outlineUndoByTpl / outlineRedoByTpl 已在文件前部声明 */
     let lastWcState = { wc: '4-6', wcCustom: '' };
     function outlineUndoKey() { return currentOutlineTpl || '系统生成大纲'; }
     function currentOutlineSnapshot(wcOverride, wcCustomOverride) {
-      const panel = document.querySelector('.outline-tree-panel');
+      const panel = outlineTreeEl();
       const wcSel = document.getElementById('wordCountSelect');
       const wcInput = document.getElementById('wordCountInput');
       const checks = [];
@@ -7361,7 +8071,7 @@
       return true;
     }
     function pushOutlineSnapshot(wcOverride, wcCustomOverride) {
-      const panel = document.querySelector('.outline-tree-panel');
+      const panel = outlineTreeEl();
       if (!panel) return;
       const key = outlineUndoKey();
       const snap = currentOutlineSnapshot(wcOverride, wcCustomOverride);
@@ -7373,7 +8083,7 @@
       updateOutlineUndoButtons();
     }
     function restoreOutlineSnapshot(snap) {
-      const panel = document.querySelector('.outline-tree-panel');
+      const panel = outlineTreeEl();
       if (!panel || !snap) return;
       panel.innerHTML = snap.html;
       if (snap.checks) {
@@ -7397,7 +8107,7 @@
     function undoOutline() {
       const key = outlineUndoKey();
       const undos = outlineUndoByTpl[key] || [];
-      const panel = document.querySelector('.outline-tree-panel');
+      const panel = outlineTreeEl();
       if (!panel || !undos.length) return;
       const redos = outlineRedoByTpl[key] || (outlineRedoByTpl[key] = []);
       redos.push(currentOutlineSnapshot());
@@ -7406,7 +8116,7 @@
     function redoOutline() {
       const key = outlineUndoKey();
       const redos = outlineRedoByTpl[key] || [];
-      const panel = document.querySelector('.outline-tree-panel');
+      const panel = outlineTreeEl();
       if (!panel || !redos.length) return;
       const undos = outlineUndoByTpl[key] || (outlineUndoByTpl[key] = []);
       undos.push(currentOutlineSnapshot());
@@ -7458,7 +8168,7 @@
       applyOutlineDescState();
     }
     function saveOutlineVersion() {
-      const panel = document.querySelector('.outline-tree-panel');
+      const panel = outlineTreeEl();
       if (!panel) return;
       ensureTplVersions(currentOutlineTpl);
       const list = outlineVersionsByTpl[currentOutlineTpl];
@@ -7485,7 +8195,7 @@
       const list = outlineVersionsByTpl[currentOutlineTpl];
       const ver = list.find(function (v) { return v.id === id; });
       if (!ver || id === activeVersionByTpl[currentOutlineTpl]) return;
-      const panel = document.querySelector('.outline-tree-panel');
+      const panel = outlineTreeEl();
       if (panel) outlineTreeCache[currentOutlineTpl] = panel.innerHTML;
       activeVersionByTpl[currentOutlineTpl] = id;
       if (panel && ver.html) {
@@ -7506,7 +8216,7 @@
       showTaskToast();
     }
     function initOutlineVersions() {
-      const panel = document.querySelector('.outline-tree-panel');
+      const panel = outlineTreeEl();
       ensureTplVersions(currentOutlineTpl);
       if (panel && !outlineVersionsByTpl[currentOutlineTpl][0].html) {
         outlineVersionsByTpl[currentOutlineTpl][0].html = panel.innerHTML;
@@ -7611,7 +8321,7 @@
     ];
     const CHECK_ISSUES = [
       { title: '⚠ 上下文一致性：总投资表述口径不一致', desc: '第二章 2.2 节出现“总投资 6.8 亿元”的近似表述，与第一章 1.1 节“项目总投资 68,259.35 万元”口径不一致，建议统一金额表述。' },
-      { title: '⚠ 财务勾稽：资金来源合计与总投资存在差额', desc: '资金来源构成中企业自筹、贷款、政府补助合计 66,893.37 万元，与项目总投资 68,259.35 万元相差 1,365.98 万元，建议补充或调整资金来源后重新勾稽。' },
+      { title: '⚠ 财务勾稽：政府补助占比偏高', desc: '资金来源构成中政府补助 6,825.93 万元，占项目总投资 68,259.35 万元的 10.00%，高于同类项目一般水平，建议复核补助依据或调整资金来源结构。' },
       { title: '⚠ 建设周期表述不一致', desc: '第五章 5.3 节出现“建设期 2 年半”的描述，与第一章 1.1 节“2026/06/01~2028/06/01（约 24 个月）”不一致，建议统一为 24 个月。' }
     ];
     function buildCheckIssues(vNo) {

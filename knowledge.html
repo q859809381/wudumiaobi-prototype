@@ -174,6 +174,33 @@
       background: #fafbfc;
       border-radius: 0 0 12px 12px;
     }
+    /* 超出大小限制的文件列表 */
+    .kb-issue-list {
+      max-height: 240px;
+      overflow-y: auto;
+      border: 1px solid #eef1f5;
+      border-radius: 8px;
+      background: #fbfcfe;
+      padding: 4px 12px;
+    }
+    .kb-issue-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+      font-size: 13px;
+      color: #555;
+      border-bottom: 1px dashed #eef1f5;
+    }
+    .kb-issue-row:last-child { border-bottom: none; }
+    .kb-issue-row .n {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .kb-issue-row .r { flex: none; color: #c0392b; }
     /* 上传任务面板（右下角） */
     .upload-panel {
       position: fixed;
@@ -472,6 +499,7 @@
         <button class="btn btn-outline" id="createFolderBtn" onclick="createFolder()">＋ 新建文件夹</button>
         <button class="btn btn-primary" onclick="openUploadGuide()">＋ 上传文件</button>
         <input type="file" id="fileInput" style="display:none" multiple onchange="onFileUploaded()">
+        <input type="file" id="folderInput" webkitdirectory directory multiple style="display:none" onchange="onFolderUploaded()">
       </div>
     </div>
 
@@ -558,11 +586,13 @@
           <p>将行业报告、企业数据、政策文件等资料上传至知识库后，可被报告生成过程引用，作为写作的数据依据。</p>
           <ul>
             <li>单份文件大小上限 100MB，可一次选择多个文件</li>
+            <li>选择整个文件夹：文件夹内（含子文件夹）的文件将批量加入上传队列</li>
             <li>上传后文件进入解析队列，解析完成后状态变为"可引用"</li>
           </ul>
         </div>
         <div class="modal-actions">
           <button class="btn btn-outline" onclick="closeUploadGuide()">取消</button>
+          <button class="btn btn-outline" onclick="chooseFolder()">选择整个文件夹</button>
           <button class="btn btn-primary" onclick="chooseFile()">选择文件上传</button>
         </div>
       </div>
@@ -586,6 +616,26 @@
       <div class="modal-actions">
         <button class="btn btn-outline" onclick="closeMoveModal()">取消</button>
         <button class="btn btn-primary" onclick="confirmMove()">移动</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 超出大小限制提醒弹窗 -->
+  <div class="modal-overlay" id="sizeIssueModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title">部分文件超出大小限制</span>
+        <span class="modal-close" onclick="closeSizeIssue()">×</span>
+      </div>
+      <div class="modal-body">
+        <div class="upload-guide">
+          <p id="sizeIssueDesc"></p>
+        </div>
+        <div class="kb-issue-list" id="sizeIssueList"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeSizeIssue()">取消</button>
+        <button class="btn btn-primary" id="sizeIssueOkBtn" onclick="confirmSizeIssue()">仍上传其余文件</button>
       </div>
     </div>
   </div>
@@ -636,7 +686,12 @@
       document.getElementById('uploadGuideModal').classList.remove('active');
     }
     function chooseFile() {
+      document.getElementById('fileInput').value = '';
       document.getElementById('fileInput').click();
+    }
+    function chooseFolder() {
+      document.getElementById('folderInput').value = '';
+      document.getElementById('folderInput').click();
     }
 
     /* ==================== 知识库：文件夹 + 文件（开放式管理） ==================== */
@@ -1023,32 +1078,90 @@
       showToast();
     }
 
+    const MAX_KB_FILE_SIZE = 100 * 1024 * 1024; // 单份文件上限 100MB
+    let pendingKbFiles = []; // 待上传文件（大小校验通过）
+
+    /* 单个文件加入上传队列（供选择文件 / 选择整个文件夹共用） */
+    function queueKbFile(file) {
+      const ext = (file.name.split('.').pop() || '').toLowerCase();
+      let icon = 'docx', letter = 'D', extLabel = 'DOCX';
+      if (ext === 'xlsx' || ext === 'xls') { icon = 'xlsx'; letter = 'X'; extLabel = 'XLSX'; }
+      else if (ext === 'pdf') { icon = 'pdf'; letter = 'P'; extLabel = 'PDF'; }
+      const kbitem = {
+        type: 'file',
+        name: file.name,
+        size: formatSize(file.size),
+        time: nowText(),
+        updateTime: nowText(),
+        icon: icon,
+        iconLetter: letter,
+        ext: extLabel,
+        status: 'uploading'
+      };
+      if (uploadTarget !== KB_ROOT) uploadTarget.updateTime = nowText();
+      uploadTarget.children.unshift(kbitem);
+      addUploadItem(file, kbitem, uploadTarget);
+    }
+
+    /* 选择文件上传 */
     function onFileUploaded() {
       const fileInput = document.getElementById('fileInput');
       const files = Array.from(fileInput.files || []);
-      files.forEach(file => {
-        const ext = (file.name.split('.').pop() || '').toLowerCase();
-        let icon = 'docx', letter = 'D', extLabel = 'DOCX';
-        if (ext === 'xlsx' || ext === 'xls') { icon = 'xlsx'; letter = 'X'; extLabel = 'XLSX'; }
-        else if (ext === 'pdf') { icon = 'pdf'; letter = 'P'; extLabel = 'PDF'; }
-        const kbitem = {
-          type: 'file',
-          name: file.name,
-          size: formatSize(file.size),
-          time: nowText(),
-          updateTime: nowText(),
-          icon: icon,
-          iconLetter: letter,
-          ext: extLabel,
-          status: 'uploading'
-        };
-        if (uploadTarget !== KB_ROOT) uploadTarget.updateTime = nowText();
-        uploadTarget.children.unshift(kbitem);
-        addUploadItem(file, kbitem, uploadTarget);
-      });
-      renderList();
       fileInput.value = '';
+      if (!files.length) return;
       closeUploadGuide();
+      handleKbPickedFiles(files);
+    }
+
+    /* 选择整个文件夹上传（含子文件夹内的文件，统一上传到所选目标文件夹） */
+    function onFolderUploaded() {
+      const folderInput = document.getElementById('folderInput');
+      const files = Array.from(folderInput.files || []);
+      folderInput.value = '';
+      if (!files.length) return;
+      closeUploadGuide();
+      handleKbPickedFiles(files);
+    }
+
+    /* 统一处理：按 100MB 单文件上限筛选，超限文件先提示再决定是否继续 */
+    function handleKbPickedFiles(files) {
+      const valid = [], oversize = [];
+      files.forEach(f => (f.size > MAX_KB_FILE_SIZE ? oversize : valid).push(f));
+      pendingKbFiles = valid;
+      if (oversize.length) {
+        showKbSizeIssue(oversize, valid.length);
+      } else {
+        uploadKbFiles(valid);
+      }
+    }
+
+    function showKbSizeIssue(oversize, okCount) {
+      document.getElementById('sizeIssueDesc').textContent =
+        '单份文件大小上限 100MB，以下 ' + oversize.length + ' 个文件超出限制，将不上传；其余 '
+        + okCount + ' 个文件可正常上传。';
+      document.getElementById('sizeIssueList').innerHTML = oversize.map(f =>
+        '<div class="kb-issue-row"><span class="n" title="' + escHtml(f.name) + '">' + escHtml(f.name)
+        + '</span><span class="r">' + formatSize(f.size) + '</span></div>'
+      ).join('');
+      const btn = document.getElementById('sizeIssueOkBtn');
+      btn.disabled = !okCount;
+      btn.textContent = okCount ? '仍上传其余 ' + okCount + ' 个文件' : '无文件可上传';
+      document.getElementById('sizeIssueModal').classList.add('active');
+    }
+    function closeSizeIssue() {
+      document.getElementById('sizeIssueModal').classList.remove('active');
+    }
+    function confirmSizeIssue() {
+      closeSizeIssue();
+      if (!pendingKbFiles.length) return;
+      uploadKbFiles(pendingKbFiles);
+    }
+
+    function uploadKbFiles(files) {
+      if (!files.length) return;
+      files.forEach(file => queueKbFile(file));
+      renderList();
+      pendingKbFiles = [];
     }
 
     /* ==================== 上传任务面板（右下角） ==================== */

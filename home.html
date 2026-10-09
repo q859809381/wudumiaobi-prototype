@@ -620,6 +620,286 @@
       text-align: center;
     }
 
+    /* =========================================
+       已登录头部用户区（沿用站点视觉规范）
+       主按钮 #333 / 辅助蓝 #4a6fa5 / 描边 #e8e8e8
+       ========================================= */
+    .ax-user-area { display: none; align-items: center; gap: 14px; }
+    .ax-user-area.show { display: flex; }
+    .ax-bell {
+      width: 30px; height: 30px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 4px; color: #666;
+    }
+    .ax-bell:hover { background: #f5f5f5; color: #333; }
+    .ax-user-divider { width: 1px; height: 16px; background: #eee; }
+    .ax-points {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 13px; font-weight: 600; color: #333;
+    }
+    .ax-points svg { display: block; }
+    .ax-recharge-link { font-size: 13px; color: #4a6fa5; cursor: pointer; }
+    .ax-recharge-link:hover { text-decoration: underline; }
+    .ax-more-wrap { position: relative; }
+    .ax-more-btn {
+      width: 34px; height: 26px;
+      border: 1px solid #e0e0e0; border-radius: 13px;
+      background: #fff; color: #666;
+      font-size: 13px; font-weight: 700; letter-spacing: 1px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ax-more-btn:hover { border-color: #999; color: #333; background: #f8f8f8; }
+    .ax-more-menu {
+      position: absolute; right: 0; top: 34px;
+      width: 172px; background: #fff;
+      border: 1px solid #e8e8e8; border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      padding: 6px 0; display: none; z-index: 300;
+    }
+    .ax-more-menu.open { display: block; }
+    .ax-more-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 16px; font-size: 13px; color: #666; cursor: pointer;
+    }
+    .ax-more-item svg { flex-shrink: 0; color: #999; }
+    .ax-more-item:hover { background: #f8f8f8; color: #333; }
+    .ax-more-item:hover svg { color: #666; }
+    .ax-more-item.logout {
+      border-top: 1px solid #f0f0f0;
+      margin-top: 5px; padding-top: 10px;
+    }
+
+    /* =========================================
+       通用弹窗
+       ========================================= */
+    .wd-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: none; align-items: center; justify-content: center;
+      z-index: 1000;
+      font-family: 'Inter', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      color: #333;
+    }
+    .wd-overlay.open { display: flex; }
+    .wd-modal {
+      position: relative; background: #fff; border-radius: 8px;
+      padding: 28px 30px; max-height: 88vh; overflow-y: auto;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+    }
+    .wd-modal-lg { width: 940px; }
+    .wd-modal-md { width: 760px; }
+    .wd-modal-sm { width: 432px; }
+    .wd-close {
+      position: absolute; top: 14px; right: 16px;
+      width: 28px; height: 28px; line-height: 28px; text-align: center;
+      font-size: 18px; color: #bbb;
+    }
+    .wd-close:hover { color: #666; }
+    .wd-modal-title, .us-title, .iv-title { font-size: 18px; font-weight: 700; }
+
+    /* =========================================
+       充值弹窗（账户金额充值）
+       ========================================= */
+    .rc-head { display: flex; align-items: flex-start; gap: 16px; padding-right: 90px; }
+    .rc-avatar {
+      width: 64px; height: 64px; flex-shrink: 0;
+      background: #f2f2f2; border: 1px solid #e8e8e8; border-radius: 4px;
+    }
+    .rc-nick { font-size: 17px; font-weight: 600; }
+    .rc-level { font-size: 12px; color: #999; margin-top: 4px; }
+    .rc-usage { font-size: 13px; color: #666; margin-top: 10px; display: flex; align-items: center; gap: 6px; }
+    .rc-usage a { color: #4a6fa5; }
+    .rc-usage a:hover { text-decoration: underline; }
+    .rc-record-btn {
+      margin-left: auto; padding: 6px 18px;
+      border: 1px solid #ddd; border-radius: 4px;
+      background: #fff; font-size: 13px; color: #333;
+    }
+    .rc-record-btn:hover { background: #f5f5f5; border-color: #ccc; }
+    .rc-banner {
+      margin-top: 22px; background: #fdf9f0; border-radius: 6px;
+      padding: 12px 16px; font-size: 13px; color: #8a6a1f;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .rc-banner a { margin-left: auto; color: #4a6fa5; }
+    .rc-banner a:hover { text-decoration: underline; }
+    .rc-body { display: flex; gap: 24px; margin-top: 24px; }
+    .rc-left { flex: 1; min-width: 0; }
+    .rc-sec-title { font-size: 15px; font-weight: 600; color: #333; }
+    .rc-sec-title small { font-size: 12px; font-weight: 400; color: #999; margin-left: 8px; }
+    .rc-price-list { margin-top: 8px; }
+    .rc-price-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 11px 2px; font-size: 13px; color: #666;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .rc-price-val { display: flex; align-items: center; gap: 5px; color: #4a6fa5; font-weight: 600; }
+    .rc-price-val svg { display: block; }
+    .rc-packs { margin-top: 14px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .rc-pack {
+      border: 1px solid #e8e8e8; border-radius: 8px;
+      padding: 14px; cursor: pointer; background: #fafafa;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .rc-pack:hover { border-color: #ccc; }
+    .rc-pack.selected { border-color: #4a6fa5; background: #f4f8fe; box-shadow: 0 0 0 1px #4a6fa5 inset; }
+    .rc-pack-price { font-size: 13px; color: #666; }
+    .rc-pack-price b { font-size: 22px; font-weight: 700; color: #333; margin: 0 3px; }
+    .rc-pack-points { font-size: 12px; color: #666; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+    .rc-pack-extra { font-size: 11px; color: #999; margin-top: 3px; }
+    .rc-pay {
+      width: 196px; flex-shrink: 0; align-self: flex-start;
+      border: 1px solid #e8e8e8; border-radius: 8px; padding: 18px 12px;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .rc-qr-box {
+      width: 150px; height: 150px; background: #fafafa; border-radius: 6px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; font-size: 12px; color: #bbb; line-height: 1.9;
+    }
+    .rc-qr-box svg { margin-bottom: 4px; }
+    .rc-pay-btn {
+      margin-top: 14px; width: 150px; padding: 8px 0;
+      background: #333; border: 1px solid #666; border-radius: 4px;
+      color: #fff; font-size: 13px;
+    }
+    .rc-pay-btn:hover { background: #555; border-color: #555; }
+    .rc-pay-icons { margin-top: 14px; display: flex; gap: 14px; }
+
+    /* =========================================
+       使用详情弹窗（消费明细）
+       ========================================= */
+    .us-stats { display: flex; align-items: center; gap: 30px; margin: 22px 0; }
+    .us-stat .lbl { font-size: 13px; color: #666; }
+    .us-stat .val { font-size: 22px; font-weight: 700; margin-top: 5px; }
+    .us-op { font-size: 16px; color: #ccc; }
+    .us-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .us-table th {
+      background: #f9f9f9; color: #666; font-weight: 600;
+      text-align: left; padding: 10px 12px;
+    }
+    .us-table th:first-child { border-radius: 4px 0 0 4px; }
+    .us-table th:last-child { border-radius: 0 4px 4px 0; }
+    .us-table td { padding: 11px 12px; border-bottom: 1px solid #f0f0f0; color: #666; vertical-align: middle; }
+    .us-name b { display: block; font-weight: 500; color: #333; }
+    .us-time { font-size: 11px; color: #bbb; margin-top: 3px; }
+    .us-fail { color: #e34d59; }
+    .us-plus { color: #4a6fa5; }
+    .us-foot {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 18px; font-size: 13px; color: #666;
+    }
+    .us-foot b { font-size: 15px; font-weight: 600; color: #333; }
+    .wd-pager { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #999; }
+    .wd-pager .pg {
+      min-width: 26px; height: 26px; padding: 0 6px;
+      border: 1px solid #e0e0e0; border-radius: 4px; background: #fff;
+      font-size: 12px; color: #666;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .wd-pager .pg:hover { border-color: #999; color: #333; }
+    .wd-pager .pg.active { background: #333; border-color: #333; color: #fff; }
+    .wd-pager select, .wd-pager input {
+      height: 26px; border: 1px solid #e0e0e0; border-radius: 4px;
+      font-size: 12px; color: #666; background: #fff; font-family: inherit;
+    }
+    .wd-pager input { width: 40px; text-align: center; }
+
+    /* =========================================
+       充值记录弹窗
+       ========================================= */
+    .rd-inv-btn {
+      padding: 6px 18px; margin: 16px 0 14px;
+      border: 1px solid #4a6fa5; border-radius: 4px;
+      background: #fff; color: #4a6fa5; font-size: 13px;
+    }
+    .rd-inv-btn:hover { background: #f4f8fe; }
+    .rd-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .rd-table th {
+      background: #f9f9f9; padding: 10px 12px;
+      text-align: left; color: #666; font-weight: 600;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .rd-order-row td {
+      background: #fff; color: #999; font-size: 12px;
+      padding: 12px 12px 8px; border-bottom: none;
+    }
+    .rd-order-label { display: inline-flex; align-items: center; gap: 6px; color: #999; }
+    .rd-order-label svg { display: block; }
+    .rd-order-label b { color: #666; font-weight: 500; }
+    .rd-table td { padding: 13px 12px; border-bottom: 1px solid #f0f0f0; color: #666; vertical-align: middle; }
+    .rd-item b { font-weight: 600; color: #333; }
+    .rd-item span { display: block; font-size: 11px; color: #999; margin-top: 3px; }
+    .rd-status-invoiced { color: #999; font-size: 12px; white-space: nowrap; }
+    .rd-status-invoiced a { display: block; color: #4a6fa5; margin-top: 3px; }
+    .rd-status-invoiced a:hover { text-decoration: underline; }
+    .rd-status-applied { color: #4a6fa5; }
+    .rd-amount { color: #4a6fa5; display: flex; align-items: center; gap: 5px; font-weight: 500; }
+    .rd-amount svg { display: block; }
+    .rd-foot { display: flex; justify-content: flex-end; margin-top: 16px; }
+
+    /* =========================================
+       发票详情 / 发票申请弹窗
+       ========================================= */
+    .iv-sub { font-size: 12px; color: #999; margin-top: 8px; }
+    .iv-row { display: flex; margin-top: 15px; font-size: 13px; align-items: flex-start; }
+    .iv-row .k { width: 88px; color: #666; flex-shrink: 0; line-height: 2; }
+    .iv-row .k .req { color: #e34d59; margin-left: 2px; }
+    .iv-row .v { color: #333; flex: 1; min-width: 0; line-height: 2; }
+    .iv-fold {
+      display: inline-flex; align-items: center; gap: 4px;
+      color: #4a6fa5; cursor: pointer; font-size: 12px; margin-left: 10px;
+    }
+    .iv-fold:hover { text-decoration: underline; }
+    .iv-packs { margin: 6px 0 4px 88px; display: none; }
+    .iv-packs.open { display: block; }
+    .iv-pack {
+      background: #fafafa; border: 1px solid #f0f0f0; border-radius: 6px;
+      padding: 13px 15px; margin-bottom: 10px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .iv-pack-price { font-size: 13px; color: #666; }
+    .iv-pack-price b { font-size: 20px; font-weight: 700; color: #333; margin: 0 3px; }
+    .iv-pack-points { font-size: 12px; color: #666; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+    .iv-pack-extra { font-size: 11px; color: #999; margin-top: 3px; }
+    .iv-pack-paid { text-align: right; font-size: 12px; color: #666; }
+    .iv-pack-paid b { display: block; font-size: 17px; font-weight: 700; color: #333; margin-top: 4px; }
+    .iv-input {
+      width: 100%; padding: 8px 12px;
+      border: 1px solid #e0e0e0; border-radius: 4px;
+      font-size: 13px; color: #333; font-family: inherit;
+    }
+    .iv-input::placeholder { color: #bbb; }
+    .iv-input:focus { outline: none; border-color: #4a6fa5; }
+    .iv-input.err { border-color: #e34d59; }
+    .iv-radio-group, .iv-check-group {
+      display: flex; gap: 28px; padding: 7px 0; font-size: 13px; color: #333;
+    }
+    .iv-radio-group label, .iv-check-group label {
+      display: flex; align-items: center; gap: 6px; cursor: pointer;
+    }
+    .iv-attach { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #333; white-space: nowrap; }
+    .iv-attach-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+    .iv-attach a { color: #4a6fa5; flex-shrink: 0; }
+    .iv-attach a:hover { text-decoration: underline; }
+    .iv-submit {
+      width: 100%; margin-top: 24px; padding: 10px 0;
+      background: #333; border: 1px solid #666; border-radius: 4px;
+      color: #fff; font-size: 14px;
+    }
+    .iv-submit:hover { background: #555; border-color: #555; }
+    .iv-err { display: none; margin-top: 12px; font-size: 12px; color: #e34d59; text-align: center; }
+    .iv-err.show { display: block; }
+
+    /* 轻提示 */
+    .wd-toast {
+      position: fixed; left: 50%; bottom: 60px; transform: translateX(-50%);
+      background: rgba(0,0,0,0.75); color: #fff; font-size: 13px;
+      padding: 9px 18px; border-radius: 6px; z-index: 2000; display: none;
+      white-space: nowrap;
+      font-family: 'Inter', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    }
+
   </style>
 </head>
 <body>
@@ -634,7 +914,53 @@
     <div class="ax-topbar-right">
       <a href="#">产品介绍</a>
       <button class="ax-btn-workspace" onclick="window.location.href='report.html'">智能体工作台</button>
-      <button class="ax-btn-login" onclick="window.location.href='index.html'">登录注册</button>
+      <!-- 未登录状态 -->
+      <button class="ax-btn-login" id="btnLogin" onclick="window.location.href='index.html'">登录注册</button>
+      <!-- 已登录状态：消息 / 积分 / 充值入口 / 更多操作 -->
+      <div class="ax-user-area" id="userArea">
+        <button class="ax-bell" title="消息" onclick="showToast('暂无新消息')">
+          <svg width="19" height="19" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.8a4.4 4.4 0 0 1 4.4 4.4c0 3 .9 4 1.5 4.6H2.1c.6-.6 1.5-1.6 1.5-4.6A4.4 4.4 0 0 1 8 1.8Z"/><path d="M6.7 13.3a1.35 1.35 0 0 0 2.6 0"/></svg>
+        </button>
+        <span class="ax-user-divider"></span>
+        <span class="ax-points" title="账户积分">
+          <svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#4a6fa5"/><path d="M8 4.2 11.8 8 8 11.8 4.2 8Z" fill="#fff"/></svg>
+          0
+        </span>
+        <a class="ax-recharge-link" onclick="openModal('rechargeModal')">充值&gt;&gt;</a>
+        <div class="ax-more-wrap">
+          <button class="ax-more-btn" id="moreBtn" onclick="toggleMoreMenu()">···</button>
+          <div class="ax-more-menu" id="moreMenu">
+            <div class="ax-more-item" onclick="demoOnly('设置昵称')">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="8" cy="8" r="6.4"/><circle cx="8" cy="6.4" r="2"/><path d="M4.2 12.6c.6-1.9 2-3 3.8-3s3.2 1.1 3.8 3"/></svg>
+              设置昵称
+            </div>
+            <div class="ax-more-item" onclick="demoOnly('用户名管理')">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="8" cy="5.2" r="2.5"/><path d="M2.8 13.8c.7-2.7 2.7-4.2 5.2-4.2s4.5 1.5 5.2 4.2"/></svg>
+              用户名管理
+            </div>
+            <div class="ax-more-item" onclick="demoOnly('报告资产')">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 1.8h6L12.5 4.8V14.2H3.5Z"/><path d="M5.8 8h4.4M5.8 10.8h4.4"/></svg>
+              报告资产
+            </div>
+            <div class="ax-more-item" onclick="demoOnly('修改密码')">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6.5" width="10" height="7.5" rx="1.2"/><path d="M5.5 6.5V4.8a2.5 2.5 0 0 1 5 0V6.5"/><path d="M8 9.5v1.8"/></svg>
+              修改密码
+            </div>
+            <div class="ax-more-item" onclick="demoOnly('变更手机号')">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="1.5" width="7" height="13" rx="1.4"/><path d="M7 12.4h2"/></svg>
+              变更手机号
+            </div>
+            <div class="ax-more-item" onclick="demoOnly('协议及隐私政策')">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 1.8h6L12.5 4.8V14.2H3.5Z"/><path d="M5.8 6.2h4.4M5.8 9h4.4M5.8 11.8h2.6"/></svg>
+              协议及隐私政策
+            </div>
+            <div class="ax-more-item logout" onclick="logout()">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2H3.2v12H9"/><path d="M6.8 8h6.4M10.8 5.4 13.4 8l-2.6 2.6"/></svg>
+              退出登录
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -1088,6 +1414,363 @@
 
 </div><!-- /home-wrapper -->
 
+<!-- ========== 弹窗：充值（账户金额充值） ========== -->
+<div class="wd-overlay" id="rechargeModal" style="z-index:1000;">
+  <div class="wd-modal wd-modal-lg">
+    <button class="wd-close" onclick="closeModal('rechargeModal')">✕</button>
+    <div class="rc-head">
+      <div class="rc-avatar"></div>
+      <div>
+        <div class="rc-nick">用户昵称</div>
+        <div class="rc-level">普通用户</div>
+        <div class="rc-usage">
+          使用详情：
+          <svg width="14" height="14" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#4a6fa5"/><path d="M8 4.2 11.8 8 8 11.8 4.2 8Z" fill="#fff"/></svg>
+          0
+          <a onclick="openModal('usageModal')">消费明细&gt;&gt;</a>
+        </div>
+      </div>
+      <button class="rc-record-btn" onclick="openModal('recordModal')">充值记录</button>
+    </div>
+    <div class="rc-banner">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3.5h12v8H8.5L5 14v-2.5H2Z"/></svg>
+      商务合作请联系客服咨询
+      <a onclick="showToast('演示环境，暂不支持在线咨询')">立即咨询 &gt;&gt;</a>
+    </div>
+    <div class="rc-body">
+      <div class="rc-left">
+        <div class="rc-sec-title">功能价目表</div>
+        <div class="rc-price-list">
+          <div class="rc-price-row">
+            <span>项目申报智能生成工具</span>
+            <span class="rc-price-val"><svg width="14" height="14" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#4a6fa5"/><path d="M8 4.2 11.8 8 8 11.8 4.2 8Z" fill="#fff"/></svg>30</span>
+          </div>
+          <div class="rc-price-row">
+            <span>可行性研究报告生成</span>
+            <span class="rc-price-val"><svg width="14" height="14" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#4a6fa5"/><path d="M8 4.2 11.8 8 8 11.8 4.2 8Z" fill="#fff"/></svg>49</span>
+          </div>
+          <div class="rc-price-row">
+            <span>招商尽调报告</span>
+            <span class="rc-price-val"><svg width="14" height="14" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#4a6fa5"/><path d="M8 4.2 11.8 8 8 11.8 4.2 8Z" fill="#fff"/></svg>60</span>
+          </div>
+        </div>
+        <div class="rc-sec-title" style="margin-top:24px;">账户金额充值 <small>可根据价目表标注金额进行消费</small></div>
+        <div class="rc-packs">
+          <div class="rc-pack selected" onclick="selectPack(this)">
+            <div class="rc-pack-price">RMB<b>99</b>元</div>
+            <div class="rc-pack-points">共获得 <svg width="13" height="13" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#4a6fa5"/><path d="M8 4.2 11.8 8 8 11.8 4.2 8Z" fill="#fff"/></svg> 109 积分</div>
+            <div class="rc-pack-extra">额外+10积分</div>
+          </div>
+          <div class="rc-pack" onclick="selectPack(this)">
+            <div class="rc-pack-price">RMB<b>475</b>元</div>
+            <div class="rc-pack-points">共获得 <svg width="13" height="13" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#4a6fa5"/><path d="M8 4.2 11.8 8 8 11.8 4.2 8Z" fill="#fff"/></svg> 535 积分</div>
+            <div class="rc-pack-extra">额外+60积分</div>
+          </div>
+          <div class="rc-pack" onclick="selectPack(this)">
+            <div class="rc-pack-price">RMB<b>900</b>元</div>
+            <div class="rc-pack-points">共获得 <svg width="13" height="13" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#4a6fa5"/><path d="M8 4.2 11.8 8 8 11.8 4.2 8Z" fill="#fff"/></svg> 1030 积分</div>
+            <div class="rc-pack-extra">额外+30积分</div>
+          </div>
+          <div class="rc-pack" onclick="selectPack(this)">
+            <div class="rc-pack-price">RMB<b>7900</b>元</div>
+            <div class="rc-pack-points">共获得 <svg width="13" height="13" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#4a6fa5"/><path d="M8 4.2 11.8 8 8 11.8 4.2 8Z" fill="#fff"/></svg> 9400 积分</div>
+            <div class="rc-pack-extra">额外+1500积分</div>
+          </div>
+        </div>
+      </div>
+      <div class="rc-pay">
+        <div class="rc-qr-box" id="qrBox">收款二维码<br>确认后展示收款二维码</div>
+        <button class="rc-pay-btn" onclick="showQr()">确认并支付</button>
+        <div class="rc-pay-icons">
+          <svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#2aae67"/><ellipse cx="9" cy="10.2" rx="3.4" ry="2.9" fill="#fff"/><ellipse cx="15.2" cy="13.6" rx="2.9" ry="2.5" fill="#fff"/><circle cx="7.9" cy="9.6" r="0.55" fill="#2aae67"/><circle cx="10.2" cy="9.6" r="0.55" fill="#2aae67"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#1677ff"/><path d="M5.5 13.2c2.6-1 5-2.4 6.6-4.2H8.4V7.6h4V5.4h2.1v2.2h4.1v1.4h-4.1c-.8 1.1-1.8 2.1-3 3h5.5v5.6c0 1.2-.7 1.8-1.9 1.8h-1.6l-.4-1.5 1.4.1c.5 0 .7-.2.7-.7v-1.4l-3.4.9c-.5 1.4-1.4 2.5-2.9 3.3l-1-1.2c1.9-1 2.9-2.3 3.2-3.9l-3.6 1v4.3H5.5Z" fill="#fff"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 弹窗：使用详情（消费明细） ========== -->
+<div class="wd-overlay" id="usageModal" style="z-index:1010;">
+  <div class="wd-modal wd-modal-md">
+    <button class="wd-close" onclick="closeModal('usageModal')">✕</button>
+    <div class="us-title">使用详情</div>
+    <div class="us-stats">
+      <div class="us-stat"><div class="lbl">剩余总积分</div><div class="val">516</div></div>
+      <span class="us-op">=</span>
+      <div class="us-stat"><div class="lbl">购买剩余积分</div><div class="val">466</div></div>
+      <span class="us-op">+</span>
+      <div class="us-stat"><div class="lbl">赠送剩余积分</div><div class="val">50</div></div>
+    </div>
+    <table class="us-table">
+      <thead>
+        <tr>
+          <th style="width:46%;">使用功能列表</th>
+          <th style="width:16%;">状态</th>
+          <th style="width:20%;">积分类型</th>
+          <th>积分变化</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="us-name"><b>可行性研究报告生成</b><div class="us-time">2026-04-11 10:00</div></div></td>
+          <td>成功</td><td>赠送</td><td>-49</td>
+        </tr>
+        <tr>
+          <td><div class="us-name"><b>招商尽调报告</b><div class="us-time">2026-04-11 10:00</div></div></td>
+          <td class="us-fail">失败</td><td>赠送(购买)</td><td class="us-plus">+60</td>
+        </tr>
+        <tr>
+          <td><div class="us-name"><b>招商尽调报告</b><div class="us-time">2026-04-11 10:00</div></div></td>
+          <td>成功</td><td>赠送(购买)</td><td>-30(-30)</td>
+        </tr>
+        <tr>
+          <td><div class="us-name"><b>可行性研究报告生成</b><div class="us-time">2026-04-11 10:00</div></div></td>
+          <td>成功</td><td>赠送</td><td>-49</td>
+        </tr>
+        <tr>
+          <td><div class="us-name"><b>可行性研究报告生成</b><div class="us-time">2026-04-11 10:00</div></div></td>
+          <td>成功</td><td>赠送</td><td>-49</td>
+        </tr>
+        <tr>
+          <td><div class="us-name"><b>可行性研究报告生成</b><div class="us-time">2026-04-11 10:00</div></div></td>
+          <td>成功</td><td>赠送</td><td>-49</td>
+        </tr>
+        <tr>
+          <td><div class="us-name"><b>可行性研究报告生成</b><div class="us-time">2026-04-11 10:00</div></div></td>
+          <td>成功</td><td>购买</td><td>-49</td>
+        </tr>
+        <tr>
+          <td><div class="us-name"><b>可行性研究报告生成</b><div class="us-time">2026-04-11 10:00</div></div></td>
+          <td>成功</td><td>购买</td><td>-49</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="us-foot">
+      <span>使用耗积分: <b>514</b></span>
+      <div class="wd-pager">
+        <button class="pg">&lt;</button>
+        <button class="pg active">1</button>
+        <button class="pg">2</button>
+        <button class="pg">3</button>
+        <button class="pg">4</button>
+        <button class="pg">5</button>
+        <button class="pg">6</button>
+        <button class="pg">7</button>
+        <button class="pg">8</button>
+        <button class="pg">9</button>
+        <button class="pg">&gt;</button>
+        <select><option>10条/页</option><option>20条/页</option><option>50条/页</option></select>
+        <span>跳至</span>
+        <input value="5">
+        <span>页</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 弹窗：充值记录 ========== -->
+<div class="wd-overlay" id="recordModal" style="z-index:1010;">
+  <div class="wd-modal wd-modal-md" style="width:840px;">
+    <button class="wd-close" onclick="closeModal('recordModal')">✕</button>
+    <div class="us-title">充值记录</div>
+    <button class="rd-inv-btn" onclick="openModal('invoiceApplyModal')">发票申请</button>
+    <table class="rd-table">
+      <thead>
+        <tr>
+          <th style="width:36px;"></th>
+          <th style="width:52px;">序号</th>
+          <th>项目表</th>
+          <th>订单日期</th>
+          <th>支付方式</th>
+          <th style="width:28%;">状态</th>
+          <th>支付金额</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="rd-order-row"><td colspan="7"><span class="rd-order-label"><svg width="12" height="12" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#4a6fa5"/><path d="M8 4.2 11.8 8 8 11.8 4.2 8Z" fill="#fff"/></svg>订单编号：<b>NAKJ_kdsdf12561</b></span></td></tr>
+        <tr>
+          <td><input type="checkbox"></td>
+          <td>1</td>
+          <td><div class="rd-item"><b>99元</b><span>共109积分</span></div></td>
+          <td>2026-02-11&nbsp;&nbsp;14:24:00</td>
+          <td>微信支付</td>
+          <td><div class="rd-status-invoiced">已开票（2026-06-12 15:32:01）<a onclick="openModal('invoiceDetailModal')">开票详情&gt;&gt;</a></div></td>
+          <td><span class="rd-amount"><svg width="13" height="13" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#4a6fa5"/><path d="M8 4.2 11.8 8 8 11.8 4.2 8Z" fill="#fff"/></svg>457元</span></td>
+        </tr>
+        <tr class="rd-order-row"><td colspan="7"><span class="rd-order-label"><svg width="12" height="12" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#4a6fa5"/><path d="M8 4.2 11.8 8 8 11.8 4.2 8Z" fill="#fff"/></svg>订单编号：<b>NAKJ_kdsdf12561</b></span></td></tr>
+        <tr>
+          <td><input type="checkbox"></td>
+          <td>2</td>
+          <td><div class="rd-item"><b>900元</b><span>共1030积分</span></div></td>
+          <td>2026-02-11&nbsp;&nbsp;14:24:00</td>
+          <td>支付宝</td>
+          <td>未开票</td>
+          <td><span class="rd-amount"><svg width="13" height="13" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#4a6fa5"/><path d="M8 4.2 11.8 8 8 11.8 4.2 8Z" fill="#fff"/></svg>900元</span></td>
+        </tr>
+        <tr class="rd-order-row"><td colspan="7"><span class="rd-order-label"><svg width="12" height="12" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#4a6fa5"/><path d="M8 4.2 11.8 8 8 11.8 4.2 8Z" fill="#fff"/></svg>订单编号：<b>NAKJ_kdsdf12561</b></span></td></tr>
+        <tr>
+          <td><input type="checkbox"></td>
+          <td>3</td>
+          <td><div class="rd-item"><b>900元</b><span>共1030积分</span></div></td>
+          <td>2026-02-11&nbsp;&nbsp;14:24:00</td>
+          <td>支付宝</td>
+          <td class="rd-status-applied">已申请</td>
+          <td><span class="rd-amount"><svg width="13" height="13" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#4a6fa5"/><path d="M8 4.2 11.8 8 8 11.8 4.2 8Z" fill="#fff"/></svg>900元</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="rd-foot">
+      <div class="wd-pager">
+        <button class="pg">&lt;</button>
+        <button class="pg active">1</button>
+        <button class="pg">2</button>
+        <button class="pg">3</button>
+        <button class="pg">4</button>
+        <button class="pg">5</button>
+        <button class="pg">6</button>
+        <button class="pg">7</button>
+        <button class="pg">8</button>
+        <button class="pg">9</button>
+        <button class="pg">&gt;</button>
+        <select><option>10条/页</option><option>20条/页</option><option>50条/页</option></select>
+        <span>跳至</span>
+        <input value="5">
+        <span>页</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 弹窗：发票详情 ========== -->
+<div class="wd-overlay" id="invoiceDetailModal" style="z-index:1020;">
+  <div class="wd-modal wd-modal-sm">
+    <button class="wd-close" onclick="closeModal('invoiceDetailModal')">✕</button>
+    <div class="iv-title">发票详情</div>
+    <div class="iv-row" style="margin-top:10px;"><div class="v" style="color:#999;">回执时间：2026-03-18 18:15:18</div></div>
+    <div class="iv-row"><div class="k">公司名称</div><div class="v">北京笃威尔数字技术有限公司</div></div>
+    <div class="iv-row"><div class="k">公司税号</div><div class="v">91110108MA01QCT15H</div></div>
+    <div class="iv-row"><div class="k">发票格式</div><div class="v">PDF或XML或OFD格式</div></div>
+    <div class="iv-row">
+      <div class="k">开票金额</div>
+      <div class="v"><b style="font-size:16px;">¥ 574</b><span class="iv-fold" onclick="toggleInvFold('fdLink','fdPacks','fdOptional')">共2张发票 <span id="fdLink">收起 ∧</span></span></div>
+    </div>
+    <div class="iv-packs open" id="fdPacks">
+      <div class="iv-pack">
+        <div>
+          <div class="iv-pack-price">RMB<b>99</b>元</div>
+          <div class="iv-pack-points">共获得 <svg width="13" height="13" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#4a6fa5"/><path d="M8 4.2 11.8 8 8 11.8 4.2 8Z" fill="#fff"/></svg> 109 积分</div>
+          <div class="iv-pack-extra">额外+10积分</div>
+        </div>
+        <div class="iv-pack-paid">实付<b>¥ 99</b></div>
+      </div>
+      <div class="iv-pack">
+        <div>
+          <div class="iv-pack-price">RMB<b>475</b>元</div>
+          <div class="iv-pack-points">共获得 <svg width="13" height="13" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#4a6fa5"/><path d="M8 4.2 11.8 8 8 11.8 4.2 8Z" fill="#fff"/></svg> 535 积分</div>
+          <div class="iv-pack-extra">额外+60积分</div>
+        </div>
+        <div class="iv-pack-paid">实付<b>¥ 475</b></div>
+      </div>
+    </div>
+    <div class="iv-row"><div class="k">发票类型</div><div class="v">增值税专用发票（专票）</div></div>
+    <div id="fdOptional">
+      <div class="iv-row"><div class="k">公司地址</div><div class="v">北京市丰台区…</div></div>
+      <div class="iv-row"><div class="k">公司电话</div><div class="v">0106833…</div></div>
+      <div class="iv-row"><div class="k">公司开户行</div><div class="v">招商银行…</div></div>
+      <div class="iv-row"><div class="k">开户行账号</div><div class="v">110941…</div></div>
+      <div class="iv-row"><div class="k">备注</div><div class="v">用于产业研究专项报销</div></div>
+    </div>
+    <div class="iv-row"><div class="k">电子邮箱</div><div class="v">23513@qq.com</div></div>
+    <div class="iv-row"><div class="k">附件回执 <span class="req">*</span></div>
+      <div class="v iv-attach">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#666" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M13 7.5 8.2 12.3a3.4 3.4 0 0 1-4.8-4.8l5.4-5.4a2.3 2.3 0 0 1 3.2 3.2L6.6 10.7a1.15 1.15 0 0 1-1.6-1.6L9.6 4.5"/></svg>
+        <span class="iv-attach-name">订单NAKJ_kdsdf12561-电子发票</span>
+        <a onclick="showToast('演示环境，预览功能暂未开放')">预览</a>
+        <a onclick="showToast('演示环境，下载功能暂未开放')">下载</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 弹窗：发票申请 ========== -->
+<div class="wd-overlay" id="invoiceApplyModal" style="z-index:1020;">
+  <div class="wd-modal wd-modal-sm">
+    <button class="wd-close" onclick="closeModal('invoiceApplyModal')">✕</button>
+    <div class="iv-title">发票申请</div>
+    <div class="iv-sub">当前仅支持开具企业类型的发票</div>
+    <div class="iv-row"><div class="k">公司名称 <span class="req">*</span></div>
+      <div class="v"><input class="iv-input" id="invCompany" placeholder="请输入企业名称"></div>
+    </div>
+    <div class="iv-row"><div class="k">公司税号 <span class="req">*</span></div>
+      <div class="v"><input class="iv-input" id="invTax" placeholder="请输入税号"></div>
+    </div>
+    <div class="iv-row"><div class="k">发票类型 <span class="req">*</span></div>
+      <div class="v">
+        <div class="iv-radio-group" id="invTypeGroup">
+          <label><input type="radio" name="invType" value="专票"> 专票</label>
+          <label><input type="radio" name="invType" value="普票"> 普票</label>
+        </div>
+      </div>
+    </div>
+    <div class="iv-row"><div class="k">发票格式 <span class="req">*</span></div>
+      <div class="v">
+        <div class="iv-check-group" id="invFormatGroup">
+          <label><input type="checkbox" value="PDF"> PDF</label>
+          <label><input type="checkbox" value="XML"> XML</label>
+          <label><input type="checkbox" value="OFD"> OFD</label>
+        </div>
+      </div>
+    </div>
+    <div class="iv-row">
+      <div class="k">开票金额</div>
+      <div class="v"><b style="font-size:16px;">¥ 574</b><span class="iv-fold" onclick="toggleInvFold('faLink','faPacks','invOptional')">共2张发票 <span id="faLink">收起 ∧</span></span></div>
+    </div>
+    <div class="iv-packs open" id="faPacks">
+      <div class="iv-pack">
+        <div>
+          <div class="iv-pack-price">RMB<b>99</b>元</div>
+          <div class="iv-pack-points">共获得 <svg width="13" height="13" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#4a6fa5"/><path d="M8 4.2 11.8 8 8 11.8 4.2 8Z" fill="#fff"/></svg> 109 积分</div>
+          <div class="iv-pack-extra">额外+10积分</div>
+        </div>
+        <div class="iv-pack-paid">实付<b>¥ 99</b></div>
+      </div>
+      <div class="iv-pack">
+        <div>
+          <div class="iv-pack-price">RMB<b>475</b>元</div>
+          <div class="iv-pack-points">共获得 <svg width="13" height="13" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#4a6fa5"/><path d="M8 4.2 11.8 8 8 11.8 4.2 8Z" fill="#fff"/></svg> 535 积分</div>
+          <div class="iv-pack-extra">额外+60积分</div>
+        </div>
+        <div class="iv-pack-paid">实付<b>¥ 475</b></div>
+      </div>
+    </div>
+    <div id="invOptional">
+      <div class="iv-row"><div class="k">公司地址</div>
+        <div class="v"><input class="iv-input" placeholder="选填"></div>
+      </div>
+      <div class="iv-row"><div class="k">公司电话</div>
+        <div class="v"><input class="iv-input" placeholder="选填"></div>
+      </div>
+      <div class="iv-row"><div class="k">公司开户行</div>
+        <div class="v"><input class="iv-input" placeholder="选填"></div>
+      </div>
+      <div class="iv-row"><div class="k">开户行账号</div>
+        <div class="v"><input class="iv-input" placeholder="选填"></div>
+      </div>
+      <div class="iv-row"><div class="k">备注</div>
+        <div class="v"><input class="iv-input" placeholder="选填，该内容会打印在发票上"></div>
+      </div>
+    </div>
+    <div class="iv-row"><div class="k">电子邮箱 <span class="req">*</span></div>
+      <div class="v"><input class="iv-input" id="invEmail" placeholder="请输入接收发票的电子邮箱地址"></div>
+    </div>
+    <div class="iv-err" id="invErr"></div>
+    <button class="iv-submit" onclick="invSubmit()">确认提交</button>
+  </div>
+</div>
+
+<div class="wd-toast" id="wdToast"></div>
+
 <script>
   function toggleFAQ(el) {
     el.classList.toggle('open');
@@ -1116,6 +1799,139 @@
     }, { root: null, threshold: 0 }).observe(productsSection);
   }
   toggleTypeNav();
+
+  /* =========================================
+     登录态控制
+     登录页 doLogin() 会写入 localStorage 并跳回首页；
+     也可通过 home.html?logged=1 模拟登录后进入。
+     ========================================= */
+  (function initLoginState() {
+    var params = new URLSearchParams(location.search);
+    if (params.get('logged') === '1') {
+      localStorage.setItem('wdmb_logged', '1');
+    }
+    if (localStorage.getItem('wdmb_logged') === '1') {
+      document.getElementById('btnLogin').style.display = 'none';
+      document.getElementById('userArea').classList.add('show');
+    }
+  })();
+
+  function logout() {
+    localStorage.removeItem('wdmb_logged');
+    location.reload();
+  }
+
+  /* ============ 头部"更多操作"下拉 ============ */
+  function toggleMoreMenu() {
+    document.getElementById('moreMenu').classList.toggle('open');
+  }
+  document.addEventListener('click', function (e) {
+    var menu = document.getElementById('moreMenu');
+    if (menu && menu.classList.contains('open') && !e.target.closest('.ax-more-wrap')) {
+      menu.classList.remove('open');
+    }
+  });
+
+  /* 更多操作内的功能：当前仅作展示 */
+  function demoOnly(name) {
+    document.getElementById('moreMenu').classList.remove('open');
+    showToast('「' + name + '」功能演示版仅作展示');
+  }
+
+  /* ============ 轻提示 ============ */
+  var toastTimer = null;
+  function showToast(msg) {
+    var t = document.getElementById('wdToast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.style.display = 'none'; }, 2200);
+  }
+
+  /* ============ 通用弹窗开关 ============ */
+  function openModal(id) {
+    document.getElementById(id).classList.add('open');
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+  }
+  /* 点击遮罩空白处关闭 */
+  document.querySelectorAll('.wd-overlay').forEach(function (ov) {
+    ov.addEventListener('click', function (e) {
+      if (e.target === ov) ov.classList.remove('open');
+    });
+  });
+
+  /* ============ 充值弹窗 ============ */
+  function selectPack(el) {
+    el.parentElement.querySelectorAll('.rc-pack').forEach(function (p) {
+      p.classList.remove('selected');
+    });
+    el.classList.add('selected');
+  }
+  function showQr() {
+    document.getElementById('qrBox').innerHTML =
+      '<svg width="110" height="110" viewBox="0 0 21 21">' +
+      '<rect width="21" height="21" fill="#fff"/>' +
+      '<g fill="#333">' +
+      '<rect x="1" y="1" width="5" height="5"/><rect x="2" y="2" width="3" height="3" fill="#fff"/><rect x="2.8" y="2.8" width="1.4" height="1.4" fill="#333"/>' +
+      '<rect x="15" y="1" width="5" height="5"/><rect x="16" y="2" width="3" height="3" fill="#fff"/><rect x="16.8" y="2.8" width="1.4" height="1.4" fill="#333"/>' +
+      '<rect x="1" y="15" width="5" height="5"/><rect x="2" y="16" width="3" height="3" fill="#fff"/><rect x="2.8" y="16.8" width="1.4" height="1.4" fill="#333"/>' +
+      '<rect x="8" y="1" width="1.4" height="1.4"/><rect x="10.6" y="1" width="1.4" height="1.4"/><rect x="12" y="2.4" width="1.4" height="1.4"/>' +
+      '<rect x="8" y="3.8" width="1.4" height="1.4"/><rect x="10.6" y="3.8" width="2.8" height="1.4"/>' +
+      '<rect x="1" y="8" width="1.4" height="1.4"/><rect x="3.8" y="8" width="2.8" height="1.4"/><rect x="8" y="8" width="1.4" height="1.4"/>' +
+      '<rect x="10.6" y="8" width="1.4" height="1.4"/><rect x="13.4" y="8" width="1.4" height="1.4"/><rect x="16.2" y="8" width="1.4" height="1.4"/><rect x="18.6" y="8" width="1.4" height="1.4"/>' +
+      '<rect x="2.4" y="10.6" width="1.4" height="1.4"/><rect x="5.2" y="10.6" width="1.4" height="1.4"/><rect x="8" y="10.6" width="2.8" height="1.4"/>' +
+      '<rect x="12" y="10.6" width="1.4" height="1.4"/><rect x="14.8" y="10.6" width="1.4" height="1.4"/><rect x="17.6" y="10.6" width="2.4" height="1.4"/>' +
+      '<rect x="1" y="12" width="2.8" height="1.4"/><rect x="6.6" y="12" width="1.4" height="1.4"/><rect x="9.4" y="12" width="1.4" height="1.4"/>' +
+      '<rect x="12" y="12" width="2.8" height="1.4"/><rect x="16.2" y="12" width="1.4" height="1.4"/>' +
+      '<rect x="8" y="15" width="1.4" height="1.4"/><rect x="10.6" y="15" width="1.4" height="1.4"/><rect x="13.4" y="15" width="1.4" height="1.4"/><rect x="16.2" y="15" width="1.4" height="1.4"/><rect x="18.6" y="15" width="1.4" height="1.4"/>' +
+      '<rect x="8" y="17.6" width="2.8" height="1.4"/><rect x="12" y="17.6" width="1.4" height="1.4"/><rect x="14.8" y="17.6" width="2.8" height="1.4"/><rect x="18.6" y="18.6" width="1.4" height="1.4"/>' +
+      '<rect x="9.4" y="19" width="1.4" height="1"/><rect x="12" y="19" width="1.4" height="1"/>' +
+      '</g></svg>' +
+      '请使用微信 / 支付宝<br>扫码完成支付';
+  }
+
+  /* ============ 发票弹窗收起/展开 ============
+     「共2张发票 收起/展开」同时控制：发票套餐列表 + 选填信息（地址、电话、开户行、账号、备注） */
+  function toggleInvFold(linkId, packsId, optId) {
+    var link = document.getElementById(linkId);
+    var packs = document.getElementById(packsId);
+    var opt = optId ? document.getElementById(optId) : null;
+    var open = packs.classList.toggle('open');
+    if (opt) opt.style.display = open ? 'block' : 'none';
+    link.textContent = open ? '收起 ∧' : '展开 ∨';
+  }
+
+  /* ============ 发票申请提交（含专票/普票必选校验） ============ */
+  function invSubmit() {
+    var company = document.getElementById('invCompany');
+    var tax = document.getElementById('invTax');
+    var email = document.getElementById('invEmail');
+    var errEl = document.getElementById('invErr');
+
+    [company, tax, email].forEach(function (i) { i.classList.remove('err'); });
+
+    var typeSelected = document.querySelector('input[name="invType"]:checked');
+    var formatSelected = document.querySelector('#invFormatGroup input[type="checkbox"]:checked');
+
+    var missing = [];
+    if (!company.value.trim()) { company.classList.add('err'); missing.push('公司名称'); }
+    if (!tax.value.trim()) { tax.classList.add('err'); missing.push('公司税号'); }
+    if (!typeSelected) { missing.push('发票类型'); }
+    if (!formatSelected) { missing.push('发票格式'); }
+    if (!email.value.trim()) { email.classList.add('err'); missing.push('电子邮箱'); }
+
+    if (missing.length) {
+      errEl.textContent = '请完成以下必填项后再提交：' + missing.join('、');
+      errEl.classList.add('show');
+      return;
+    }
+
+    errEl.classList.remove('show');
+    closeModal('invoiceApplyModal');
+    showToast('发票申请已提交（' + typeSelected.value + '），电子发票将发送至您的邮箱');
+  }
 </script>
 </body>
 </html>
