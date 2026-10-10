@@ -4599,6 +4599,25 @@
       </div>
     </div>
 
+    <!-- 回本测算提示（第3步→第4步规则判断） -->
+    <div class="modal-mask" id="paybackCheckModal" style="display:none;z-index:1150;">
+      <div class="modal-box" style="width:500px;">
+        <div class="modal-head">
+          <span class="modal-title">回本测算提示</span>
+          <span class="modal-close" onclick="closePaybackCheck()">✕</span>
+        </div>
+        <div class="modal-body">
+          <p style="font-size:13px;color:#555;line-height:1.8;margin:0;">根据当前锚定的投资与收益参数，系统完成回本测算：</p>
+          <p style="font-size:14px;color:#1f2d3d;line-height:1.9;margin:10px 0 0;padding:12px 14px;border:1px solid #e8eef6;border-radius:8px;background:#f8fafd;font-weight:600;" id="paybackRuleText"></p>
+          <p style="font-size:12px;color:#98a6b8;line-height:1.7;margin:10px 0 0;">如需调整，可返回修改单价、年产能或直接成本率等参数后再生成大纲。</p>
+        </div>
+        <div class="modal-actions" style="display:flex;gap:10px;justify-content:flex-end;padding:14px 24px;border-top:1px solid #f0f0f0;background:#fafbfc;border-radius:0 0 12px 12px;">
+          <button class="btn btn-outline" onclick="closePaybackCheck()">返回修改</button>
+          <button class="btn btn-primary" onclick="continuePaybackCheck()">我已知晓，继续</button>
+        </div>
+      </div>
+    </div>
+
     <!-- 大纲模板选择（第3步→第4步） -->
     <div class="gen-mask" id="tplPickModal">
       <div class="gen-box tpl-pick-box">
@@ -5314,6 +5333,8 @@
     if (parseMaskEl) document.body.appendChild(parseMaskEl);
     const tplPickModalEl = document.getElementById('tplPickModal');
     if (tplPickModalEl) document.body.appendChild(tplPickModalEl);
+    const paybackCheckModalEl = document.getElementById('paybackCheckModal');
+    if (paybackCheckModalEl) document.body.appendChild(paybackCheckModalEl);
     if (kbUpModalEl) document.body.appendChild(kbUpModalEl);
     const kbNewFolderModalEl = document.getElementById('kbNewFolderModal');
     if (kbNewFolderModalEl) document.body.appendChild(kbNewFolderModalEl);
@@ -6534,6 +6555,65 @@
       openTplPickModal(); // 先选择大纲模板，再按选择依次生成两份大纲
     }
 
+    /* ---------- 回本测算提示（配平通过后、选择大纲模板前） ---------- */
+    function calcPaybackRule() {
+      // 兜底演示值（页面数据缺失时使用）
+      let T = 68259.35, P = 0.5, Qwan = 100000, c = 0.65, unit = '次';
+      const modal = document.querySelector('.confirm-step');
+      if (modal) {
+        modal.querySelectorAll('#collapseBase .anchor-row').forEach(row => {
+          const l = row.querySelector('.anchor-label');
+          if (l && l.textContent.indexOf('项目总投资') >= 0) {
+            const dv = row.querySelector('.dim-val');
+            if (dv) { const v = parseMoney(dv.textContent); if (v > 0) T = v; }
+          }
+        });
+        const card = modal.querySelector('#productServiceList .product-service-card');
+        if (card) {
+          card.querySelectorAll('.anchor-row').forEach(row => {
+            const l = row.querySelector('.anchor-label');
+            const dv = row.querySelector('.dim-val');
+            if (!l || !dv) return;
+            const label = l.textContent.trim();
+            const text = (dv.textContent || '').trim();
+            if (label.indexOf('单价') >= 0) {
+              const v = parseFloat(text.replace(/,/g, ''));
+              if (v > 0) P = v;
+            } else if (label.indexOf('达产年产能') >= 0) {
+              const m = text.match(/([\d.,]+)\s*(万|亿)?/);
+              if (m) {
+                const v = parseFloat(m[1].replace(/,/g, ''));
+                if (v > 0) Qwan = v * (m[2] === '亿' ? 10000 : 1); // 统一换算为"万计价单位"
+              }
+            } else if (label.indexOf('直接成本占比') >= 0) {
+              const v = parseFloat(text.replace('%', ''));
+              if (!isNaN(v)) c = Math.min(Math.max(v / 100, 0), 0.99);
+            } else if (label.indexOf('计价单位') >= 0) {
+              if (text && text !== '待填写') unit = text;
+            }
+          });
+        }
+      }
+      // 达产年营收（万元/年）与年净贡献
+      const rev = P * Qwan;
+      // 单价阈值：T / (5 × 年产能 × (1 - 直接成本率))
+      const x = T / (5 * Qwan * (1 - c));
+      // 年产能阈值：T / (5 × 单价 × (1 - 直接成本率))，单位：万计价单位/年
+      const yWan = T / (5 * P * (1 - c));
+      const yText = yWan >= 10000 ? (yWan / 10000).toFixed(2) + '亿' + unit : yWan.toFixed(2) + '万' + unit;
+      // 直接成本率阈值：1 - T / (5 × 达产年营收)
+      const z = Math.min(Math.max((1 - T / (5 * rev)) * 100, 0), 100);
+      return { x: x >= 0.01 ? x.toFixed(2) : x.toFixed(4), y: yText, z: z.toFixed(2) };
+    }
+    function openPaybackCheck() {
+      const r = calcPaybackRule();
+      document.getElementById('paybackRuleText').textContent =
+        '要在 5 年内回本，单价需≥' + r.x + ' 万元，或年产能需≥' + r.y + '，或直接成本率需≤' + r.z + '%';
+      document.getElementById('paybackCheckModal').style.display = 'flex';
+    }
+    function closePaybackCheck() { document.getElementById('paybackCheckModal').style.display = 'none'; }
+    function continuePaybackCheck() { closePaybackCheck(); confirmOutline(); }
+
     let rampPlanEditingValue = null;
 
     function parseRampPlanText(text) {
@@ -7218,7 +7298,8 @@
           showCreditToast('总投资构成或资金来源尚未配平（差额不为 0），请调整金额配平后再进入下一步');
           return;
         }
-        confirmOutline(); return; // 确认锚定 → 生成大纲 → 目录生成及管理（第4步）
+        // 配平通过 → 回本测算提示（确认后再进入大纲模板选择）
+        openPaybackCheck(); return;
       }
       if (flowStage < 4) showStage(flowStage + 1);
     }
