@@ -694,9 +694,12 @@
       margin-left: 4px;
       line-height: 1.4;
     }
-    /* 只读统计展示：维度值 */
+    /* 维度值：常显编辑框容器（输入框 + 后缀说明） */
     .anchor-value .dim-val {
-      display: block;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
       font-size: 12.5px;
       color: #222;
       font-weight: 500;
@@ -709,44 +712,29 @@
       filter: blur(3px);
       pointer-events: none;
     }
-    /* 可编辑维度：编辑图标常驻展示在数据前方，点击即进入编辑态 */
-    .anchor-value.has-edit {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    /* 编辑中隐藏图标，避免与输入框重复 */
-    .anchor-value.has-edit.editing .edit-icon { display: none; }
-    /* 数据行编辑 */
-    .edit-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 18px;
-      height: 18px;
-      margin-left: 0;
-      opacity: 1;
-      border: 1px solid #cdd9ea;
-      border-radius: 4px;
-      color: #7d95b5;
-      font-size: 11px;
-      cursor: pointer;
-      vertical-align: middle;
-      background: #f6f9fd;
-      flex-shrink: 0;
-    }
-    .edit-icon:hover { border-color: #4a6fa5; color: #4a6fa5; background: #eef3fb; }
+    /* 信息确认页：数据行常显编辑框（输入框/下拉框），无编辑图标 */
     .confirm-edit-input {
-      width: calc(100% - 12px);
-      max-width: 240px;
-      padding: 4px 10px;
-      font-size: 13px;
-      border: 1px solid #4a6fa5;
+      width: 100%;
+      max-width: 280px;
+      padding: 3px 8px;
+      font-size: 12.5px;
+      border: 1px solid #d5deeb;
       border-radius: 4px;
       outline: none;
       color: #333;
+      background: #fff;
+      font-family: inherit;
     }
-    .dim-val.edited { color: #c77a1e; }
+    .confirm-edit-input:focus { border-color: #4a6fa5; }
+    .confirm-edit-input.edited { color: #c77a1e; }
+    select.confirm-edit-input { cursor: pointer; }
+    /* 通栏行（产品名称、爬坡计划等）与爬坡卡片：放开宽度限制，内容完整展示 */
+    .anchor-row.full .confirm-edit-input,
+    .project-ramp-card .confirm-edit-input { max-width: 100%; }
+    /* 爬坡计划：只读输入框，点击弹出计划编辑弹窗 */
+    .project-ramp-card .confirm-edit-input { cursor: pointer; }
+    .dim-val .dim-suffix { flex-shrink: 0; color: #555; font-size: 12.5px; font-weight: 500; }
+    .dim-val.edited .dim-suffix { color: #c77a1e; }
     .anchor-value .dim-empty {
       display: block;
       font-size: 13px;
@@ -4389,7 +4377,7 @@
           </div>
           <div class="stage-panel confirm-step" id="stagePanel3">
           <div class="confirm-note">
-        以下数据为系统根据您输入的信息及知识库整理，请确认以下核心数据，点击每项数据前的 ✎ 图标即可修改。确认后，若数据为空或财务数据不平衡，模型将自行推理补充。
+        以下数据为系统根据您输入的信息及知识库整理，请确认以下核心数据，各数据项可直接在输入框或下拉框中修改。确认后，若数据为空或财务数据不平衡，模型将自行推理补充。
       </div>
 
             <div class="step2-groups">
@@ -4440,27 +4428,27 @@
             <div class="product-service-head"><span>产品/服务 1</span></div>
             <div class="product-service-fields">
               <div class="anchor-row full">
-                <div class="anchor-label">产品/服务名称</div>
+                <div class="anchor-label">产品/服务名称 <span class="req">*</span></div>
                 <div class="anchor-value"><span class="dim-val">商业大数据API服务</span></div>
               </div>
               <div class="anchor-row">
-                <div class="anchor-label">计价单位（吨、次、份等，根据实际情况填写）</div>
+                <div class="anchor-label">计价单位（吨、次、份等，根据实际情况填写） <span class="req">*</span></div>
                 <div class="anchor-value"><span class="dim-val">次</span></div>
               </div>
               <div class="anchor-row">
-                <div class="anchor-label">单价（<strong>万元</strong>/计价单位）</div>
+                <div class="anchor-label">单价（<strong>万元</strong>/计价单位） <span class="req">*</span></div>
                 <div class="anchor-value"><span class="dim-val">0.5</span></div>
               </div>
               <div class="anchor-row">
-                <div class="anchor-label">达产年产能</div>
+                <div class="anchor-label">达产年产能 <span class="req">*</span></div>
                 <div class="anchor-value"><span class="dim-val">10亿次</span></div>
               </div>
               <div class="anchor-row">
-                <div class="anchor-label">增值税率</div>
+                <div class="anchor-label">增值税率 <span class="req">*</span></div>
                 <div class="anchor-value"><span class="dim-val" data-options="0%、3%、6%、9%、13%">6%</span></div>
               </div>
               <div class="anchor-row">
-                <div class="anchor-label">直接成本占比（不含人工、折旧、利息）</div>
+                <div class="anchor-label">直接成本占比（不含人工、折旧、利息） <span class="req">*</span></div>
                 <div class="anchor-value"><span class="dim-val" data-numeric="true" data-percent="true">65%</span></div>
               </div>
             </div>
@@ -6271,7 +6259,7 @@
         const l = rows[i].querySelector('.anchor-label');
         if (l && l.textContent.trim().indexOf(label) === 0) {
           const dv = rows[i].querySelector('.dim-val');
-          if (dv) return dv.textContent.replace('✎', '').trim();
+          if (dv) return dimValText(dv);
         }
       }
       return '';
@@ -6565,7 +6553,7 @@
           const l = row.querySelector('.anchor-label');
           if (l && l.textContent.indexOf('项目总投资') >= 0) {
             const dv = row.querySelector('.dim-val');
-            if (dv) { const v = parseMoney(dv.textContent); if (v > 0) T = v; }
+            if (dv) { const v = parseMoney(dimValText(dv)); if (v > 0) T = v; }
           }
         });
         const card = modal.querySelector('#productServiceList .product-service-card');
@@ -6575,7 +6563,7 @@
             const dv = row.querySelector('.dim-val');
             if (!l || !dv) return;
             const label = l.textContent.trim();
-            const text = (dv.textContent || '').trim();
+            const text = dimValText(dv);
             if (label.indexOf('单价') >= 0) {
               const v = parseFloat(text.replace(/,/g, ''));
               if (v > 0) P = v;
@@ -6682,7 +6670,7 @@
         const label = row.querySelector('.anchor-label');
         if (!label || label.textContent.indexOf('运营期') < 0) return;
         const value = row.querySelector('.dim-val');
-        const match = value && value.textContent.match(/\d+/);
+        const match = value && dimValText(value).match(/\d+/);
         const years = match ? parseInt(match[0], 10) : NaN;
         if (Number.isFinite(years) && years > 0) maxYears = years;
       });
@@ -6734,7 +6722,7 @@
       const modal = document.getElementById('rampPlanModal');
       if (!modal) return;
       rampPlanEditingValue = valueEl;
-      renderRampPlanRows(parseRampPlanText(valueEl.textContent.replace('✎', '').trim()));
+      renderRampPlanRows(parseRampPlanText(dimValText(valueEl)));
       const error = document.getElementById('rampPlanError');
       if (error) error.textContent = '';
       modal.style.display = 'flex';
@@ -6800,30 +6788,156 @@
         return;
       }
       plans.sort(function (a, b) { return a.year - b.year; });
-      rampPlanEditingValue.textContent = plans.map(function (plan) {
+      const planText = plans.map(function (plan) {
         return '第' + plan.year + '年达产目标' + formatRampPlanTarget(plan.target) + '%';
       }).join('、');
+      const planInput = rampPlanEditingValue.querySelector('input.confirm-edit-input');
+      if (planInput) planInput.value = planText;
+      else rampPlanEditingValue.textContent = planText;
       rampPlanEditingValue.classList.add('edited');
+      if (planInput) planInput.classList.add('edited');
       closeRampPlanModal();
       attachConfirmEditIcons();
     }
 
-    /* 信息确认弹窗：数据直接编辑（编辑图标常驻展示在数值前方） */
+    /* 信息确认页：数据行常显编辑框（输入框/下拉框），无编辑图标 */
+    function dimValText(dv) {
+      if (!dv) return '';
+      const inp = dv.querySelector(':scope > input.confirm-edit-input');
+      if (inp) {
+        const suffix = dv.querySelector(':scope > .dim-suffix');
+        return inp.value.trim() + (suffix ? suffix.textContent : '');
+      }
+      const sel = dv.querySelector(':scope > select.confirm-edit-input');
+      if (sel) return sel.value;
+      return dv.textContent.replace('✎', '').trim();
+    }
+    function markConfirmEdited(v, control) {
+      v.classList.add('edited');
+      if (control) control.classList.add('edited');
+    }
     function attachConfirmEditIcons() {
       document.querySelectorAll('.confirm-step .anchor-value .dim-val').forEach(v => {
-        const host = v.closest('.anchor-value');
-        if (!host || host.querySelector(':scope > .edit-icon')) return;
-        host.classList.add('has-edit');
-        const icon = document.createElement('span');
-        icon.className = 'edit-icon';
-        icon.title = '点击编辑该数据';
-        icon.textContent = '✎';
-        host.insertBefore(icon, v); // 放到数值前面
-        icon.addEventListener('click', function (e) {
-          e.stopPropagation();
-          if (v.hasAttribute('data-ramp-plan')) openRampPlanModal(v);
-          else editConfirmValue(v);
+        if (v.querySelector(':scope > .confirm-edit-input')) return; // 已转换为编辑框
+        const row = v.closest('.anchor-row');
+        const label = row && row.querySelector('.anchor-label') ? row.querySelector('.anchor-label').textContent.trim() : '';
+        const options = v.getAttribute('data-options');
+        const amountOnly = v.hasAttribute('data-amount');
+        const numericOnly = v.hasAttribute('data-numeric');
+        const percentOnly = v.hasAttribute('data-percent');
+        const curText = v.textContent.replace('✎', '').trim();
+
+        // 选项类数据：渲染为常显下拉框
+        if (options) {
+          const sel = document.createElement('select');
+          sel.className = 'confirm-edit-input';
+          options.split('、').forEach(function (opt) {
+            const op = document.createElement('option');
+            op.value = opt;
+            op.textContent = opt;
+            if (opt === curText) op.selected = true;
+            sel.appendChild(op);
+          });
+          if (!sel.value) sel.selectedIndex = 0;
+          sel.addEventListener('change', function () {
+            markConfirmEdited(v, sel);
+            recalcConfirmBalances();
+          });
+          v.textContent = '';
+          v.appendChild(sel);
+          return;
+        }
+
+        // 投资达产计划：只读输入框，点击打开计划编辑弹窗
+        if (v.hasAttribute('data-ramp-plan')) {
+          const input = document.createElement('input');
+          input.className = 'confirm-edit-input';
+          input.type = 'text';
+          input.readOnly = true;
+          input.title = '点击编辑达产计划';
+          input.value = curText;
+          input.addEventListener('click', function () { openRampPlanModal(v); });
+          v.textContent = '';
+          v.appendChild(input);
+          return;
+        }
+
+        const input = document.createElement('input');
+        input.className = 'confirm-edit-input';
+        input.type = 'text';
+        input.autocomplete = 'off';
+
+        // 资金来源金额项：输入框编辑金额，占比由 refreshFundingPercents 自动计算
+        if (amountOnly) {
+          input.inputMode = 'decimal';
+          input.value = String(parseMoney(v.getAttribute('data-amount') || '0'));
+          const suffix = document.createElement('span');
+          suffix.className = 'dim-suffix';
+          const pm = curText.match(/[（(]([\d.]+)%[)）]$/);
+          suffix.textContent = pm ? '（' + pm[1] + '%）' : '';
+          input.addEventListener('input', function () { this.value = sanitizeNumeric(this.value); });
+          input.addEventListener('change', function () {
+            const val = sanitizeNumeric(input.value);
+            input.value = fmtAmount4(parseMoney(val));
+            v.setAttribute('data-amount', parseMoney(val));
+            markConfirmEdited(v, input);
+            recalcConfirmBalances();
+          });
+          v.textContent = '';
+          v.appendChild(input);
+          v.appendChild(suffix);
+          return;
+        }
+
+        // 百分比项：输入框编辑数字，% 由后缀展示
+        if (percentOnly) {
+          input.inputMode = 'decimal';
+          input.value = sanitizeNumeric(curText);
+          const suffix = document.createElement('span');
+          suffix.className = 'dim-suffix';
+          suffix.textContent = '%';
+          input.addEventListener('input', function () { this.value = sanitizeNumeric(this.value); });
+          input.addEventListener('change', function () {
+            const n = parseFloat(sanitizeNumeric(input.value));
+            if (isNaN(n)) { input.value = sanitizeNumeric(curText); return; }
+            const disp = label.indexOf('直接成本占比') >= 0 ? String(Number(n.toFixed(10))) : n.toFixed(2);
+            input.value = disp;
+            if (disp !== sanitizeNumeric(curText)) markConfirmEdited(v, input);
+            recalcConfirmBalances();
+          });
+          v.textContent = '';
+          v.appendChild(input);
+          v.appendChild(suffix);
+          return;
+        }
+
+        // 纯数字项：金额四位小数、利率两位小数
+        if (numericOnly) {
+          input.inputMode = 'decimal';
+          input.value = formatNumberText(label, curText);
+          input.addEventListener('input', function () { this.value = sanitizeNumeric(this.value); });
+          input.addEventListener('change', function () {
+            const val = sanitizeNumeric(input.value);
+            if (!val) { input.value = formatNumberText(label, curText); return; }
+            input.value = formatNumberText(label, val);
+            if (val !== sanitizeNumeric(curText)) markConfirmEdited(v, input);
+            recalcConfirmBalances();
+          });
+          v.textContent = '';
+          v.appendChild(input);
+          return;
+        }
+
+        // 普通文本项
+        input.value = curText;
+        input.addEventListener('change', function () {
+          const val = input.value.trim() || curText;
+          input.value = val;
+          if (val !== curText) markConfirmEdited(v, input);
+          recalcConfirmBalances();
         });
+        v.textContent = '';
+        v.appendChild(input);
       });
     }
     function sanitizeNumeric(value) {
@@ -6831,99 +6945,6 @@
       const dot = clean.indexOf('.');
       if (dot >= 0) clean = clean.slice(0, dot + 1) + clean.slice(dot + 1).replace(/\./g, '');
       return clean;
-    }
-    function percentFractionFromDisplay(value) {
-      const n = parseFloat(sanitizeNumeric(value));
-      return isNaN(n) ? '' : String(n / 100);
-    }
-    function percentDisplayFromFraction(label, value) {
-      const n = parseFloat(sanitizeNumeric(value));
-      if (isNaN(n)) return '';
-      const pct = n * 100;
-      return (label.indexOf('直接成本占比') >= 0 ? String(Number(pct.toFixed(10))) : pct.toFixed(2)) + '%';
-    }
-    function editConfirmValue(v) {
-      if (v.querySelector('input') || v.querySelector('select')) return;
-      const host = v.closest('.anchor-value');
-      if (host && host.classList.contains('editing')) return;
-      if (host) host.classList.add('editing'); // 编辑态：隐藏编辑图标
-      const oldText = v.textContent.replace('✎', '').trim();
-      const amountOnly = v.hasAttribute('data-amount');
-      const numericOnly = v.hasAttribute('data-numeric');
-      const percentOnly = v.hasAttribute('data-percent');
-      const oldNumericText = percentOnly ? percentFractionFromDisplay(oldText) : oldText;
-      const options = v.getAttribute('data-options');
-      v.classList.remove('edited');
-      v.innerHTML = '';
-      // 选项类数据（如下拉选择）：渲染为下拉框
-      if (options) {
-        const sel = document.createElement('select');
-        sel.className = 'confirm-edit-input';
-        options.split('、').forEach(function (opt) {
-          const op = document.createElement('option');
-          op.value = opt;
-          op.textContent = opt;
-          if (opt === oldText) op.selected = true;
-          sel.appendChild(op);
-        });
-        v.appendChild(sel);
-        sel.focus();
-        let doneSel = false;
-        function finishSelect(save) {
-          if (doneSel) return;
-          doneSel = true;
-          const val = sel.value;
-          v.textContent = val || oldText;
-          if (save && val && val !== oldText) v.classList.add('edited');
-          if (host) host.classList.remove('editing');
-          attachConfirmEditIcons();
-          recalcConfirmBalances();
-        }
-        sel.addEventListener('change', function () { finishSelect(true); });
-        sel.addEventListener('keydown', function (e) {
-          e.stopPropagation();
-          if (e.key === 'Escape') finishSelect(false);
-        });
-        sel.addEventListener('blur', function () { finishSelect(true); });
-        return;
-      }
-      const input = document.createElement('input');
-      input.className = 'confirm-edit-input';
-      if (numericOnly) {
-        input.inputMode = 'decimal';
-        input.type = 'text';
-        input.addEventListener('input', function () { this.value = sanitizeNumeric(this.value); });
-      }
-      // 资金来源金额项：仅编辑万元金额，比例由 refreshFundingPercents 自动计算
-      input.value = amountOnly ? String(parseMoney(v.getAttribute('data-amount') || '0')) : (percentOnly ? oldNumericText : (numericOnly ? sanitizeNumeric(oldText) : oldText));
-      v.appendChild(input);
-      input.focus();
-      input.select();
-      let done = false;
-      function finish(save) {
-        if (done) return;
-        done = true;
-        const val = input.value.trim();
-        const row = v.closest('.anchor-row');
-        const label = row && row.querySelector('.anchor-label') ? row.querySelector('.anchor-label').textContent.trim() : '';
-        if (amountOnly) {
-          v.textContent = ''; // 清除编辑输入框，由 refreshFundingPercents 渲染金额与占比
-          v.setAttribute('data-amount', parseMoney(val));
-        } else {
-          const cleanValue = numericOnly ? (sanitizeNumeric(val) || oldNumericText) : (val || oldText);
-          v.textContent = percentOnly ? (percentDisplayFromFraction(label, cleanValue) || oldText) : (numericOnly ? cleanValue : (label.indexOf('回收期') >= 0 ? formatNumberText(label, val || oldText) : (val || oldText)));
-        }
-        if (save && val && (percentOnly ? sanitizeNumeric(val) !== oldNumericText : val !== oldText)) v.classList.add('edited');
-        if (host) host.classList.remove('editing');
-        attachConfirmEditIcons();
-        recalcConfirmBalances();
-      }
-      input.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') { e.preventDefault(); finish(true); }
-        else if (e.key === 'Escape') { finish(false); }
-        e.stopPropagation();
-      });
-      input.addEventListener('blur', function () { finish(true); });
     }
     attachConfirmEditIcons();
     recalcConfirmBalances();
@@ -6938,12 +6959,12 @@
       card.innerHTML = ''
         + '<div class="product-service-head"><span>产品/服务 ' + count + '</span></div>'
         + '<div class="product-service-fields">'
-        + '<div class="anchor-row full"><div class="anchor-label">产品/服务名称</div><div class="anchor-value"><span class="dim-val">待填写</span></div></div>'
-        + '<div class="anchor-row"><div class="anchor-label">计价单位（吨、次、份等，根据实际情况填写）</div><div class="anchor-value"><span class="dim-val">次</span></div></div>'
-        + '<div class="anchor-row"><div class="anchor-label">单价（<strong>万元</strong>/计价单位）</div><div class="anchor-value"><span class="dim-val">0</span></div></div>'
-        + '<div class="anchor-row"><div class="anchor-label">达产年产能</div><div class="anchor-value"><span class="dim-val">待填写</span></div></div>'
-        + '<div class="anchor-row"><div class="anchor-label">增值税率</div><div class="anchor-value"><span class="dim-val" data-options="0%、3%、6%、9%、13%">6%</span></div></div>'
-        + '<div class="anchor-row"><div class="anchor-label">直接成本占比（不含人工、折旧、利息）</div><div class="anchor-value"><span class="dim-val" data-numeric="true" data-percent="true">0%</span></div></div>'
+        + '<div class="anchor-row full"><div class="anchor-label">产品/服务名称 <span class="req">*</span></div><div class="anchor-value"><span class="dim-val">待填写</span></div></div>'
+        + '<div class="anchor-row"><div class="anchor-label">计价单位（吨、次、份等，根据实际情况填写） <span class="req">*</span></div><div class="anchor-value"><span class="dim-val">次</span></div></div>'
+        + '<div class="anchor-row"><div class="anchor-label">单价（<strong>万元</strong>/计价单位） <span class="req">*</span></div><div class="anchor-value"><span class="dim-val">0</span></div></div>'
+        + '<div class="anchor-row"><div class="anchor-label">达产年产能 <span class="req">*</span></div><div class="anchor-value"><span class="dim-val">待填写</span></div></div>'
+        + '<div class="anchor-row"><div class="anchor-label">增值税率 <span class="req">*</span></div><div class="anchor-value"><span class="dim-val" data-options="0%、3%、6%、9%、13%">6%</span></div></div>'
+        + '<div class="anchor-row"><div class="anchor-label">直接成本占比（不含人工、折旧、利息） <span class="req">*</span></div><div class="anchor-value"><span class="dim-val" data-numeric="true" data-percent="true">0%</span></div></div>'
         + '</div>';
       const insertBefore = list.querySelector('.project-ramp-card') || list.querySelector('.product-service-add');
       list.insertBefore(card, insertBefore);
@@ -7054,15 +7075,16 @@
         dv.textContent = formatNumberText(label, raw);
       });
     }
-    /* 资金来源金额项：按金额 ÷ 总投资自动计算并展示占比 */
+    /* 资金来源金额项：按金额 ÷ 总投资自动计算并展示占比（输入框值不动，仅更新后缀占比） */
     function refreshFundingPercents(total) {
       const modal = document.querySelector('.confirm-step');
       if (!modal) return;
       modal.querySelectorAll('#collapseFunding .dim-val[data-amount]').forEach(dv => {
-        if (dv.querySelector('input') || dv.querySelector('select')) return; // 正在编辑时跳过，避免打断输入
         const amt = parseFloat(dv.getAttribute('data-amount')) || 0;
         const pct = total > 0 ? amt / total * 100 : 0;
-        dv.textContent = fmtAmount4(amt) + '（' + fmtPercent2(pct) + '%）';
+        const suffix = dv.querySelector(':scope > .dim-suffix');
+        if (suffix) suffix.textContent = '（' + fmtPercent2(pct) + '%）';
+        else dv.textContent = fmtAmount4(amt) + '（' + fmtPercent2(pct) + '%）';
       });
     }
     function recalcConfirmBalances() {
@@ -7074,7 +7096,7 @@
         const l = r.querySelector('.anchor-label');
         if (l && l.textContent.indexOf('项目总投资') >= 0) {
           const dv = r.querySelector('.dim-val');
-          if (dv) total = parseMoney(dv.textContent);
+          if (dv) total = parseMoney(dimValText(dv));
         }
       });
       refreshFundingPercents(total);
@@ -7088,7 +7110,7 @@
           const label = l.textContent.trim();
           if (skipLabels && skipLabels.some(s => label.indexOf(s) >= 0)) return;
           const dv = r.querySelector('.dim-val');
-          if (dv) sum += parseMoney(dv.textContent);
+          if (dv) sum += parseMoney(dimValText(dv));
         });
         return sum;
       }
