@@ -25,6 +25,86 @@
       margin-right: 12px;
     }
     .action-link:hover { text-decoration: underline; }
+    /* 下载弹窗：选择导出 Word / 导出 PDF */
+    .dl-mask {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(15, 27, 45, .45);
+      align-items: center;
+      justify-content: center;
+    }
+    .dl-mask.open { display: flex; }
+    .dl-box {
+      width: 420px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 12px 40px rgba(15, 27, 45, .18);
+      padding: 20px 22px 18px;
+    }
+    .dl-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .dl-title { font-size: 15px; font-weight: 600; color: #222; }
+    .dl-close {
+      border: none;
+      background: none;
+      font-size: 18px;
+      color: #999;
+      cursor: pointer;
+      line-height: 1;
+      padding: 2px 4px;
+    }
+    .dl-close:hover { color: #555; }
+    .dl-name {
+      font-size: 12.5px;
+      color: #888;
+      margin-bottom: 14px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .dl-opts { display: flex; gap: 12px; }
+    .dl-opt {
+      flex: 1;
+      border: 1px solid #dde5ef;
+      border-radius: 8px;
+      padding: 14px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .dl-opt:hover { border-color: #4a6fa5; box-shadow: 0 2px 10px rgba(74, 111, 165, .15); }
+    .dl-opt-icon {
+      display: block;
+      width: 40px;
+      height: 40px;
+      margin: 0 auto 8px;
+      border-radius: 8px;
+      line-height: 40px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .dl-opt-icon.word { background: #2b579a; }
+    .dl-opt-icon.pdf { background: #d1443c; }
+    .dl-opt-name { display: block; font-size: 13.5px; font-weight: 600; color: #333; }
+    .dl-opt-sub { display: block; font-size: 11.5px; color: #999; margin-top: 2px; }
+    .dl-foot { margin-top: 16px; text-align: right; }
+    .dl-cancel {
+      padding: 6px 18px;
+      font-size: 13px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: #fff;
+      color: #555;
+      cursor: pointer;
+    }
+    .dl-cancel:hover { border-color: #999; background: #f5f5f5; }
     .action-link.danger { color: #c0392b; }
     /* 表头筛选下拉（报告类型） */
     .th-filter {
@@ -276,13 +356,13 @@
           </tr>
         </thead>
         <tbody id="reportList">
-          <tr data-type="可行性研究报告">
+          <tr data-type="可行性研究报告（专业版）">
             <td><span class="word-icon">W</span><span class="report-name" title="企查查商业大数据人工智能研发建设项目·可行性研究报告">企查查商业大数据人工智能研发建设项目·可行性研究报告</span></td>
-            <td><span class="tag">可行性研究报告</span></td>
+            <td><span class="tag">可行性研究报告（专业版）</span></td>
             <td data-sort="2026-07-22 16:24">2026-07-22 16:24</td>
             <td>
               <span class="action-link" onclick="showToast()">查看</span>
-              <span class="action-link" onclick="showToast()">下载</span>
+              <span class="action-link" onclick="openDownloadModal()">下载</span>
               <span class="action-link danger" onclick="showToast()">删除</span>
             </td>
           </tr>
@@ -376,6 +456,32 @@
 
   <!-- 报告类型筛选下拉 -->
   <div class="type-menu" id="typeMenu"></div>
+
+  <!-- 下载报告弹窗：选择导出格式 -->
+  <div class="dl-mask" id="downloadModal" onclick="if (event.target === this) closeDownloadModal()">
+    <div class="dl-box">
+      <div class="dl-head">
+        <span class="dl-title">下载报告</span>
+        <button class="dl-close" onclick="closeDownloadModal()" title="关闭">×</button>
+      </div>
+      <div class="dl-name" id="downloadName">企查查商业大数据人工智能研发建设项目·可行性研究报告</div>
+      <div class="dl-opts">
+        <div class="dl-opt" onclick="chooseDownload('Word')">
+          <span class="dl-opt-icon word">W</span>
+          <span class="dl-opt-name">导出 Word</span>
+          <span class="dl-opt-sub">.docx 格式，可在线编辑</span>
+        </div>
+        <div class="dl-opt" onclick="chooseDownload('PDF')">
+          <span class="dl-opt-icon pdf">PDF</span>
+          <span class="dl-opt-name">导出 PDF</span>
+          <span class="dl-opt-sub">.pdf 格式，版式固定</span>
+        </div>
+      </div>
+      <div class="dl-foot">
+        <button class="dl-cancel" onclick="closeDownloadModal()">取消</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Toast -->
   <div class="task-toast" id="actionToast">
@@ -556,7 +662,7 @@
     }
 
     /* 报告类型表头下拉筛选 */
-    const REPORT_TYPES = ['全部', '可行性研究报告', '企业全景分析报告', '投前咨询分析报告', '招商策略分析报告', '项目立项报告', '项目资金申请报告', '生物医药产业分析报告', '全产业分析报告'];
+    const REPORT_TYPES = ['全部', '可行性研究报告（专业版）', '企业全景分析报告', '投前咨询分析报告', '招商策略分析报告', '项目立项报告', '项目资金申请报告', '生物医药产业分析报告', '全产业分析报告'];
     let activeType = '全部';
 
     function openTypeMenu(e) {
@@ -598,6 +704,21 @@
     }
     function closeToast() {
       document.getElementById('actionToast').classList.remove('active');
+    }
+
+    /* ==================== 下载报告弹窗：导出 Word / 导出 PDF ==================== */
+    function openDownloadModal() {
+      document.getElementById('downloadModal').classList.add('open');
+    }
+    function closeDownloadModal() {
+      document.getElementById('downloadModal').classList.remove('open');
+    }
+    function chooseDownload(fmt) {
+      closeDownloadModal();
+      const desc = document.querySelector('#actionToast .task-toast-desc');
+      if (desc) desc.textContent = '已选择导出 ' + fmt + '（原型演示）';
+      showToast();
+      setTimeout(() => { if (desc) desc.textContent = '操作已触发（原型演示）'; }, 2100);
     }
 
     /* 侧栏底部：用户二级悬浮窗 */
