@@ -1372,25 +1372,6 @@
       transition: opacity 0.2s;
     }
     .ai-credit-toast.show { opacity: 1; }
-    /* 导出 Word 二次确认弹窗 */
-    .export-warn {
-      font-size: 15px;
-      font-weight: 700;
-      color: #c0392b;
-      margin-bottom: 8px;
-    }
-    .export-desc {
-      font-size: 13px;
-      color: #555;
-      line-height: 1.8;
-      margin-bottom: 18px;
-    }
-    .export-desc strong { color: #c0392b; }
-    .export-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-    }
     /* 导出后：报告锁定为只读，隐藏所有编辑/AI操作入口 */
     body.exported .editor-toolbar,
     body.exported .editor-progress,
@@ -4975,8 +4956,7 @@
             <div class="editor-version-menu" id="editorVersionMenu" style="display:none;"></div>
           </div>
           <span class="export-time" id="exportTime" style="display:none;"></span>
-          <button class="btn btn-sm btn-primary" onclick="openExportModal('Word')">📄 导出Word</button>
-          <button class="btn btn-sm btn-primary" onclick="openExportModal('PDF')">📄 导出PDF</button>
+          <button class="btn btn-sm btn-primary" onclick="exportWord()">📄 导出Word</button>
         </div>
       </div>
 
@@ -5291,31 +5271,12 @@
     </div>
   </div>
 
-  <!-- 导出文件二次确认弹窗 -->
-  <div class="modal-mask" id="exportModal" style="display:none;">
-    <div class="modal-box" style="width:480px;">
-      <div class="modal-head">
-        <span class="modal-title" id="exportModalTitle">导出 Word 报告</span>
-        <span class="modal-close" onclick="closeExportModal()">✕</span>
-      </div>
-      <div class="modal-body">
-        <div class="export-warn">⚠ 导出前请确认</div>
-        <p class="export-desc">文件导出后，该报告将<strong>不再支持修改及任何 AI 辅助操作</strong>（AI撰写、改写、扩写、缩写、润色等）。</p>
-        <div class="export-actions">
-          <button class="btn btn-outline" onclick="closeExportModal()">取消</button>
-          <button class="btn btn-primary" id="confirmExportBtn" onclick="confirmExport()">确认导出</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <script>
     /* 弹窗移出主内容区：避免被正文编辑区的模糊效果波及 */
     const genMaskEl = document.getElementById('genMask');
     const parseMaskEl = document.getElementById('parseMask');
     const kbUpModalEl = document.getElementById('kbUploadGuideModal');
     const kbUpPanelEl = document.getElementById('kbUploadPanel');
-    const exportModalEl = document.getElementById('exportModal');
     const rampPlanModalEl = document.getElementById('rampPlanModal');
     if (genMaskEl) document.body.appendChild(genMaskEl);
     if (parseMaskEl) document.body.appendChild(parseMaskEl);
@@ -5327,7 +5288,6 @@
     const kbNewFolderModalEl = document.getElementById('kbNewFolderModal');
     if (kbNewFolderModalEl) document.body.appendChild(kbNewFolderModalEl);
     if (kbUpPanelEl) document.body.appendChild(kbUpPanelEl);
-    if (exportModalEl) document.body.appendChild(exportModalEl);
     if (rampPlanModalEl) document.body.appendChild(rampPlanModalEl);
 
 /* ==================== 智能体与报告类型 ==================== */
@@ -5401,18 +5361,9 @@
       updateAiCreditUI();
       return true;
     }
-    /* ==================== 导出文件：一次确认 ==================== */
-    let exportFormat = 'Word';
-    function openExportModal(format) {
-      exportFormat = format || 'Word';
-      const title = document.getElementById('exportModalTitle');
-      if (title) title.textContent = '导出 ' + exportFormat + ' 报告';
-      const confirmBtn = document.getElementById('confirmExportBtn');
-      if (confirmBtn) confirmBtn.textContent = '确认导出' + exportFormat;
-      document.getElementById('exportModal').style.display = 'flex';
-    }
-    function closeExportModal() {
-      document.getElementById('exportModal').style.display = 'none';
+    /* ==================== 导出文件：直接导出（无确认弹窗，不锁定编辑） ==================== */
+    function exportWord() {
+      showCreditToast('已导出 Word');
     }
     /* 应用导出只读状态（供导出操作与“已完成且已导出”任务复用） */
     function applyExportedState() {
@@ -5456,13 +5407,6 @@
       const exportTime = document.getElementById('exportTime');
       if (exportTime) { exportTime.style.display = 'none'; exportTime.textContent = ''; }
       if (typeof updateSaveTime === 'function') updateSaveTime();
-    }
-    function confirmExport() {
-      closeExportModal();
-      applyExportedState();
-      aiCreditLeft = 0;
-      updateAiCreditUI();
-      showCreditToast('已导出 ' + exportFormat + '，报告已锁定，不再支持修改及 AI 辅助操作');
     }
     const PAPER_SAMPLE_PARAS = [
       '本项目立足于行业数字化转型趋势，围绕数据要素价值释放，系统推进基础设施建设与智能化应用落地，为业务高质量发展提供坚实支撑。',
