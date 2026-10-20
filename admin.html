@@ -420,7 +420,7 @@
 
   <!-- ============ 顶部栏 ============ -->
   <header class="admin-topbar">
-    <div class="admin-logo">
+    <div class="admin-logo" style="cursor:pointer;" onclick="window.location.href='home.html'" title="返回五度妙笔首页">
       <div class="admin-logo-mark">5</div>
       <div class="admin-logo-name">五度妙笔<small>WUDU MIAOBI</small></div>
     </div>
@@ -698,6 +698,14 @@
                 <option value="投促助手">投促助手</option>
                 <option value="产研院门户">产研院门户</option>
               </select>
+              <span class="label-txt">报告类型</span>
+              <select class="select" id="priceReportFilter" onchange="filterPrices()">
+                <option value="all">全部报告类型</option>
+                <option>企业全景报告</option>
+                <option>可行性研究报告</option>
+                <option>项目立项报告</option>
+                <option>供应链分析报告</option>
+              </select>
               <span class="label-txt">状态</span>
               <select class="select" id="priceStatusFilter" onchange="filterPrices()">
                 <option value="all">全部状态</option>
@@ -884,12 +892,14 @@
     // ============ 渠道价格配置：渠道 + 状态筛选 ============
     function filterPrices() {
       var c = document.getElementById('priceChannelFilter').value;
+      var r = document.getElementById('priceReportFilter').value;
       var s = document.getElementById('priceStatusFilter').value;
       document.querySelectorAll('#priceTable tbody tr').forEach(function (tr) {
         if (tr.dataset.empty) return;   // 空态占位行不参与筛选
         var okC = (c === 'all' || tr.dataset.channel === c);
+        var okR = (r === 'all' || tr.dataset.report === r);
         var okS = (s === 'all' || tr.dataset.status === s);
-        tr.style.display = (okC && okS) ? '' : 'none';
+        tr.style.display = (okC && okR && okS) ? '' : 'none';
       });
     }
 
@@ -1317,7 +1327,7 @@
         var ops = '<span class="link" onclick="editPrice(' + p.id + ')">修改</span>' +
           '<span style="color:#e0e0e0;margin:0 6px;">|</span>' +
           '<span class="link" onclick="deletePrice(' + p.id + ')">删除</span>';
-        html += '<tr data-channel="' + p.channel + '" data-status="' + st + '">' +
+        html += '<tr data-channel="' + p.channel + '" data-report="' + p.report + '" data-status="' + st + '">' +
           '<td class="c">' + (seq + 1) + '</td>' +
           '<td>' + p.channel + '</td><td>' + p.report + '</td>' +
           '<td class="num r">¥' + p.price + '</td>' +
