@@ -109,6 +109,25 @@
     .side-item:hover { background: #f5f5f5; }
     .side-item.active { background: #e8f1ff; color: #1677ff; font-weight: 500; }
     .side-item .ico { font-size: 15px; }
+    /* 一级导航（仅展示，无点击效果）；渠道管理下的二级项可点击切换 */
+    .side-l1 {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 12px;
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 2px;
+    }
+    .side-l1 .ico { font-size: 15px; }
+    .side-item.sub { padding-left: 35px; font-size: 13px; }
+    .side-item.sub .ico { font-size: 13px; }
+    /* 可折叠的一级分组 */
+    .side-l1.clickable { cursor: pointer; }
+    .side-l1.clickable:hover { background: #f5f5f5; }
+    .side-l1 .caret {
+      margin-left: auto; font-size: 16px; color: #999; line-height: 1;
+      transition: transform 0.15s;
+    }
+    .side-l1.collapsed .caret { transform: rotate(-90deg); }
 
     .admin-main { flex: 1; padding: 20px 24px 40px; min-width: 0; }
     .admin-section { display: none; }
@@ -237,6 +256,8 @@
     /* 首列与卡片标题色块对齐（卡片头 padding 20px），末列与右侧对齐 */
     .data-table th:first-child, .data-table td:first-child { padding-left: 20px; }
     .data-table th:last-child, .data-table td:last-child { padding-right: 20px; }
+    /* 用户使用记录 13 列，压缩内边距，避免 1440 宽度下状态/操作列被截断 */
+    #usageTable th, #usageTable td { padding: 12px 6px; }
     .link { color: #1677ff; cursor: pointer; font-size: 13px; }
     .link:hover { text-decoration: underline; }
 
@@ -419,12 +440,15 @@
   <div class="admin-layout">
     <!-- ============ 左侧导航 ============ -->
     <aside class="admin-sidebar">
-      <div class="side-group-title">统计</div>
-      <div class="side-item active" data-target="sec-overview"><span class="ico">📊</span> 渠道数据总览</div>
-      <div class="side-group-title">管理</div>
-      <div class="side-item" data-target="sec-channel"><span class="ico">🏢</span> 渠道管理</div>
-      <div class="side-item" data-target="sec-user"><span class="ico">👥</span> 渠道用户管理</div>
-      <div class="side-item" data-target="sec-price"><span class="ico">💰</span> 渠道价格管理</div>
+      <div class="side-l1"><span class="ico">📊</span> 统计面板</div>
+      <div class="side-l1 clickable" onclick="toggleChannelGroup(this)"><span class="ico">🗂️</span> 渠道管理<span class="caret">▾</span></div>
+      <div class="side-item sub active" data-target="sec-overview">渠道数据总览</div>
+      <div class="side-item sub" data-target="sec-price">渠道价格管理</div>
+      <div class="side-l1"><span class="ico">📝</span> 反馈记录</div>
+      <div class="side-l1"><span class="ico">👤</span> 用户管理</div>
+      <div class="side-l1"><span class="ico">🛡️</span> 角色管理</div>
+      <div class="side-l1"><span class="ico">🏷️</span> 报告价格管理</div>
+      <div class="side-l1"><span class="ico">💬</span> 消息通知</div>
     </aside>
 
     <!-- ============ 主内容区 ============ -->
@@ -434,7 +458,7 @@
       <section class="admin-section active" id="sec-overview">
         <div class="section-head">
           <div class="section-title">渠道数据总览</div>
-          <div class="section-sub">统计范围内所有第三方渠道的汇总数据</div>
+          <div class="section-sub">所有第三方渠道与终端用户的汇总数据及明细</div>
         </div>
 
 
@@ -524,28 +548,30 @@
               <select class="select"><option>全部类型</option><option>企业全景报告</option><option>可行性研究报告</option><option>项目立项报告</option><option>供应链分析报告</option></select>
               <span class="label-txt">状态</span>
               <select class="select"><option>全部状态</option><option>成功</option><option>失败</option><option>队列中</option><option>运行中</option></select>
+              <button class="btn" style="margin-left:6px;" onclick="exportUsageRecords()">导出记录</button>
             </div>
           </div>
           <div style="overflow-x:auto;">
             <table class="data-table" id="usageTable">
               <thead>
                 <tr>
-                  <th class="c">序号</th><th>用户名</th><th>手机号</th><th>所属渠道</th><th>报告类型</th><th>报告名称</th>
-                  <th class="sortable" data-sort="none" onclick="toggleUsageSort(this,6)">发起时间</th>
-                  <th class="sortable" data-sort="none" onclick="toggleUsageSort(this,7)">生成时间</th>
-                  <th class="sortable" data-sort="none" onclick="toggleUsageSort(this,8)">生成时长</th>
+                  <th class="c">序号</th><th>用户ID</th><th>用户名</th><th>手机号</th><th>所属渠道</th><th>报告类型</th><th>报告名称</th>
+                  <th class="r">报告费用</th>
+                  <th class="sortable" data-sort="none" onclick="toggleUsageSort(this,8)">发起时间</th>
+                  <th class="sortable" data-sort="none" onclick="toggleUsageSort(this,9)">生成时间</th>
+                  <th class="sortable" data-sort="none" onclick="toggleUsageSort(this,10)">生成时长</th>
                   <th>状态</th><th>操作</th>
                 </tr>
               </thead>
               <tbody>
-                <tr><td class="c">1</td><td>hongyuan365</td><td class="num">185****3659</td><td>慧招网</td><td>企业全景报告</td><td>竹材智能加工产业分析</td><td class="num">2026-10-16 11:24:08</td><td class="num">2026-10-16 11:24:54</td><td class="num">00:00:46</td><td><span class="tag tag-green">成功</span></td><td><span class="link" onclick="openRecordDetail(0)">记录详情</span><span style="color:#e0e0e0;margin:0 6px;">|</span><span class="link" onclick="showToast('该功能为原型演示')">下载报告</span></td></tr>
-                <tr><td class="c">2</td><td>qihang2018</td><td class="num">139****2217</td><td>产业通</td><td>可行性研究报告</td><td>年产8万吨乳酸酯项目可行性研究</td><td class="num">2026-10-16 10:47:33</td><td class="num">2026-10-16 10:50:26</td><td class="num">00:02:53</td><td><span class="tag tag-green">成功</span></td><td><span class="link" onclick="openRecordDetail(1)">记录详情</span><span style="color:#e0e0e0;margin:0 6px;">|</span><span class="link" onclick="showToast('该功能为原型演示')">下载报告</span></td></tr>
-                <tr><td class="c">3</td><td>hengxin8842</td><td class="num">136****8842</td><td>慧招网</td><td>项目立项报告</td><td>高端装备制造基地项目立项建议</td><td class="num">2026-10-16 09:32:51</td><td class="num">—</td><td class="num">—</td><td><span class="tag tag-orange">队列中</span></td><td><span class="link" onclick="openRecordDetail(2)">记录详情</span></td></tr>
-                <tr><td class="c">4</td><td>znjg0907</td><td class="num">158****9035</td><td>招商云</td><td>供应链分析报告</td><td>华中建材供应链效率评估</td><td class="num">2026-10-16 09:15:20</td><td class="num">2026-10-16 09:17:18</td><td class="num">00:01:58</td><td><span class="tag tag-green">成功</span></td><td><span class="link" onclick="openRecordDetail(3)">记录详情</span><span style="color:#e0e0e0;margin:0 6px;">|</span><span class="link" onclick="showToast('该功能为原型演示')">下载报告</span></td></tr>
-                <tr><td class="c">5</td><td>xinda5566</td><td class="num">187****5566</td><td>企联港</td><td>企业全景报告</td><td>鑫达电子企业全景画像</td><td class="num">2026-10-15 18:05:12</td><td class="num">2026-10-15 18:06:04</td><td class="num">00:00:52</td><td><span class="tag tag-green">成功</span></td><td><span class="link" onclick="openRecordDetail(4)">记录详情</span><span style="color:#e0e0e0;margin:0 6px;">|</span><span class="link" onclick="showToast('该功能为原型演示')">下载报告</span></td></tr>
-                <tr><td class="c">6</td><td>jietong3328</td><td class="num">150****3328</td><td>供应链服务网</td><td>供应链分析报告</td><td>冷链物流网络布局优化分析</td><td class="num">2026-10-15 16:41:27</td><td class="num">2026-10-15 16:44:39</td><td class="num">00:03:12</td><td><span class="tag tag-red">失败</span></td><td><span class="link" onclick="openRecordDetail(5)">记录详情</span></td></tr>
-                <tr><td class="c">7</td><td>qingyun7701</td><td class="num">133****7701</td><td>招商云</td><td>可行性研究报告</td><td>固废处理扩建项目可行性研究</td><td class="num">2026-10-15 15:58:44</td><td class="num">2026-10-15 16:01:31</td><td class="num">00:02:47</td><td><span class="tag tag-green">成功</span></td><td><span class="link" onclick="openRecordDetail(6)">记录详情</span><span style="color:#e0e0e0;margin:0 6px;">|</span><span class="link" onclick="showToast('该功能为原型演示')">下载报告</span></td></tr>
-                <tr><td class="c">8</td><td>mingrui2026</td><td class="num">176****4913</td><td>产业通</td><td>项目立项报告</td><td>智慧园区运营服务立项申请</td><td class="num">2026-10-16 08:15:02</td><td class="num">—</td><td class="num">—</td><td><span class="tag tag-blue">运行中</span></td><td><span class="link" onclick="openRecordDetail(7)">记录详情</span></td></tr>
+                <tr><td class="c">1</td><td>hongyuan365</td><td class="num">USR-2001</td><td class="num">185****3659</td><td>慧招网</td><td>企业全景报告</td><td>竹材智能加工产业分析</td><td class="num r">¥58</td><td class="num">2026-10-16 11:24:08</td><td class="num">2026-10-16 11:24:54</td><td class="num">00:00:46</td><td><span class="tag tag-green">成功</span></td><td><span class="link" onclick="openRecordDetail(0)">记录详情</span><span style="color:#e0e0e0;margin:0 6px;">|</span><span class="link" onclick="showToast('该功能为原型演示')">下载报告</span></td></tr>
+                <tr><td class="c">2</td><td>qihang2018</td><td class="num">USR-2002</td><td class="num">139****2217</td><td>产业通</td><td>可行性研究报告</td><td>年产8万吨乳酸酯项目可行性研究</td><td class="num r">¥198</td><td class="num">2026-10-16 10:47:33</td><td class="num">2026-10-16 10:50:26</td><td class="num">00:02:53</td><td><span class="tag tag-green">成功</span></td><td><span class="link" onclick="openRecordDetail(1)">记录详情</span><span style="color:#e0e0e0;margin:0 6px;">|</span><span class="link" onclick="showToast('该功能为原型演示')">下载报告</span></td></tr>
+                <tr><td class="c">3</td><td>hengxin8842</td><td class="num">USR-2003</td><td class="num">136****8842</td><td>慧招网</td><td>项目立项报告</td><td>高端装备制造基地项目立项建议</td><td class="num r">—</td><td class="num">2026-10-16 09:32:51</td><td class="num">—</td><td class="num">—</td><td><span class="tag tag-orange">队列中</span></td><td><span class="link" onclick="openRecordDetail(2)">记录详情</span></td></tr>
+                <tr><td class="c">4</td><td>znjg0907</td><td class="num">USR-2004</td><td class="num">158****9035</td><td>招商云</td><td>供应链分析报告</td><td>华中建材供应链效率评估</td><td class="num r">¥298</td><td class="num">2026-10-16 09:15:20</td><td class="num">2026-10-16 09:17:18</td><td class="num">00:01:58</td><td><span class="tag tag-green">成功</span></td><td><span class="link" onclick="openRecordDetail(3)">记录详情</span><span style="color:#e0e0e0;margin:0 6px;">|</span><span class="link" onclick="showToast('该功能为原型演示')">下载报告</span></td></tr>
+                <tr><td class="c">5</td><td>xinda5566</td><td class="num">USR-2005</td><td class="num">187****5566</td><td>企联港</td><td>企业全景报告</td><td>鑫达电子企业全景画像</td><td class="num r">¥58</td><td class="num">2026-10-15 18:05:12</td><td class="num">2026-10-15 18:06:04</td><td class="num">00:00:52</td><td><span class="tag tag-green">成功</span></td><td><span class="link" onclick="openRecordDetail(4)">记录详情</span><span style="color:#e0e0e0;margin:0 6px;">|</span><span class="link" onclick="showToast('该功能为原型演示')">下载报告</span></td></tr>
+                <tr><td class="c">6</td><td>jietong3328</td><td class="num">USR-2006</td><td class="num">150****3328</td><td>供应链服务网</td><td>供应链分析报告</td><td>冷链物流网络布局优化分析</td><td class="num r">—</td><td class="num">2026-10-15 16:41:27</td><td class="num">2026-10-15 16:44:39</td><td class="num">00:03:12</td><td><span class="tag tag-red">失败</span></td><td><span class="link" onclick="openRecordDetail(5)">记录详情</span></td></tr>
+                <tr><td class="c">7</td><td>qingyun7701</td><td class="num">USR-2007</td><td class="num">133****7701</td><td>招商云</td><td>可行性研究报告</td><td>固废处理扩建项目可行性研究</td><td class="num r">¥198</td><td class="num">2026-10-15 15:58:44</td><td class="num">2026-10-15 16:01:31</td><td class="num">00:02:47</td><td><span class="tag tag-green">成功</span></td><td><span class="link" onclick="openRecordDetail(6)">记录详情</span><span style="color:#e0e0e0;margin:0 6px;">|</span><span class="link" onclick="showToast('该功能为原型演示')">下载报告</span></td></tr>
+                <tr><td class="c">8</td><td>mingrui2026</td><td class="num">USR-2008</td><td class="num">176****4913</td><td>产业通</td><td>项目立项报告</td><td>智慧园区运营服务立项申请</td><td class="num r">—</td><td class="num">2026-10-16 08:15:02</td><td class="num">—</td><td class="num">—</td><td><span class="tag tag-blue">运行中</span></td><td><span class="link" onclick="openRecordDetail(7)">记录详情</span></td></tr>
               </tbody>
             </table>
           </div>
@@ -556,15 +582,6 @@
             <span>10条/页</span>
           </div>
         </div>
-      </section>
-
-      <!-- ========== 3. 渠道管理 ========== -->
-      <section class="admin-section" id="sec-channel">
-        <div class="section-head">
-          <div class="section-title">渠道管理</div>
-          <div class="section-sub">已接入报告生成能力的第三方平台</div>
-        </div>
-
 
         <div class="card">
           <div class="card-head">
@@ -601,19 +618,10 @@
             <span>10条/页</span>
           </div>
         </div>
-      </section>
-
-      <!-- ========== 4. 渠道用户管理 ========== -->
-      <section class="admin-section" id="sec-user">
-        <div class="section-head">
-          <div class="section-title">渠道用户管理</div>
-          <div class="section-sub">通过第三方渠道使用报告生成功能的终端用户</div>
-        </div>
-
 
         <div class="card">
           <div class="card-head">
-            <span class="bar"></span><span class="card-title">用户列表</span>
+            <span class="bar"></span><span class="card-title">渠道用户列表</span>
             <div class="card-tools">
               <input class="input" placeholder="输入用户名或手机号查询">
               <span class="label-txt">所属渠道</span>
@@ -636,14 +644,14 @@
                 </tr>
               </thead>
               <tbody>
-                <tr data-channel="慧招网"><td class="c">1</td><td>hongyuan365</td><td class="num">185****3659</td><td>慧招网</td><td class="num">2026-03-11</td><td class="num">2026-10-16 09:41</td><td class="num r">126</td><td class="num r">¥8,568</td><td><span class="link" onclick="openUserRecords('hongyuan365')">使用记录</span></td></tr>
-                <tr data-channel="产业通"><td class="c">2</td><td>qihang2018</td><td class="num">139****2217</td><td>产业通</td><td class="num">2026-02-27</td><td class="num">2026-10-16 08:15</td><td class="num r">98</td><td class="num r">¥11,604</td><td><span class="link" onclick="openUserRecords('qihang2018')">使用记录</span></td></tr>
-                <tr data-channel="慧招网"><td class="c">3</td><td>hengxin8842</td><td class="num">136****8842</td><td>慧招网</td><td class="num">2026-05-06</td><td class="num">2026-10-15 17:32</td><td class="num r">74</td><td class="num r">¥5,032</td><td><span class="link" onclick="openUserRecords('hengxin8842')">使用记录</span></td></tr>
-                <tr data-channel="招商云"><td class="c">4</td><td>znjg0907</td><td class="num">158****9035</td><td>招商云</td><td class="num">2026-06-19</td><td class="num">2026-10-15 14:08</td><td class="num r">61</td><td class="num r">¥7,808</td><td><span class="link" onclick="openUserRecords('znjg0907')">使用记录</span></td></tr>
-                <tr data-channel="企联港"><td class="c">5</td><td>xinda5566</td><td class="num">187****5566</td><td>企联港</td><td class="num">2026-07-03</td><td class="num">2026-10-14 11:56</td><td class="num r">43</td><td class="num r">¥2,494</td><td><span class="link" onclick="openUserRecords('xinda5566')">使用记录</span></td></tr>
-                <tr data-channel="供应链服务网"><td class="c">6</td><td>jietong3328</td><td class="num">150****3328</td><td>供应链服务网</td><td class="num">2026-08-12</td><td class="num">2026-10-14 09:20</td><td class="num r">35</td><td class="num r">¥10,430</td><td><span class="link" onclick="openUserRecords('jietong3328')">使用记录</span></td></tr>
-                <tr data-channel="招商云"><td class="c">7</td><td>qingyun7701</td><td class="num">133****7701</td><td>招商云</td><td class="num">2026-08-28</td><td class="num">2026-10-12 16:44</td><td class="num r">22</td><td class="num r">¥2,816</td><td><span class="link" onclick="openUserRecords('qingyun7701')">使用记录</span></td></tr>
-                <tr data-channel="产业通"><td class="c">8</td><td>mingrui2026</td><td class="num">176****4913</td><td>产业通</td><td class="num">2026-09-15</td><td class="num">2026-10-10 13:37</td><td class="num r">17</td><td class="num r">¥2,012</td><td><span class="link" onclick="openUserRecords('mingrui2026')">使用记录</span></td></tr>
+                <tr data-channel="慧招网"><td class="c">1</td><td>hongyuan365</td><td class="num">USR-2001</td><td class="num">185****3659</td><td>慧招网</td><td class="num">2026-03-11</td><td class="num">2026-10-16 09:41</td><td class="num r">126</td><td class="num r">¥8,568</td><td><span class="link" onclick="openUserRecords('hongyuan365')">使用记录</span></td></tr>
+                <tr data-channel="产业通"><td class="c">2</td><td>qihang2018</td><td class="num">USR-2002</td><td class="num">139****2217</td><td>产业通</td><td class="num">2026-02-27</td><td class="num">2026-10-16 08:15</td><td class="num r">98</td><td class="num r">¥11,604</td><td><span class="link" onclick="openUserRecords('qihang2018')">使用记录</span></td></tr>
+                <tr data-channel="慧招网"><td class="c">3</td><td>hengxin8842</td><td class="num">USR-2003</td><td class="num">136****8842</td><td>慧招网</td><td class="num">2026-05-06</td><td class="num">2026-10-15 17:32</td><td class="num r">74</td><td class="num r">¥5,032</td><td><span class="link" onclick="openUserRecords('hengxin8842')">使用记录</span></td></tr>
+                <tr data-channel="招商云"><td class="c">4</td><td>znjg0907</td><td class="num">USR-2004</td><td class="num">158****9035</td><td>招商云</td><td class="num">2026-06-19</td><td class="num">2026-10-15 14:08</td><td class="num r">61</td><td class="num r">¥7,808</td><td><span class="link" onclick="openUserRecords('znjg0907')">使用记录</span></td></tr>
+                <tr data-channel="企联港"><td class="c">5</td><td>xinda5566</td><td class="num">USR-2005</td><td class="num">187****5566</td><td>企联港</td><td class="num">2026-07-03</td><td class="num">2026-10-14 11:56</td><td class="num r">43</td><td class="num r">¥2,494</td><td><span class="link" onclick="openUserRecords('xinda5566')">使用记录</span></td></tr>
+                <tr data-channel="供应链服务网"><td class="c">6</td><td>jietong3328</td><td class="num">USR-2006</td><td class="num">150****3328</td><td>供应链服务网</td><td class="num">2026-08-12</td><td class="num">2026-10-14 09:20</td><td class="num r">35</td><td class="num r">¥10,430</td><td><span class="link" onclick="openUserRecords('jietong3328')">使用记录</span></td></tr>
+                <tr data-channel="招商云"><td class="c">7</td><td>qingyun7701</td><td class="num">USR-2007</td><td class="num">133****7701</td><td>招商云</td><td class="num">2026-08-28</td><td class="num">2026-10-12 16:44</td><td class="num r">22</td><td class="num r">¥2,816</td><td><span class="link" onclick="openUserRecords('qingyun7701')">使用记录</span></td></tr>
+                <tr data-channel="产业通"><td class="c">8</td><td>mingrui2026</td><td class="num">USR-2008</td><td class="num">176****4913</td><td>产业通</td><td class="num">2026-09-15</td><td class="num">2026-10-10 13:37</td><td class="num r">17</td><td class="num r">¥2,012</td><td><span class="link" onclick="openUserRecords('mingrui2026')">使用记录</span></td></tr>
               </tbody>
             </table>
           </div>
@@ -660,93 +668,71 @@
       <section class="admin-section" id="sec-price">
         <div class="section-head">
           <div class="section-title">渠道价格管理</div>
-          <div class="section-sub">按报告维度维护价格，可对不同渠道商在不同时期设定不同价格</div>
+          <div class="section-sub">按渠道与报告维度维护价格，不同渠道可对同一报告分别定价</div>
         </div>
 
         <div class="price-notes">
           <div class="price-note">
-            <b><span class="p-ico">📌</span>报告常态价格</b>
-            各类报告的统一默认售价，对所有渠道长期生效；某渠道在特殊时间段内优先按特殊价格执行。
-          </div>
-          <div class="price-note">
-            <b><span class="p-ico">⏱️</span>特殊时间段价格</b>
-            针对指定渠道在指定时间范围内生效的临时价格（如大促、活动期），优先级高于常态价格；超出时间段后自动恢复为常态价格。
+            <b><span class="p-ico">💰</span>渠道差异化定价</b>
+            同一份报告在不同渠道可设置不同价格，价格仅对指定渠道生效；同一渠道的同一报告在不同时间段也可分别定价。
           </div>
           <div class="price-note">
             <b><span class="p-ico">🔀</span>冲突与更新规则</b>
-            同一渠道同一报告的特殊时间段不允许重叠，重叠时保存将被拦截；特殊价按「渠道 + 时段」逐条维护，仅被改动的记录更新更新时间。
+            同一渠道、同一报告的时间段不能重叠，重叠时无法保存。每条价格记录独立维护，只有修改过的记录才会刷新更新时间。
           </div>
         </div>
 
-
         <div class="card">
           <div class="card-head">
-            <span class="bar"></span><span class="card-title">报告价格</span>
+            <span class="bar"></span><span class="card-title">渠道价格配置</span>
+            <div class="card-tools">
+              <span class="label-txt">渠道</span>
+              <select class="select" id="priceChannelFilter" onchange="filterPrices()">
+                <option value="all">全部渠道</option>
+                <option value="慧招网">慧招网</option>
+                <option value="产业通">产业通</option>
+                <option value="招商云">招商云</option>
+                <option value="企联港">企联港</option>
+                <option value="供应链服务网">供应链服务网</option>
+                <option value="园区智服平台">园区智服平台</option>
+                <option value="投促助手">投促助手</option>
+                <option value="产研院门户">产研院门户</option>
+              </select>
+              <span class="label-txt">状态</span>
+              <select class="select" id="priceStatusFilter" onchange="filterPrices()">
+                <option value="all">全部状态</option>
+                <option value="未生效">未生效</option>
+                <option value="生效中">生效中</option>
+                <option value="已过期">已过期</option>
+              </select>
+              <button class="btn btn-primary" style="margin-left:6px;" onclick="openPriceModal()">新增价格配置</button>
+            </div>
           </div>
           <div style="overflow-x:auto;">
-            <table class="data-table" style="table-layout:fixed;">
+            <table class="data-table" id="priceTable" style="table-layout:fixed;">
               <colgroup>
-                <col style="width:13%;"><col style="width:31%;"><col style="width:12%;">
-                <col style="width:14%;"><col style="width:12%;"><col style="width:18%;">
+                <col style="width:6%;"><col style="width:12%;"><col style="width:16%;"><col style="width:9%;">
+                <col style="width:12%;"><col style="width:12%;"><col style="width:9%;">
+                <col style="width:12%;"><col style="width:12%;">
               </colgroup>
               <thead>
                 <tr>
-                  <th>报告类型</th><th>报告说明</th><th class="r">常态价格</th><th>特殊时间段</th><th>更新时间</th><th>操作</th>
+                  <th class="c">序号</th><th>渠道名称</th><th>报告类型</th><th class="r">价格</th>
+                  <th class="sortable" data-sort="none" onclick="togglePriceSort(this,'start')">开始时间</th>
+                  <th class="sortable" data-sort="none" onclick="togglePriceSort(this,'end')">结束时间</th>
+                  <th>状态</th>
+                  <th class="sortable" data-sort="none" onclick="togglePriceSort(this,'updated')">更新时间</th>
+                  <th>操作</th>
                 </tr>
               </thead>
-              <tbody id="reportPriceBody"></tbody>
+              <tbody id="priceBody"></tbody>
             </table>
           </div>
-
-          <div style="border-top:1px solid #f0f0f0;padding:16px 20px 0;">
-            <div style="display:flex;align-items:center;margin-bottom:12px;">
-              <span class="sub-title">└ 特殊价格明细</span>
-              <span class="hint" style="margin-left:10px;">报告价格的子模块，展示各渠道的特殊时间段价格</span>
-              <div class="card-tools" style="margin-left:auto;">
-                <span class="label-txt">渠道</span>
-                <select class="select" id="priceChannelFilter" onchange="filterPrices()">
-                  <option value="all">全部渠道</option>
-                  <option value="慧招网">慧招网</option>
-                  <option value="产业通">产业通</option>
-                  <option value="招商云">招商云</option>
-                  <option value="企联港">企联港</option>
-                  <option value="供应链服务网">供应链服务网</option>
-                </select>
-                <span class="label-txt" style="margin-left:14px;">状态</span>
-                <select class="select" id="priceStatusFilter" onchange="filterPrices()">
-                  <option value="all">全部状态</option>
-                  <option value="未生效">未生效</option>
-                  <option value="生效中">生效中</option>
-                  <option value="已过期">已过期</option>
-                </select>
-              </div>
-            </div>
-            <div style="overflow-x:auto;">
-              <table class="data-table" id="priceTable" style="table-layout:fixed;">
-                <colgroup>
-                  <col style="width:12%;"><col style="width:16%;"><col style="width:10%;">
-                  <col style="width:13%;"><col style="width:13%;"><col style="width:10%;">
-                  <col style="width:13%;"><col style="width:13%;">
-                </colgroup>
-                <thead>
-                  <tr>
-                    <th>渠道名称</th><th>报告类型</th><th class="r">特殊价格</th>
-                    <th class="sortable" data-sort="none" onclick="toggleSpecialSort(this,'start')">开始时间</th>
-                    <th class="sortable" data-sort="none" onclick="toggleSpecialSort(this,'end')">结束时间</th>
-                    <th>状态</th>
-                    <th class="sortable" data-sort="none" onclick="toggleSpecialSort(this,'updated')">更新时间</th>
-                    <th>操作</th>
-                  </tr>
-                </thead>
-                <tbody id="specialPriceBody"></tbody>
-              </table>
-            </div>
-            <div class="pager" style="padding:14px 0 16px;">
-              <span class="pg disabled">‹</span>
-              <span class="pg on">1</span>
-              <span class="pg disabled">›</span>
-              <span>10条/页</span>
-            </div>
+          <div class="pager" style="padding:14px 0 16px;">
+            <span class="pg disabled">‹</span>
+            <span class="pg on">1</span>
+            <span class="pg disabled">›</span>
+            <span id="priceCount">共 0 条</span>
           </div>
         </div>
       </section>
@@ -782,42 +768,21 @@
     </div>
   </div>
 
-  <!-- ============ 价格设置弹窗 ============ -->
-  <!-- ============ 常态价格设置弹窗 ============ -->
-  <div class="modal-mask" id="basePriceModal" onclick="if(event.target===this)closeBasePriceModal()">
-    <div class="modal" style="width:460px;">
-      <div class="modal-head">
-        <div class="modal-title">常态价格设置 · <span id="basePriceTitle"></span></div>
-        <span class="modal-close" onclick="closeBasePriceModal()">✕</span>
-      </div>
-      <div class="modal-body">
-        <div class="form-row"><span class="form-label">报告类型</span><span id="basePriceReport">—</span></div>
-        <div class="form-row"><span class="form-label">常态价格（元）</span><input class="input" id="basePriceInput" type="number" style="width:140px;"></div>
-        <div class="hint" style="margin-top:6px;">统一默认售价，对所有渠道长期生效；未设特殊价格的渠道均按此价格执行。</div>
-      </div>
-      <div class="modal-foot">
-        <button class="btn" onclick="closeBasePriceModal()">取消</button>
-        <button class="btn btn-primary" onclick="saveBasePrice()">保存设置</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============ 特殊价格设置弹窗 ============ -->
+  <!-- ============ 价格配置弹窗 ============ -->
   <div class="modal-mask" id="priceModal" onclick="if(event.target===this)closePriceModal()">
-    <div class="modal" style="width:760px;">
+    <div class="modal" style="width:840px;">
       <div class="modal-head">
-        <div class="modal-title">特殊价格设置 · <span id="priceModalTitle"></span></div>
+        <div class="modal-title" id="priceModalTitle">新增价格配置</div>
         <span class="modal-close" onclick="closePriceModal()">✕</span>
       </div>
       <div class="modal-body">
         <div id="priceModalWarn" class="warn-bar" style="display:none;"></div>
-        <div class="form-row"><span class="form-label">报告类型</span><span id="priceReportName">—</span></div>
-        <div style="display:flex;align-items:center;margin-bottom:10px;margin-top:4px;">
-          <span class="card-title">特殊时间段价格</span>
-          <span class="btn-text" style="margin-left:auto;" onclick="addPeriodRow()">+ 添加渠道时段</span>
+        <div style="display:flex;align-items:center;margin-bottom:10px;">
+          <span class="card-title">价格记录</span>
+          <span class="btn-text" style="margin-left:auto;" onclick="addPeriodRow()">+ 添加一条</span>
         </div>
         <div id="periodList"></div>
-        <div class="hint" style="margin-top:6px;">此处仅添加新的渠道时段，不反显已有时段；与已有时段重叠时保存会被拦截。已开始执行的特殊时段不支持修改，请在特殊价格明细中查看。</div>
+        <div class="hint" style="margin-top:6px;">同一渠道同一报告的时间段不可重叠，保存时会校验；勾选「长期」表示不限结束日期。新增时不反显已有配置，修改时为单条反显。</div>
       </div>
       <div class="modal-foot">
         <button class="btn" onclick="closePriceModal()">取消</button>
@@ -891,6 +856,13 @@
         document.getElementById(item.dataset.target).classList.add('active');
       });
     });
+    // 「渠道管理」分组折叠 / 展开
+    function toggleChannelGroup(el) {
+      var collapsed = el.classList.toggle('collapsed');
+      document.querySelectorAll('.side-item.sub').forEach(function (i) {
+        i.style.display = collapsed ? 'none' : '';
+      });
+    }
 
     // ============ 管理员菜单 ============
     function toggleAdminMenu(e) {
@@ -909,7 +881,7 @@
       });
     }
 
-    // ============ 特殊价格明细：渠道 + 状态筛选 ============
+    // ============ 渠道价格配置：渠道 + 状态筛选 ============
     function filterPrices() {
       var c = document.getElementById('priceChannelFilter').value;
       var s = document.getElementById('priceStatusFilter').value;
@@ -1281,65 +1253,57 @@
       });
     }
 
-    // ============ 价格设置 ============
-    var priceConfig = {
-      '企业全景报告': { base: 58, desc: '企业尽调、招商与供应链画像', periods: [
-        { channel: '慧招网', start: '2026-10-20', end: '2026-11-11', price: 49, updated: '2026-10-09' },
-        { channel: '产业通', start: '2026-09-01', end: '2027-02-28', price: 68, updated: '2026-08-17' },
-        { channel: '企联港', start: '2026-11-01', end: '2026-11-15', price: 45, updated: '2026-10-12' },
-        { channel: '供应链服务网', start: '2026-10-01', end: '2026-10-31', price: 238, updated: '2026-09-18' }
-      ] },
-      '可行性研究报告': { base: 198, desc: '项目投资可行性与风险论证', periods: [
-        { channel: '慧招网', start: '2026-10-20', end: '2026-11-11', price: 158, updated: '2026-10-09' }
-      ] },
-      '项目立项报告': { base: 128, desc: '项目立项与申报材料支撑', periods: [
-        { channel: '招商云', start: '2026-10-01', end: '2026-12-31', price: 99, updated: '2026-09-24' }
-      ] },
-      '供应链分析报告': { base: 298, desc: '产业链上下游供应链效率评估', periods: [
-        { channel: '供应链服务网', start: '2026-10-01', end: '2026-10-31', price: 238, updated: '2026-09-18' }
-      ] }
-    };
-    var REPORT_ORDER = ['企业全景报告', '可行性研究报告', '项目立项报告', '供应链分析报告'];
+    // ============ 渠道价格配置 ============
+    // 一条记录 = 某渠道某报告在一段时间内的价格；同一渠道同一报告的时间段不允许重叠
+    var priceList = [
+      { id: 1, channel: '慧招网', report: '企业全景报告', price: 58, start: '2026-01-01', end: '2026-10-19', updated: '2026-01-06' },
+      { id: 2, channel: '慧招网', report: '企业全景报告', price: 49, start: '2026-10-20', end: '2026-11-11', updated: '2026-10-09' },
+      { id: 3, channel: '慧招网', report: '企业全景报告', price: 58, start: '2026-11-12', end: '2027-12-31', updated: '2026-10-09' },
+      { id: 4, channel: '慧招网', report: '可行性研究报告', price: 198, start: '2026-01-01', end: '', updated: '2026-01-06' },
+      { id: 5, channel: '产业通', report: '企业全景报告', price: 58, start: '2026-01-01', end: '2026-08-31', updated: '2026-01-15' },
+      { id: 6, channel: '产业通', report: '企业全景报告', price: 68, start: '2026-09-01', end: '2027-02-28', updated: '2026-08-17' },
+      { id: 7, channel: '产业通', report: '企业全景报告', price: 58, start: '2027-03-01', end: '2027-12-31', updated: '2026-08-17' },
+      { id: 8, channel: '产业通', report: '可行性研究报告', price: 228, start: '2026-03-01', end: '2027-12-31', updated: '2026-02-20' },
+      { id: 9, channel: '招商云', report: '企业全景报告', price: 78, start: '2026-01-01', end: '2027-12-31', updated: '2026-01-20' },
+      { id: 10, channel: '招商云', report: '项目立项报告', price: 128, start: '2026-01-01', end: '2026-09-30', updated: '2026-01-20' },
+      { id: 11, channel: '招商云', report: '项目立项报告', price: 99, start: '2026-10-01', end: '2026-12-31', updated: '2026-09-24' },
+      { id: 12, channel: '招商云', report: '项目立项报告', price: 128, start: '2027-01-01', end: '2027-12-31', updated: '2026-09-24' },
+      { id: 13, channel: '企联港', report: '企业全景报告', price: 58, start: '2026-02-14', end: '2026-10-31', updated: '2026-02-14' },
+      { id: 14, channel: '企联港', report: '企业全景报告', price: 45, start: '2026-11-01', end: '2026-11-15', updated: '2026-10-12' },
+      { id: 15, channel: '企联港', report: '企业全景报告', price: 58, start: '2026-11-16', end: '2027-12-31', updated: '2026-10-12' },
+      { id: 16, channel: '供应链服务网', report: '供应链分析报告', price: 298, start: '2026-04-01', end: '2026-09-30', updated: '2026-03-10' },
+      { id: 17, channel: '供应链服务网', report: '供应链分析报告', price: 238, start: '2026-10-01', end: '2026-10-31', updated: '2026-09-18' },
+      { id: 18, channel: '供应链服务网', report: '供应链分析报告', price: 298, start: '2026-11-01', end: '2027-12-31', updated: '2026-09-18' },
+      { id: 19, channel: '供应链服务网', report: '企业全景报告', price: 98, start: '2026-04-01', end: '2027-12-31', updated: '2026-03-10' },
+      { id: 20, channel: '园区智服平台', report: '企业全景报告', price: 58, start: '2026-07-22', end: '', updated: '2026-07-22' },
+      { id: 21, channel: '投促助手', report: '企业全景报告', price: 58, start: '2026-08-30', end: '2027-12-31', updated: '2026-08-30' },
+      { id: 22, channel: '产研院门户', report: '可行性研究报告', price: 198, start: '2026-09-25', end: '2027-12-31', updated: '2026-09-25' }
+    ];
+    var priceSeq = 100;
+    var REPORT_TYPES = ['企业全景报告', '可行性研究报告', '项目立项报告', '供应链分析报告'];
     var PRICE_CHANNELS = ['慧招网', '产业通', '招商云', '企联港', '供应链服务网', '园区智服平台', '投促助手', '产研院门户'];
-    var editingReport = null;
-    var editingIndex = null; // null=新增模式；数字=单行修改模式
+    var editingPriceId = null;                    // null=新增模式；数字=单条修改模式
+    var priceSort = { key: '', dir: '' };          // key = start / end / updated
 
     function todayStr() {
       var d = new Date(), p = function (n) { return (n < 10 ? '0' : '') + n; };
       return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
     }
-    // 报告价格：常态价 + 特殊时段数量 + 最近更新
-    function renderReportPrices() {
-      var html = '';
-      REPORT_ORDER.forEach(function (r) {
-        var cfg = priceConfig[r];
-        var last = '';
-        cfg.periods.forEach(function (p) { if (p.updated && p.updated > last) last = p.updated; });
-        last = last || '—';
-        html += '<tr><td>' + r + '</td><td>' + cfg.desc + '</td><td class="num r">¥' + cfg.base + '</td>' +
-          '<td>' + (cfg.periods.length ? cfg.periods.length + ' 个渠道时段' : '—') + '</td>' +
-          '<td class="num">' + last + '</td>' +
-          '<td><span class="link" onclick="openBasePriceModal(\'' + r + '\')">常态价格设置</span>' +
-          '<span style="color:#e0e0e0;margin:0 6px;">|</span>' +
-          '<span class="link" onclick="openSpecialPriceModal(\'' + r + '\')">特殊价格设置</span></td></tr>';
-      });
-      var body = document.getElementById('reportPriceBody');
-      if (body) body.innerHTML = html;
+    function priceStatus(p) {
+      var today = todayStr();
+      return today < p.start ? '未生效' : (!p.end || today <= p.end ? '生效中' : '已过期');  // 长期不会过期
     }
-    // 特殊价格明细：结果展示；所有状态均可修改/删除，已开始执行的操作前需确认（影响已统计收入）
-    // 排序状态：key = start / end / updated，dir = asc / desc，空表示初始（按报告顺序）
-    var specialPriceSort = { key: '', dir: '' };
-    function renderSpecialPrices() {
-      var today = todayStr(), list = [];
-      REPORT_ORDER.forEach(function (r) {
-        priceConfig[r].periods.forEach(function (p, idx) {
-          list.push({ report: r, idx: idx, p: p, status: today < p.start ? '未生效' : (today > p.end ? '已过期' : '生效中') });
-        });
-      });
-      var k = specialPriceSort.key, dir = specialPriceSort.dir === 'asc' ? 1 : -1;
+    function findPrice(id) {
+      for (var i = 0; i < priceList.length; i++) { if (priceList[i].id === id) return priceList[i]; }
+      return null;
+    }
+    // 价格表渲染：按当前排序输出，行携带渠道与状态供筛选
+    function renderPrices() {
+      var list = priceList.slice();
+      var k = priceSort.key, dir = priceSort.dir === 'asc' ? 1 : -1;
       if (k) {
         list.sort(function (a, b) {
-          var va = a.p[k] || '', vb = b.p[k] || '';
+          var va = a[k] || '', vb = b[k] || '';
           if (!va && !vb) return 0;
           if (!va) return 1;    // 空值恒排最后（正序倒序一致）
           if (!vb) return -1;
@@ -1347,82 +1311,61 @@
         });
       }
       var html = '';
-      list.forEach(function (item) {
-        var r = item.report, idx = item.idx, p = item.p, st = item.status;
+      list.forEach(function (p, seq) {
+        var st = priceStatus(p);
         var statusHtml = '<span class="tag ' + (st === '未生效' ? 'tag-blue' : (st === '已过期' ? 'tag-gray' : 'tag-orange')) + '">' + st + '</span>';
-        var ops = '<span class="link" onclick="editSpecialPeriod(\'' + r + '\',' + idx + ')">修改</span>' +
+        var ops = '<span class="link" onclick="editPrice(' + p.id + ')">修改</span>' +
           '<span style="color:#e0e0e0;margin:0 6px;">|</span>' +
-          '<span class="link" onclick="deleteSpecialPeriod(\'' + r + '\',' + idx + ')">删除</span>';
+          '<span class="link" onclick="deletePrice(' + p.id + ')">删除</span>';
         html += '<tr data-channel="' + p.channel + '" data-status="' + st + '">' +
-          '<td>' + p.channel + '</td><td>' + r + '</td>' +
+          '<td class="c">' + (seq + 1) + '</td>' +
+          '<td>' + p.channel + '</td><td>' + p.report + '</td>' +
           '<td class="num r">¥' + p.price + '</td>' +
-          '<td class="num">' + p.start + '</td><td class="num">' + p.end + '</td>' +
+          '<td class="num">' + p.start + '</td><td' + (p.end ? ' class="num"' : '') + '>' + (p.end || '长期') + '</td>' +
           '<td>' + statusHtml + '</td><td class="num">' + (p.updated || '—') + '</td>' +
           '<td>' + ops + '</td></tr>';
       });
-      var body = document.getElementById('specialPriceBody');
-      if (body) body.innerHTML = html || '<tr data-empty="1"><td colspan="8" style="text-align:center;color:#999;">暂无特殊时间段价格</td></tr>';
+      var body = document.getElementById('priceBody');
+      if (body) body.innerHTML = html || '<tr data-empty="1"><td colspan="9" style="text-align:center;color:#999;">暂无渠道价格配置</td></tr>';
+      var cnt = document.getElementById('priceCount');
+      if (cnt) cnt.textContent = '共 ' + priceList.length + ' 条';
     }
 
-    // ============ 常态价格设置 ============
-    function openBasePriceModal(report) {
-      document.getElementById('basePriceTitle').textContent = report;
-      document.getElementById('basePriceReport').textContent = report;
-      document.getElementById('basePriceInput').value = priceConfig[report] ? priceConfig[report].base : '';
-      document.getElementById('basePriceModal').classList.add('show');
-    }
-    function closeBasePriceModal() {
-      document.getElementById('basePriceModal').classList.remove('show');
-    }
-    function saveBasePrice() {
-      var report = document.getElementById('basePriceReport').textContent;
-      var base = parseFloat(document.getElementById('basePriceInput').value);
-      if (!(base > 0)) { showToast('请输入有效的常态价格'); return; }
-      if (!priceConfig[report]) priceConfig[report] = { base: base, desc: '', periods: [] };
-      priceConfig[report].base = base;
-      renderReportPrices();
-      closeBasePriceModal();
-      showToast('常态价格已保存：' + report + ' ¥' + base);
-    }
-
-    // ============ 特殊价格设置 ============
-    // 新增模式：不反显已有配置，仅添加新的渠道时段；与已有时段的重叠冲突在保存时校验提示
-    function openSpecialPriceModal(report) {
-      editingReport = report;
-      editingIndex = null;
-      document.getElementById('priceModalTitle').textContent = report;
-      document.getElementById('priceReportName').textContent = report;
+    // ============ 新增 / 修改价格配置 ============
+    // 新增：不反显已有配置，可一次添加多条；修改：单条反显，已开始执行先确认收入影响
+    function openPriceModal() {
+      editingPriceId = null;
+      document.getElementById('priceModalTitle').textContent = '新增价格配置';
       document.getElementById('periodList').innerHTML = '';
       setPriceModalWarn('');
       addPeriodRow();
       document.getElementById('priceModal').classList.add('show');
     }
-    // 单行修改：仅反显该行；已开始执行的时段先确认收入影响，弹窗内常驻警示
-    function editSpecialPeriod(report, idx) {
-      var p = priceConfig[report].periods[idx];
+    function editPrice(id) {
+      var p = findPrice(id);
+      if (!p) return;
       var started = todayStr() >= p.start;
-      if (started && !window.confirm('该特殊价格已开始执行，修改将影响已统计的渠道收入金额，确认继续修改？')) return;
-      editingReport = report;
-      editingIndex = idx;
-      document.getElementById('priceModalTitle').textContent = report;
-      document.getElementById('priceReportName').textContent = report;
+      if (started && !window.confirm('该价格已开始执行，修改将影响已统计的渠道收入金额，确认继续修改？')) return;
+      editingPriceId = id;
+      document.getElementById('priceModalTitle').textContent = '修改价格配置';
       document.getElementById('periodList').innerHTML = '';
-      setPriceModalWarn(started ? '该时段已开始执行，修改将影响已统计的渠道收入金额。' : '');
-      addPeriodRow(p.channel, p.start, p.end, p.price);
+      setPriceModalWarn(started ? '该价格已开始执行，修改将影响已统计的渠道收入金额。' : '');
+      addPeriodRow(p.channel, p.start, p.end, p.price, p.report);
       document.getElementById('priceModal').classList.add('show');
     }
-    function deleteSpecialPeriod(report, idx) {
-      var p = priceConfig[report].periods[idx];
+    function deletePrice(id) {
+      var p = findPrice(id);
+      if (!p) return;
       var started = todayStr() >= p.start;
+      var target = '「' + p.channel + ' · ' + p.report + '」' + p.start + ' ~ ' + (p.end || '长期');
       var msg = started
-        ? '该特殊价格已开始执行，删除将影响已统计的渠道收入金额（「' + p.channel + '」将恢复按常态价格执行），确认删除？'
-        : '删除后「' + p.channel + '」在该时间段将恢复按常态价格执行，确认删除？';
+        ? '该价格已开始执行，删除将影响已统计的渠道收入金额（' + target + ' 将无价格配置），确认删除？'
+        : '删除后 ' + target + ' 将无价格配置，确认删除？';
       if (!window.confirm(msg)) return;
-      priceConfig[report].periods.splice(idx, 1);
-      renderReportPrices();
-      renderSpecialPrices();
+      priceList = priceList.filter(function (x) { return x.id !== id; });
+      renderPrices();
       filterPrices();
-      showToast('已删除「' + p.channel + '」的特殊时间段价格，恢复按常态价格执行');
+      showToast('已删除 1 条价格配置');
     }
     function setPriceModalWarn(msg) {
       var bar = document.getElementById('priceModalWarn');
@@ -1433,74 +1376,90 @@
     function closePriceModal() {
       document.getElementById('priceModal').classList.remove('show');
     }
-    function addPeriodRow(channel, start, end, price, updated) {
+    function addPeriodRow(channel, start, end, price, report) {
       var list = document.getElementById('periodList');
       var row = document.createElement('div');
       row.className = 'period-row';
-      row.dataset.updated = updated || '';
-      var options = PRICE_CHANNELS.map(function (c) {
+      var chOpts = PRICE_CHANNELS.map(function (c) {
         return '<option' + (c === channel ? ' selected' : '') + '>' + c + '</option>';
       }).join('');
+      var rpOpts = REPORT_TYPES.map(function (r) {
+        return '<option' + (r === report ? ' selected' : '') + '>' + r + '</option>';
+      }).join('');
       row.innerHTML =
-        '<select class="select p-channel" style="width:130px;">' + options + '</select>' +
-        '<input class="input p-start" type="date" value="' + (start || '') + '" style="width:145px;">' +
+        '<select class="select p-channel" style="width:118px;">' + chOpts + '</select>' +
+        '<select class="select p-report" style="width:146px;">' + rpOpts + '</select>' +
+        '<input class="input p-start" type="date" value="' + (start || '') + '" style="width:136px;">' +
         '<span class="label-txt">至</span>' +
-        '<input class="input p-end" type="date" value="' + (end || '') + '" style="width:145px;">' +
-        '<input class="input p-price" type="number" placeholder="价格（元）" value="' + (price === undefined ? '' : price) + '" style="width:100px;">' +
+        '<input class="input p-end" type="date" value="' + (end || '') + '"' + (end === '' ? ' disabled' : '') + ' style="width:136px;">' +
+        '<label style="font-size:13px;color:#666;white-space:nowrap;cursor:pointer;display:inline-flex;align-items:center;gap:4px;">' +
+          '<input type="checkbox" class="p-forever"' + (end === '' ? ' checked' : '') + ' onchange="toggleForever(this)">长期</label>' +
+        '<input class="input p-price" type="number" placeholder="价格（元）" value="' + (price === undefined ? '' : price) + '" style="width:94px;">' +
         '<span class="btn-text danger" onclick="this.parentNode.remove()">删除</span>';
       list.appendChild(row);
     }
+    // 勾选「长期」后不设结束时间，清空并禁用结束日期
+    function toggleForever(cb) {
+      var row = cb.closest('.period-row');
+      var e = row.querySelector('.p-end');
+      e.disabled = cb.checked;
+      if (cb.checked) e.value = '';
+    }
     function savePriceSetting() {
-      var report = editingReport;
       var rows = document.querySelectorAll('#periodList .period-row');
       var list = [], invalid = false;
       Array.prototype.forEach.call(rows, function (row) {
         var c = row.querySelector('.p-channel').value;
+        var r = row.querySelector('.p-report').value;
         var s = row.querySelector('.p-start').value;
-        var e = row.querySelector('.p-end').value;
+        var forever = row.querySelector('.p-forever').checked;
+        var e = forever ? '' : row.querySelector('.p-end').value;
         var p = parseFloat(row.querySelector('.p-price').value);
-        if (!s || !e || !(p > 0) || s > e) { invalid = true; return; }
-        list.push({ channel: c, start: s, end: e, price: p });
+        if (!s || (!forever && !e) || !(p > 0) || (!forever && s > e)) { invalid = true; return; }
+        list.push({ channel: c, report: r, start: s, end: e, price: p });
       });
-      if (invalid) { showToast('请完整填写渠道、起止日期与价格，且开始日期不得晚于结束日期'); return; }
-      if (!list.length) { showToast('请至少添加一条渠道时段'); return; }
-      // 行内自身冲突（新增模式提交多行时）
+      if (invalid) { showToast('请完整填写渠道、报告、开始日期与价格；未勾选长期时还需填写结束日期，且开始日期不得晚于结束日期'); return; }
+      if (!list.length) { showToast('请至少添加一条价格记录'); return; }
+      var endV = function (x) { return x || '9999-12-31'; };  // 长期视为无上限
+      // 本次提交内部冲突
       for (var i = 0; i < list.length; i++) {
         for (var j = i + 1; j < list.length; j++) {
-          if (list[i].channel === list[j].channel && list[i].start <= list[j].end && list[j].start <= list[i].end) {
-            showToast(list[i].channel + ' 存在重叠时间段（' + list[i].start + '~' + list[i].end + ' 与 ' + list[j].start + '~' + list[j].end + '），请调整后再保存');
+          if (list[i].channel === list[j].channel && list[i].report === list[j].report &&
+              list[i].start <= endV(list[j].end) && list[j].start <= endV(list[i].end)) {
+            showToast(list[i].channel + ' · ' + list[i].report + ' 存在重叠时间段（' + list[i].start + '~' + (list[i].end || '长期') + ' 与 ' + list[j].start + '~' + (list[j].end || '长期') + '），请调整后再保存');
             return;
           }
         }
       }
-      // 与已有配置的冲突（单行修改时排除自身）
-      var existing = priceConfig[report] ? priceConfig[report].periods : [];
+      // 与已有配置的冲突（修改时排除自身）
+      var others = priceList.filter(function (x) { return x.id !== editingPriceId; });
       for (var k = 0; k < list.length; k++) {
-        for (var m = 0; m < existing.length; m++) {
-          if (editingIndex !== null && m === editingIndex) continue;
-          var o = existing[m];
-          if (list[k].channel === o.channel && list[k].start <= o.end && o.start <= list[k].end) {
-            showToast(list[k].channel + ' 的新时段（' + list[k].start + '~' + list[k].end + '）与已有时段（' + o.start + '~' + o.end + '）重叠，请调整后再保存');
+        for (var m = 0; m < others.length; m++) {
+          var o = others[m];
+          if (list[k].channel === o.channel && list[k].report === o.report &&
+              list[k].start <= endV(o.end) && o.start <= endV(list[k].end)) {
+            showToast(list[k].channel + ' · ' + list[k].report + ' 的新时段（' + list[k].start + '~' + (list[k].end || '长期') + '）与已有时段（' + o.start + '~' + (o.end || '长期') + '）重叠，请调整后再保存');
             return;
           }
         }
       }
       var today = todayStr();
-      if (editingIndex !== null) {
-        // 单行修改：替换该行，更新时间记为今天
-        list[0].updated = today;
-        priceConfig[report].periods.splice(editingIndex, 1, list[0]);
+      if (editingPriceId !== null) {
+        for (var n = 0; n < priceList.length; n++) {
+          if (priceList[n].id === editingPriceId) {
+            list[0].id = editingPriceId;
+            list[0].updated = today;
+            priceList[n] = list[0];
+            break;
+          }
+        }
       } else {
-        // 新增模式：追加，不触碰已有配置
-        list.forEach(function (n) { n.updated = today; });
-        if (!priceConfig[report]) priceConfig[report] = { base: 0, desc: '', periods: [] };
-        priceConfig[report].periods = priceConfig[report].periods.concat(list);
+        list.forEach(function (item) { item.id = ++priceSeq; item.updated = today; priceList.push(item); });
       }
-      renderReportPrices();
-      renderSpecialPrices();
+      renderPrices();
       filterPrices();
       closePriceModal();
-      showToast(editingIndex !== null ? '特殊价格已修改并生效于原时间段' : '已新增 ' + list.length + ' 条特殊时间段价格');
+      showToast(editingPriceId !== null ? '价格配置已修改' : '已新增 ' + list.length + ' 条价格配置');
     }
 
     // ============ 趋势图时间快捷选择 ============
@@ -1543,16 +1502,46 @@
       rows.forEach(function (r) { tbody.appendChild(r); });
     }
 
-    // ============ 特殊价格明细排序（开始时间 / 结束时间 / 更新时间） ============
-    function toggleSpecialSort(th, key) {
+    // ============ 用户使用记录导出 ============
+    // 按当前筛选与排序结果导出 CSV（首行表头，末列「操作」不导出），Excel 可直接打开
+    function exportUsageRecords() {
+      var table = document.getElementById('usageTable');
+      if (!table) return;
+      var heads = Array.prototype.slice.call(table.querySelectorAll('thead th'))
+        .map(function (th) { return th.textContent.replace(/[⇅↑↓]/g, '').trim(); });
+      heads = heads.slice(0, heads.length - 1);
+      var quote = function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; };
+      var lines = [heads.map(quote).join(',')], count = 0;
+      Array.prototype.forEach.call(table.tBodies[0].rows, function (tr) {
+        if (tr.style.display === 'none') return;   // 跳过被筛选隐藏的行
+        var vals = Array.prototype.slice.call(tr.cells, 0, tr.cells.length - 1)
+          .map(function (td) { return td.textContent.replace(/\s+/g, ' ').trim(); });
+        lines.push(vals.map(quote).join(','));
+        count++;
+      });
+      if (!count) { showToast('当前筛选条件下没有可导出的记录'); return; }
+      var blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = '渠道用户使用记录_' + todayStr() + '.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      showToast('已导出 ' + count + ' 条使用记录');
+    }
+
+    // ============ 价格表排序（开始时间 / 结束时间 / 更新时间） ============
+    function togglePriceSort(th, key) {
       var state = th.dataset.sort || 'none';
       var next = state === 'none' ? 'asc' : (state === 'asc' ? 'desc' : 'none');
       // 同一行其他表头恢复初始
       th.parentNode.querySelectorAll('th.sortable').forEach(function (t) { t.dataset.sort = 'none'; });
       th.dataset.sort = next;
-      specialPriceSort.key = next === 'none' ? '' : key;
-      specialPriceSort.dir = next === 'none' ? '' : next;
-      renderSpecialPrices();
+      priceSort.key = next === 'none' ? '' : key;
+      priceSort.dir = next === 'none' ? '' : next;
+      renderPrices();
       filterPrices();   // 重渲染后保持渠道 / 状态筛选
     }
 
@@ -1569,8 +1558,7 @@
     // 初始绘制趋势图
     drawTrendChart();
     // 初始渲染价格表
-    renderReportPrices();
-    renderSpecialPrices();
+    renderPrices();
   </script>
 </body>
 </html>
