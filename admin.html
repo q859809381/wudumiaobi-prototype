@@ -401,6 +401,21 @@
     .rd-field-value { margin-top: 6px; font-size: 13px; color: #333; line-height: 1.8; padding-left: 11px; }
     .rd-preview { border-top: 1px solid #f0f0f0; padding-top: 12px; font-size: 13px; color: #666; }
     /* 专业版四步内容 */
+    .rd-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+    .rd-tab {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; color: #555;
+      border: 1px solid #e0e0e0; border-radius: 16px;
+      padding: 5px 14px 5px 6px; cursor: pointer;
+    }
+    .rd-tab i {
+      font-style: normal; width: 18px; height: 18px; border-radius: 50%;
+      background: #e8e8e8; color: #666; font-size: 12px; font-weight: 600;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .rd-tab:hover { border-color: #1677ff; color: #1677ff; }
+    .rd-tab.on { background: #1677ff; border-color: #1677ff; color: #fff; }
+    .rd-tab.on i { background: #fff; color: #1677ff; }
     .rd-step { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; margin: 18px 0 8px; }
     .rd-step .no { background: #1677ff; color: #fff; font-size: 12px; font-weight: 500; border-radius: 4px; padding: 2px 8px; }
     .rd-confirm-row { display: flex; font-size: 13px; line-height: 1.9; padding-left: 11px; }
@@ -1352,9 +1367,16 @@
       html += '<div class="rd-section">填写信息预览</div>';
       var hasPreview = !d.proSteps;   // 专业版弹窗不展示模板预览行
       if (d.proSteps) {
-        // 专业版四步：基础信息录入及确认 → 知识库引用及设置 → 信息确认与设定 → 目录生成及管理
+        // 专业版四步以页签展示：基础信息录入及确认 → 知识库引用及设置 → 信息确认与设定 → 目录生成及管理
         var s = d.proSteps;
-        html += '<div class="rd-step"><span class="no">第一步</span>基础信息录入及确认</div>';
+        var tabNames = ['基础信息录入及确认', '知识库引用及设置', '信息确认与设定', '目录生成及管理'];
+        html += '<div class="rd-tabs">';
+        tabNames.forEach(function (t, i) {
+          html += '<span class="rd-tab' + (i === 0 ? ' on' : '') + '" onclick="switchProTab(this,' + i + ')"><i>' + (i + 1) + '</i>' + t + '</span>';
+        });
+        html += '</div>';
+        // 第一步
+        html += '<div class="rd-pane">';
         s.step1.forEach(function (kv) {
           if (kv[0] === '需求描述') {
             html += '<div class="rd-confirm-row"><span class="k">需求描述</span></div>' +
@@ -1363,7 +1385,9 @@
             html += '<div class="rd-confirm-row"><span class="k">' + kv[0] + '</span><span class="v">' + kv[1] + '</span></div>';
           }
         });
-        html += '<div class="rd-step"><span class="no">第二步</span>知识库引用及设置</div>' +
+        html += '</div>';
+        // 第二步
+        html += '<div class="rd-pane" style="display:none;">' +
           '<div class="rd-kb-meta">引用范围：' + s.step2.scope + '，已选 ' + s.step2.total + ' 项</div>';
         s.step2.groups.forEach(function (g) {
           html += '<div class="rd-group">' + g.name + '</div>';
@@ -1372,7 +1396,9 @@
               '<span class="link" style="margin-left:16px;" onclick="previewKbFile(\'' + f[0] + '\',\'' + f[1] + '\',\'' + f[2] + '\')">预览</span></div>';
           });
         });
-        html += '<div class="rd-step"><span class="no">第三步</span>信息确认与设定</div>';
+        html += '</div>';
+        // 第三步
+        html += '<div class="rd-pane" style="display:none;">';
         s.step3.sections.forEach(function (sec) {
           if (sec.head) html += '<div class="rd-sec">' + sec.head + '</div>';
           html += '<div class="rd-box"><div class="rd-box-title">' + sec.box + '</div>';
@@ -1381,14 +1407,16 @@
           });
           html += '</div>';
         });
-        html += '<div class="rd-step"><span class="no">第四步</span>目录生成及管理</div>' +
-          '<div class="rd-version">⚙ 系统生成大纲</div>';
+        html += '</div>';
+        // 第四步
+        html += '<div class="rd-pane" style="display:none;"><div class="rd-version">⚙ 系统生成大纲</div>';
         s.step4.chapters.forEach(function (c) {
           html += '<div class="rd-ch">' + c.title + '</div>';
           c.nodes.forEach(function (n) {
             html += '<div class="rd-node"><div class="t">' + n[0] + '</div><div class="desc">' + n[1] + '</div></div>';
           });
         });
+        html += '</div>';
       } else {
         d.fields.forEach(function (f) {
           html += '<div class="rd-field">' +
@@ -1409,6 +1437,15 @@
       var type = name.split('.').pop().toLowerCase();
       window.open('file-preview.html?name=' + encodeURIComponent(name) +
         '&size=' + encodeURIComponent(size) + '&time=' + encodeURIComponent(time) + '&type=' + type);
+    }
+    // 专业版四步页签切换
+    function switchProTab(tab, idx) {
+      var body = document.getElementById('recordDetailBody');
+      tab.parentNode.querySelectorAll('.rd-tab').forEach(function (t) { t.classList.remove('on'); });
+      tab.classList.add('on');
+      body.querySelectorAll('.rd-pane').forEach(function (p, i) {
+        p.style.display = (i === idx) ? '' : 'none';
+      });
     }
 
     // ============ 用户使用记录弹窗 → 记录详情 ============
