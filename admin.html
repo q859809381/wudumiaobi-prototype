@@ -400,6 +400,26 @@
     .rd-field-label small { color: #999; font-weight: 400; margin-left: 6px; font-size: 12px; }
     .rd-field-value { margin-top: 6px; font-size: 13px; color: #333; line-height: 1.8; padding-left: 11px; }
     .rd-preview { border-top: 1px solid #f0f0f0; padding-top: 12px; font-size: 13px; color: #666; }
+    /* 专业版四步内容 */
+    .rd-step { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; margin: 18px 0 8px; }
+    .rd-step .no { background: #1677ff; color: #fff; font-size: 12px; font-weight: 500; border-radius: 4px; padding: 2px 8px; }
+    .rd-confirm-row { display: flex; font-size: 13px; line-height: 1.9; padding-left: 11px; }
+    .rd-confirm-row .k { color: #999; width: 150px; flex-shrink: 0; }
+    .rd-confirm-row .v { color: #333; flex: 1; }
+    .rd-kb-meta { font-size: 12px; color: #999; margin-bottom: 8px; padding-left: 11px; }
+    .rd-group { font-size: 13px; font-weight: 600; color: #333; background: #f7f8fa; border-radius: 4px; padding: 6px 12px; margin-top: 6px; }
+    .rd-file-row { display: flex; align-items: center; font-size: 13px; color: #333; padding: 7px 12px 7px 20px; border-bottom: 1px solid #f5f5f5; }
+    .rd-file-row .n { flex: 1; min-width: 0; }
+    .rd-file-row .m { color: #999; font-size: 12px; }
+    .rd-tip { font-size: 12px; color: #555; background: #f0f5ff; border-radius: 4px; padding: 8px 12px; margin-bottom: 10px; line-height: 1.7; }
+    .rd-sec { font-size: 13px; font-weight: 600; color: #333; border-left: 3px solid #1677ff; padding-left: 8px; margin: 12px 0 8px; }
+    .rd-box { border: 1px solid #ececec; border-radius: 6px; padding: 10px 12px 4px; margin-bottom: 10px; }
+    .rd-box-title { font-size: 13px; font-weight: 600; color: #333; margin-bottom: 4px; }
+    .rd-version { display: inline-block; font-size: 13px; color: #333; background: #f7f8fa; border-radius: 4px; padding: 6px 12px; margin-bottom: 8px; }
+    .rd-ch { font-size: 13px; font-weight: 600; color: #333; background: #f7f8fa; border-radius: 4px; padding: 6px 12px; margin-top: 8px; }
+    .rd-node { padding: 4px 12px 4px 24px; }
+    .rd-node .t { font-size: 13px; color: #333; line-height: 1.6; }
+    .rd-node .desc { font-size: 12px; color: #999; margin-top: 1px; }
 
     /* ============ Toast ============ */
     .toast {
@@ -545,7 +565,7 @@
               <span class="label-txt">所属渠道</span>
               <select class="select"><option>全部渠道</option><option>慧招网</option><option>产业通</option><option>招商云</option><option>企联港</option><option>供应链服务网</option></select>
               <span class="label-txt">报告类型</span>
-              <select class="select"><option>全部类型</option><option>企业全景报告</option><option>可行性研究报告</option><option>项目立项报告</option><option>供应链分析报告</option></select>
+              <select class="select"><option>全部类型</option><option>可行性研究报告专业版</option><option>企业全景报告</option><option>可行性研究报告</option><option>项目立项报告</option><option>供应链分析报告</option></select>
               <span class="label-txt">状态</span>
               <select class="select"><option>全部状态</option><option>成功</option><option>失败</option><option>队列中</option><option>运行中</option></select>
               <button class="btn" style="margin-left:6px;" onclick="exportUsageRecords()">导出记录</button>
@@ -564,8 +584,8 @@
                 </tr>
               </thead>
               <tbody>
-                <tr><td class="c">1</td><td>hongyuan365</td><td class="num">USR-2001</td><td class="num">185****3659</td><td>慧招网</td><td>企业全景报告</td><td>竹材智能加工产业分析</td><td class="num r">¥58</td><td class="num">2026-10-16 11:24:08</td><td class="num">2026-10-16 11:24:54</td><td class="num">00:00:46</td><td><span class="tag tag-green">成功</span></td><td><span class="link" onclick="openRecordDetail(0)">记录详情</span><span style="color:#e0e0e0;margin:0 6px;">|</span><span class="link" onclick="showToast('该功能为原型演示')">下载报告</span></td></tr>
-                <tr><td class="c">2</td><td>qihang2018</td><td class="num">USR-2002</td><td class="num">139****2217</td><td>产业通</td><td>可行性研究报告</td><td>年产8万吨乳酸酯项目可行性研究</td><td class="num r">¥198</td><td class="num">2026-10-16 10:47:33</td><td class="num">2026-10-16 10:50:26</td><td class="num">00:02:53</td><td><span class="tag tag-green">成功</span></td><td><span class="link" onclick="openRecordDetail(1)">记录详情</span><span style="color:#e0e0e0;margin:0 6px;">|</span><span class="link" onclick="showToast('该功能为原型演示')">下载报告</span></td></tr>
+                <tr><td class="c">1</td><td>hongyuan365</td><td class="num">USR-2001</td><td class="num">185****3659</td><td>慧招网</td><td>可行性研究报告专业版</td><td>竹材智能加工产业分析</td><td class="num r">¥58</td><td class="num">2026-10-16 11:24:08</td><td class="num">2026-10-16 11:24:54</td><td class="num">00:00:46</td><td><span class="tag tag-green">成功</span></td><td><span class="link" onclick="openRecordDetail(0)">记录详情</span><span style="color:#e0e0e0;margin:0 6px;">|</span><span class="link" onclick="showToast('该功能为原型演示')">下载报告</span></td></tr>
+                <tr><td class="c">2</td><td>qihang2018</td><td class="num">USR-2002</td><td class="num">139****2217</td><td>产业通</td><td>可行性研究报告专业版</td><td>年产8万吨乳酸酯项目可行性研究</td><td class="num r">¥198</td><td class="num">2026-10-16 10:47:33</td><td class="num">2026-10-16 10:50:26</td><td class="num">00:02:53</td><td><span class="tag tag-green">成功</span></td><td><span class="link" onclick="openRecordDetail(1)">记录详情</span><span style="color:#e0e0e0;margin:0 6px;">|</span><span class="link" onclick="showToast('该功能为原型演示')">下载报告</span></td></tr>
                 <tr><td class="c">3</td><td>hengxin8842</td><td class="num">USR-2003</td><td class="num">136****8842</td><td>慧招网</td><td>项目立项报告</td><td>高端装备制造基地项目立项建议</td><td class="num r">—</td><td class="num">2026-10-16 09:32:51</td><td class="num">—</td><td class="num">—</td><td><span class="tag tag-orange">队列中</span></td><td><span class="link" onclick="openRecordDetail(2)">记录详情</span></td></tr>
                 <tr><td class="c">4</td><td>znjg0907</td><td class="num">USR-2004</td><td class="num">158****9035</td><td>招商云</td><td>供应链分析报告</td><td>华中建材供应链效率评估</td><td class="num r">¥298</td><td class="num">2026-10-16 09:15:20</td><td class="num">2026-10-16 09:17:18</td><td class="num">00:01:58</td><td><span class="tag tag-green">成功</span></td><td><span class="link" onclick="openRecordDetail(3)">记录详情</span><span style="color:#e0e0e0;margin:0 6px;">|</span><span class="link" onclick="showToast('该功能为原型演示')">下载报告</span></td></tr>
                 <tr><td class="c">5</td><td>xinda5566</td><td class="num">USR-2005</td><td class="num">187****5566</td><td>企联港</td><td>企业全景报告</td><td>鑫达电子企业全景画像</td><td class="num r">¥58</td><td class="num">2026-10-15 18:05:12</td><td class="num">2026-10-15 18:06:04</td><td class="num">00:00:52</td><td><span class="tag tag-green">成功</span></td><td><span class="link" onclick="openRecordDetail(4)">记录详情</span><span style="color:#e0e0e0;margin:0 6px;">|</span><span class="link" onclick="showToast('该功能为原型演示')">下载报告</span></td></tr>
@@ -1064,28 +1084,178 @@
     var HINT_PROGRESS = '项目一般要求为在建项目，进度不得为0，上限各省要求可能不同，请咨询当地主管部门';
 
     var recordDetailData = [
-      { user: 'hongyuan365', phone: '185****3659', channel: '慧招网', reportType: '企业全景报告', status: '成功',
+      { user: 'hongyuan365', phone: '185****3659', channel: '慧招网', reportType: '可行性研究报告专业版', status: '成功',
         reportName: '竹材智能加工产业分析', startTime: '2026-10-16 11:24:08', endTime: '2026-10-16 11:24:54', duration: '00:00:46',
-        templateName: '企业全景报告页面下载模板.docx',
-        fields: [
-          ['企业名称', HINT_COMPANY, '宏远机械制造有限公司'],
-          ['所属行业', '企业所处产业链环节，例如“上游原材料/中游制造/下游应用”', '智能装备制造 · 中游精密铸造环节'],
-          ['企业规模', '注册资本、员工人数、年产值等', '注册资本5,000万元，员工380人，年产值约2.6亿元'],
-          ['分析需求', HINT_DEMAND, '企业经营稳定性、供应链配套能力与区域竞争格局']
-        ]},
-      { user: 'qihang2018', phone: '139****2217', channel: '产业通', reportType: '可行性研究报告', status: '成功',
+        templateName: '可行性研究报告页面下载模板.docx',
+        proSteps: {
+          step1: [
+            ['企业名称', '宏远机械制造有限公司'],
+            ['项目名称', '竹材智能加工生产线建设项目'],
+            ['项目建设内容及规模', '总建筑面积24,000㎡，建设竹材智能加工车间2座、仓储中心1座，采购智能加工产线8条，达产后形成年产5万吨竹材精深加工产品的能力。'],
+            ['项目建设地点', '浙江省宁波市'],
+            ['建设开始日期', '2026/03/01'],
+            ['建设结束日期', '2027/12/31'],
+            ['高新技术企业', '否'],
+            ['项目总投资（万元）', '12,000'],
+            ['需求描述', '报告主旨：用于项目立项论证与投资决策参考，各部分相互印证论证必要性、可行性、方案及主要风险。写作重点：围绕竹材智能加工生产线建设与运营展开，重点论证市场前景、产品方案、技术路线、投资估算与实施进度，说明项目建成后如何支撑经营目标。主要内容：结合竹材加工行业数据与政策文件，论证建设必要性、市场需求与产能配置，明确收入与成本测算、财务评价参数和风险应对措施。工程量要详实，涵盖场地、建筑结构及给排水、供配电、消防等配套工程，明确工程规模与实施进度。避免只作概念介绍，不虚构企业资质与客户案例。']
+          ],
+          step2: {
+            scope: '可行性报告文件或外部文件',
+            total: 4,
+            groups: [
+              { name: '📁 企业数据（已选 2 个文件）', files: [
+                ['企业数据汇总_2025Q2.xlsx', '157.78KB', '2025-07-22 16:10'],
+                ['财务模型_JRR计算模板_v3.xlsx', '890.54KB', '2025-07-19 11:08']
+              ]},
+              { name: '📁 政策文件（已选 1 个文件）', files: [
+                ['竹产业扶持政策汇编_2025.pdf', '5.42M', '2025-07-21 09:35']
+              ]},
+              { name: '📁 项目独立文件（已选 1 个）', files: [
+                ['公司资质与认证材料.pdf', '2.85M', '2025-07-18 15:40', 1]
+              ]}
+            ]
+          },
+          step3: {
+            sections: [
+              { head: '一、项目概况', box: '项目基础信息', rows: [
+                ['项目总投资（万元）', '12,000.00'],
+                ['产品方向', '竹材智能加工装备与制品'],
+                ['建设性质', '新建'],
+                ['运营期（年）', '10'],
+                ['建设期（月）', '22'],
+                ['建设面积（㎡）', '24,000.00'],
+                ['用地面积（亩）', '0'],
+                ['新增就业岗位（人）', '380']
+              ]},
+              { head: '二、资源测算', box: '收入与成本', rows: [
+                ['产品/服务名称', '竹材精深加工制品'],
+                ['计价单位', '吨'],
+                ['单价（万元/计价单位）', '0.35'],
+                ['设计生产量', '50,000 吨/年'],
+                ['销售负荷率', '65 %'],
+                ['直接成本占比', '55 %'],
+                ['预计投产计划', '第一年投产达产率30%，第二年投产达产率70%，第三年投产达产率100%']
+              ]},
+              { head: '', box: '财务评价参数', rows: [
+                ['基准收益率', '8.00 %'],
+                ['行业基准', '制造业'],
+                ['预测运营持续性（年）', '10']
+              ]}
+            ]
+          },
+          step4: {
+            op: '操作说明：只有勾选的节参与正文生成，点击章节/小节可在右侧编辑标题和写作方向。',
+            version: '系统生成大纲 · 版本-v1',
+            chapters: [
+              { title: '第一章 概述', nodes: [
+                ['1.1 项目概况', '围绕项目概况展开，结合引用资料梳理关键要点并补充数据支撑，生成本节正文内容。'],
+                ['1.2 主要技术经济指标', '围绕主要技术经济指标展开，结合引用资料梳理关键要点并补充数据支撑，生成本节正文内容。']
+              ]},
+              { title: '第二章 项目建设背景及必要性', nodes: [
+                ['2.1 政策背景', '围绕政策背景展开，结合引用资料梳理关键要点并补充数据支撑，生成本节正文内容。'],
+                ['2.2 建设必要性', '围绕建设必要性展开，结合引用资料梳理关键要点并补充数据支撑，生成本节正文内容。']
+              ]},
+              { title: '第三章 市场需求分析与产出方案', nodes: [
+                ['3.1 市场需求分析', '围绕市场需求分析展开，结合引用资料梳理关键要点并补充数据支撑，生成本节正文内容。'],
+                ['3.2 产品定位与产出方案', '围绕产品定位与产出方案展开，结合引用资料梳理关键要点并补充数据支撑，生成本节正文内容。']
+              ]},
+              { title: '第四章 投资估算与财务分析', nodes: [
+                ['4.1 投资估算', '围绕投资估算展开，结合引用资料梳理关键要点并补充数据支撑，生成本节正文内容。'],
+                ['4.2 财务效益分析', '围绕财务效益分析展开，结合引用资料梳理关键要点并补充数据支撑，生成本节正文内容。']
+              ]},
+              { title: '第五章 风险分析与对策', nodes: [
+                ['5.1 主要风险识别', '围绕主要风险识别展开，结合引用资料梳理关键要点并补充数据支撑，生成本节正文内容。'],
+                ['5.2 风险应对措施', '围绕风险应对措施展开，结合引用资料梳理关键要点并补充数据支撑，生成本节正文内容。']
+              ]}
+            ]
+          }
+        }},
+      { user: 'qihang2018', phone: '139****2217', channel: '产业通', reportType: '可行性研究报告专业版', status: '成功',
         reportName: '年产8万吨乳酸酯项目可行性研究', startTime: '2026-10-16 10:47:33', endTime: '2026-10-16 10:50:26', duration: '00:02:53',
         templateName: '可行性研究报告页面下载模板.docx',
-        fields: [
-          ['企业名称', HINT_COMPANY, '启航工程咨询有限公司'],
-          ['项目名称', HINT_PROJECT, '启航咨询年产8万吨乳酸酯项目'],
-          ['项目总投资', HINT_INVEST, '项目总投资32,000万元，其中企业自筹20,000万元，银行贷款12,000万元。'],
-          ['项目建设内容、规模', HINT_BUILD, '新建乳酸酯生产车间2座、仓储中心1座，采购酯化反应釜12套、精馏塔4套，形成年产8万吨乳酸酯的生产能力。'],
-          ['需求描述', HINT_DEMAND, '本报告用于项目投资决策与融资申报。重点内容包括：1）市场需求与价格走势分析；2）工艺路线比选与技术先进性论证；3）经济效益：预计投产后年新增营收4.2亿元，投资回收期约5.8年。注意事项：需说明项目不属于“两高”项目，并附环保合规性说明。'],
-          ['项目建设起止日期', HINT_DATE, '2026年6月 — 2028年5月（共24个月）'],
-          ['项目建设地点', '', '山东省潍坊市'],
-          ['项目已实施进度', HINT_PROGRESS, '已完成场地平整与环评预审，正在进行施工图设计，计划2026年6月正式开工，目前进度约15%。']
-        ]},
+        proSteps: {
+          step1: [
+            ['企业名称', '启航工程咨询有限公司'],
+            ['项目名称', '年产8万吨乳酸酯项目'],
+            ['项目建设内容及规模', '总建筑面积28,000㎡，新建乳酸酯生产车间2座、仓储中心1座，采购酯化反应釜12套、精馏塔4套，形成年产8万吨乳酸酯的生产能力。'],
+            ['项目建设地点', '山东省潍坊市'],
+            ['建设开始日期', '2026/06/01'],
+            ['建设结束日期', '2028/05/31'],
+            ['高新技术企业', '否'],
+            ['项目总投资（万元）', '32,000'],
+            ['需求描述', '报告主旨：用于项目投资决策与融资申报，重点论证市场需求、工艺路线与经济效益。写作重点：围绕乳酸酯项目建设与运营展开，论证市场需求与价格走势、工艺路线比选与先进性、建设规模与产品方案；需说明项目不属于“两高”项目并附环保合规性专项说明。主要内容：结合行业市场数据与政策文件，明确收入与成本测算、财务评价参数及风险应对措施。工程量要详实，涵盖工艺、储运及给排水、供配电、消防等配套工程，明确实施进度。避免只作概念介绍，不虚构企业资质与客户案例。']
+          ],
+          step2: {
+            scope: '可行性报告文件或外部文件',
+            total: 4,
+            groups: [
+              { name: '📁 企业数据（已选 2 个文件）', files: [
+                ['企业数据汇总_2025Q2.xlsx', '157.78KB', '2025-07-22 16:10'],
+                ['财务模型_JRR计算模板_v3.xlsx', '890.54KB', '2025-07-19 11:08']
+              ]},
+              { name: '📁 政策文件（已选 1 个文件）', files: [
+                ['化工产业政策汇编_2025.pdf', '5.42M', '2025-07-21 09:35']
+              ]},
+              { name: '📁 项目独立文件（已选 1 个）', files: [
+                ['公司资质与认证材料.pdf', '2.85M', '2025-07-18 15:40', 1]
+              ]}
+            ]
+          },
+          step3: {
+            sections: [
+              { head: '一、项目概况', box: '项目基础信息', rows: [
+                ['项目总投资（万元）', '32,000.00'],
+                ['产品方向', '化工新材料 · 乳酸酯'],
+                ['建设性质', '新建'],
+                ['运营期（年）', '10'],
+                ['建设期（月）', '24'],
+                ['建设面积（㎡）', '28,000.00'],
+                ['用地面积（亩）', '0'],
+                ['新增就业岗位（人）', '260']
+              ]},
+              { head: '二、资源测算', box: '收入与成本', rows: [
+                ['产品/服务名称', '乳酸酯（工业级/食品级）'],
+                ['计价单位', '吨'],
+                ['单价（万元/计价单位）', '0.85'],
+                ['设计生产量', '80,000 吨/年'],
+                ['销售负荷率', '70 %'],
+                ['直接成本占比', '60 %'],
+                ['预计投产计划', '第一年投产达产率30%，第二年投产达产率70%，第三年投产达产率100%']
+              ]},
+              { head: '', box: '财务评价参数', rows: [
+                ['基准收益率', '8.00 %'],
+                ['行业基准', '化工业'],
+                ['预测运营持续性（年）', '10']
+              ]}
+            ]
+          },
+          step4: {
+            op: '操作说明：只有勾选的节参与正文生成，点击章节/小节可在右侧编辑标题和写作方向。',
+            version: '系统生成大纲 · 版本-v1',
+            chapters: [
+              { title: '第一章 概述', nodes: [
+                ['1.1 项目概况', '围绕项目概况展开，结合引用资料梳理关键要点并补充数据支撑，生成本节正文内容。'],
+                ['1.2 主要技术经济指标', '围绕主要技术经济指标展开，结合引用资料梳理关键要点并补充数据支撑，生成本节正文内容。']
+              ]},
+              { title: '第二章 项目建设背景及必要性', nodes: [
+                ['2.1 政策背景', '围绕政策背景展开，结合引用资料梳理关键要点并补充数据支撑，生成本节正文内容。'],
+                ['2.2 建设必要性', '围绕建设必要性展开，结合引用资料梳理关键要点并补充数据支撑，生成本节正文内容。']
+              ]},
+              { title: '第三章 市场需求分析与产出方案', nodes: [
+                ['3.1 市场需求分析', '围绕市场需求分析展开，结合引用资料梳理关键要点并补充数据支撑，生成本节正文内容。'],
+                ['3.2 产品定位与产出方案', '围绕产品定位与产出方案展开，结合引用资料梳理关键要点并补充数据支撑，生成本节正文内容。']
+              ]},
+              { title: '第四章 投资估算与财务分析', nodes: [
+                ['4.1 投资估算', '围绕投资估算展开，结合引用资料梳理关键要点并补充数据支撑，生成本节正文内容。'],
+                ['4.2 财务效益分析', '围绕财务效益分析展开，结合引用资料梳理关键要点并补充数据支撑，生成本节正文内容。']
+              ]},
+              { title: '第五章 风险分析与对策', nodes: [
+                ['5.1 主要风险识别', '围绕主要风险识别展开，结合引用资料梳理关键要点并补充数据支撑，生成本节正文内容。'],
+                ['5.2 风险应对措施', '围绕风险应对措施展开，结合引用资料梳理关键要点并补充数据支撑，生成本节正文内容。']
+              ]}
+            ]
+          }
+        }},
       { user: 'hengxin8842', phone: '136****8842', channel: '慧招网', reportType: '项目立项报告', status: '队列中',
         reportName: '高端装备制造基地项目立项建议', startTime: '2026-10-16 09:32:51', endTime: '—', duration: '—',
         templateName: '项目立项报告页面下载模板.docx',
@@ -1180,18 +1350,65 @@
           '<span>生成时长：<b>' + d.duration + '</b></span>' +
         '</div>';
       html += '<div class="rd-section">填写信息预览</div>';
-      d.fields.forEach(function (f) {
-        html += '<div class="rd-field">' +
-            '<div class="rd-field-label">' + f[0] + (f[1] ? '<small>（' + f[1] + '）</small>' : '') + '</div>' +
-            '<div class="rd-field-value">' + f[2] + '</div>' +
-          '</div>';
-      });
-      html += '<div class="rd-preview">📄 点击预览：<span class="link" onclick="showToast(\'该功能为原型演示\')">' + d.templateName + '</span></div>';
+      var hasPreview = !d.proSteps;   // 专业版弹窗不展示模板预览行
+      if (d.proSteps) {
+        // 专业版四步：基础信息录入及确认 → 知识库引用及设置 → 信息确认与设定 → 目录生成及管理
+        var s = d.proSteps;
+        html += '<div class="rd-step"><span class="no">第一步</span>基础信息录入及确认</div>';
+        s.step1.forEach(function (kv) {
+          if (kv[0] === '需求描述') {
+            html += '<div class="rd-confirm-row"><span class="k">需求描述</span></div>' +
+              '<div class="rd-field-value" style="margin-top:0;">' + kv[1] + '</div>';
+          } else {
+            html += '<div class="rd-confirm-row"><span class="k">' + kv[0] + '</span><span class="v">' + kv[1] + '</span></div>';
+          }
+        });
+        html += '<div class="rd-step"><span class="no">第二步</span>知识库引用及设置</div>' +
+          '<div class="rd-kb-meta">引用范围：' + s.step2.scope + '，已选 ' + s.step2.total + ' 项</div>';
+        s.step2.groups.forEach(function (g) {
+          html += '<div class="rd-group">' + g.name + '</div>';
+          g.files.forEach(function (f) {
+            html += '<div class="rd-file-row"><span class="n">📄 ' + f[0] + '</span><span class="m">' + f[1] + '　' + f[2] + (f[3] ? '　·　已引用' : '') + '</span>' +
+              '<span class="link" style="margin-left:16px;" onclick="previewKbFile(\'' + f[0] + '\',\'' + f[1] + '\',\'' + f[2] + '\')">预览</span></div>';
+          });
+        });
+        html += '<div class="rd-step"><span class="no">第三步</span>信息确认与设定</div>';
+        s.step3.sections.forEach(function (sec) {
+          if (sec.head) html += '<div class="rd-sec">' + sec.head + '</div>';
+          html += '<div class="rd-box"><div class="rd-box-title">' + sec.box + '</div>';
+          sec.rows.forEach(function (kv) {
+            html += '<div class="rd-confirm-row"><span class="k">' + kv[0] + '</span><span class="v">' + kv[1] + '</span></div>';
+          });
+          html += '</div>';
+        });
+        html += '<div class="rd-step"><span class="no">第四步</span>目录生成及管理</div>' +
+          '<div class="rd-version">⚙ 系统生成大纲</div>';
+        s.step4.chapters.forEach(function (c) {
+          html += '<div class="rd-ch">' + c.title + '</div>';
+          c.nodes.forEach(function (n) {
+            html += '<div class="rd-node"><div class="t">' + n[0] + '</div><div class="desc">' + n[1] + '</div></div>';
+          });
+        });
+      } else {
+        d.fields.forEach(function (f) {
+          html += '<div class="rd-field">' +
+              '<div class="rd-field-label">' + f[0] + (f[1] ? '<small>（' + f[1] + '）</small>' : '') + '</div>' +
+              '<div class="rd-field-value">' + f[2] + '</div>' +
+            '</div>';
+        });
+      }
+      if (hasPreview) html += '<div class="rd-preview">📄 点击预览：<span class="link" onclick="showToast(\'该功能为原型演示\')">' + d.templateName + '</span></div>';
       document.getElementById('recordDetailBody').innerHTML = html;
       document.getElementById('recordModal').classList.add('show');
     }
     function closeRecordModal() {
       document.getElementById('recordModal').classList.remove('show');
+    }
+    // 专业版第二步：知识库文件在线预览（新页签打开，与报告编辑器一致）
+    function previewKbFile(name, size, time) {
+      var type = name.split('.').pop().toLowerCase();
+      window.open('file-preview.html?name=' + encodeURIComponent(name) +
+        '&size=' + encodeURIComponent(size) + '&time=' + encodeURIComponent(time) + '&type=' + type);
     }
 
     // ============ 用户使用记录弹窗 → 记录详情 ============
