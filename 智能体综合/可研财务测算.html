@@ -10,6 +10,8 @@
     /* ==================== 可研财务测算 专属样式 ==================== */
     /* agent-flow.css 的 border-box 只作用于 #agentFlowRoot，本页表单挂在别处，需自行声明，否则输入框按 content-box 溢出压到相邻控件 */
     .fc-formpage *, .fc-rampmodal-mask * { box-sizing: border-box; }
+    /* 本页 toast 移到页面顶部（头部与步骤条下方），默认在底部 */
+    .agent-shell-toast { bottom: auto; top: 90px; }
     .fc-card { max-width: 1080px; }
     /* 数据录入页大宽版面：卡片撑满内容区，字段按宽度自适应多列（对齐可研专业版信息确认页的宽版式） */
     .fc-formpage .fc-card { max-width: none; }
@@ -18,13 +20,10 @@
     .fc-panel { border: 1px solid #e8e8e8; border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
     .fc-panel-head {
       width: 100%; border: 0; background: #f7f9fc; padding: 12px 18px;
-      display: flex; align-items: center; justify-content: space-between;
-      font-size: 14px; font-weight: 600; color: #333; cursor: pointer; text-align: left;
+      display: flex; align-items: center;
+      font-size: 14px; font-weight: 600; color: #333; text-align: left;
     }
-    .fc-panel-head .fc-arrow { color: #999; font-weight: 400; transition: transform .15s; }
-    .fc-panel.closed .fc-arrow { transform: rotate(-90deg); }
     .fc-panel-body { padding: 18px; }
-    .fc-panel.closed .fc-panel-body { display: none; }
     .fc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 20px; }
     .fc-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px 18px; }
     .fc-grid .af-form-field, .fc-grid-4 .af-form-field { margin-bottom: 4px; }
@@ -104,7 +103,7 @@
     .fc-rampmodal-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 12px 20px; border-top: 1px solid #f0f0f0; }
     .fc-check { font-size: 12px; border-radius: 6px; padding: 8px 12px; margin-top: 12px; display: none; }
     .fc-check.ok { display: block; background: #eef8f1; color: #2b7a45; border: 1px solid #cdeed8; }
-    .fc-check.warn { display: block; background: #fdf6ec; color: #a86808; border: 1px solid #f2dfc0; }
+    .fc-check.bad { display: block; background: #fdf0ef; color: #c0392b; border: 1px solid #f5d0cc; }
     .fc-error {
       background: #fdf0ef; border: 1px solid #f0c9c6; color: #b03a32;
       font-size: 13px; border-radius: 8px; padding: 10px 14px; margin-top: 4px; display: none;
@@ -192,6 +191,7 @@
   /* 与可研专业版"信息确认与锚定"资金来源一致：企业自筹及比例 / 贷款及比例 / 政府补助（贷款利率为参数不计入合计） */
   var FUNDING_FIELDS = [['equity', '企业自筹及比例'], ['loan', '贷款及比例'], ['subsidy', '政府补助']];
   var INDUSTRY_OPTIONS = ['制造业', '软件业', '建筑业', '批发零售', '交通运输', '服务业', '其他'];
+  var HIGHTech_OPTIONS = ['是，所得税按照15%计算', '否，所得税按照25%计算'];
   var PRODUCT_FIELDS = [
     ['name', '产品/服务名称', 'text', null, true],
     ['unit', '计价单位（吨、次、份等，根据实际情况填写）', 'text', null, true],
@@ -203,6 +203,7 @@
   /* 新建任务默认数据：全部为空，由用户自行填写 */
   var DEFAULTS = {
     total: '', construction: '', operation: '',
+    hightech: '',
     discount: '', industryBenchmark: '', target: '',
     equipment: '', software: '', research: '', building: '', installation: '',
     otherConstruction: '', land: '', reserve: '', buildInterest: '', working: '',
@@ -250,8 +251,10 @@
       /* 与可研专业版一致：输入数字，% 由后缀展示（填 8.00 表示 8%） */
       input = '<div class="fc-control"><input class="af-input" id="' + id + '" data-key="' + key + '" data-percent="1" inputmode="decimal" placeholder="例如 8.00"><span class="fc-unit">%</span></div>';
     } else {
-      input = '<div class="fc-control"><input class="af-input" id="' + id + '" data-key="' + key + '" type="' + (type === 'number' ? 'number' : 'text') + '"'
-        + (type === 'number' ? ' min="0" step="any"' : '') + (required ? ' required' : '')
+      /* 数值字段用 text + inputmode=decimal，配合输入监听实现"仅数字、最多 2 位小数" */
+      input = '<div class="fc-control"><input class="af-input" id="' + id + '" data-key="' + key + '"'
+        + (type === 'number' ? ' inputmode="decimal"' : ' type="text"')
+        + (required ? ' required' : '')
         + ' placeholder="' + (type === 'number' ? '请输入数值' : '请填写' + label) + '">'
         + (unit ? '<span class="fc-unit">' + unit + '</span>' : '') + '</div>';
     }
@@ -286,7 +289,10 @@
       if (input.dataset.text) return input.value === '' ? null : input.value;
       return input.value === '' ? null : Number(input.value.replace('%', '')) / 100;
     }
-    return input.type === 'number' ? (input.value === '' ? null : Number(input.value)) : input.value.trim();
+    if (input.inputMode === 'decimal') {
+      return input.value.trim() === '' ? null : (isFinite(Number(input.value)) ? Number(input.value) : null);
+    }
+    return input.value.trim();
   }
 
   /* ---------- 表单页 ---------- */
@@ -295,33 +301,34 @@
     var html = '';
     /* 一、项目概况 */
     html += '<div class="af-card fc-card"><div class="fc-section-title">一、项目概况</div>'
-      + '<div class="fc-panel"><button type="button" class="fc-panel-head"><span>项目基础信息</span><span class="fc-arrow">⌄</span></button>'
+      + '<div class="fc-panel"><div class="fc-panel-head"><span>项目基础信息</span></div>'
       + '<div class="fc-panel-body"><div class="fc-grid">'
       + fieldHtml(['total', '项目总投资', 'number', '万元', true])
       + fieldHtml(['construction', '建设周期（手动填写）', 'number', '月', true])
       + fieldHtml(['operation', '运营期（一般为10年）', 'number', '年', true])
+      + fieldHtml(['hightech', '高新技术企业', 'select-text', null, false, HIGHTech_OPTIONS])
       + '</div></div></div></div>';
     /* 二、财务测算 */
     html += '<div class="af-card fc-card"><div class="fc-section-title">二、财务测算</div>'
-      + '<div class="fc-panel"><button type="button" class="fc-panel-head"><span>收入与成本</span><span class="fc-arrow">⌄</span></button>'
+      + '<div class="fc-panel"><div class="fc-panel-head"><span>收入与成本</span></div>'
       + '<div class="fc-panel-body"><div id="fcProductList"></div>'
       + '<button type="button" class="fc-add-product" id="fcAddProduct">＋ 添加产品/服务</button>'
       + '<div class="fc-ramp"><div class="fc-ramp-title">爬坡计划（如：第一年50%，第二年70%，第三年达产100%）</div>'
       + '<input class="af-input fc-ramp-summary" id="fcRampSummary" readonly title="点击编辑达产计划" placeholder="点击编辑达产计划（留空按各年100%计）">'
       + '</div></div></div>'
-      + '<div class="fc-panel"><button type="button" class="fc-panel-head"><span>财务评价参数</span><span class="fc-arrow">⌄</span></button>'
+      + '<div class="fc-panel"><div class="fc-panel-head"><span>财务评价参数</span></div>'
       + '<div class="fc-panel-body"><div class="fc-grid">'
       + fieldHtml(['discount', '基准收益率', 'percent', null, false])
       + fieldHtml(['industryBenchmark', '行业基准', 'select-text', null, false, INDUSTRY_OPTIONS])
-      + fieldHtml(['target', '期望投资回收期（年）', 'number', null, false])
+      + fieldHtml(['target', '期望投资回收期（不含建设期，年）', 'number', null, false])
       + '</div></div></div></div>';
     /* 三、投资与资金 */
     html += '<div class="af-card fc-card"><div class="fc-section-title">三、投资与资金</div>'
-      + '<div class="fc-panel"><button type="button" class="fc-panel-head"><span>总投资构成</span><span class="fc-arrow">⌄</span></button>'
+      + '<div class="fc-panel"><div class="fc-panel-head"><span>总投资构成</span></div>'
       + '<div class="fc-panel-body"><div class="fc-grid">'
       + INVEST_FIELDS.map(function (f) { return fieldHtml([f[0], f[1], 'number', '万元', false]); }).join('')
       + '</div><div class="fc-check" id="fcInvestCheck"></div></div></div>'
-      + '<div class="fc-panel"><button type="button" class="fc-panel-head"><span>资金来源构成</span><span class="fc-arrow">⌄</span></button>'
+      + '<div class="fc-panel"><div class="fc-panel-head"><span>资金来源构成</span></div>'
       + '<div class="fc-panel-body"><div class="fc-grid">'
       + '<div class="fc-with-ratio">' + fieldHtml([FUNDING_FIELDS[0][0], FUNDING_FIELDS[0][1], 'number', '万元', false]) + '<span class="fc-ratio-badge" id="fcRatioEquity"></span></div>'
       + '<div class="fc-with-ratio">' + fieldHtml([FUNDING_FIELDS[1][0], FUNDING_FIELDS[1][1], 'number', '万元', false]) + '<span class="fc-ratio-badge" id="fcRatioLoan"></span></div>'
@@ -337,14 +344,8 @@
     return $('fcDrawer') || $('agentShellContent');
   }
 
-  /* 绑定折叠面板、添加产品按钮与表单输入事件（每个根元素只绑一次） */
+  /* 绑定添加产品按钮与表单输入事件（每个根元素只绑一次） */
   function activateFormRoot(root) {
-    root.querySelectorAll('.fc-panel-head').forEach(function (btn) {
-      btn.onclick = function () {
-        var closed = btn.closest('.fc-panel').classList.toggle('closed');
-        btn.setAttribute('aria-expanded', String(!closed));
-      };
-    });
     var addBtn = root.querySelector('#fcAddProduct');
     if (addBtn) addBtn.onclick = function () {
       collectForm();
@@ -358,6 +359,20 @@
     root.addEventListener('input', function (e) {
       var input = e.target;
       if (!input.dataset || !input.dataset.key) return;
+      /* 数值/比例输入框：只允许数字和小数点，小数最多 2 位（金额口径；直接成本比例聚焦态为原始小数，不限制） */
+      if ((input.type === 'number' || input.inputMode === 'decimal') && !input.hasAttribute('data-ratio')) {
+        var raw = input.value;
+        var cleaned = raw.replace(/[^\d.]/g, '');
+        var seg = cleaned.split('.');
+        if (seg.length > 2) cleaned = seg[0] + '.' + seg.slice(1).join('');
+        var dm = cleaned.split('.');
+        if (dm[1] && dm[1].length > 2) cleaned = dm[0] + '.' + dm[1].slice(0, 2);
+        if (cleaned !== raw) {
+          var pos = input.selectionStart - (raw.length - cleaned.length);
+          input.value = cleaned;
+          try { input.setSelectionRange(pos, pos); } catch (err) {}
+        }
+      }
       if (input.hasAttribute('data-ratio') && input.value.trim() !== '') {
         /* 聚焦状态下输入框显示原始小数（如 0.1），直接按小数记录 */
         var rn = Number(input.value);
@@ -487,16 +502,16 @@
     [['fcInvestCheck', INVEST_FIELDS, '投资构成'], ['fcFundingCheck', FUNDING_FIELDS, '资金来源']].forEach(function (cfg) {
       var box = $(cfg[0]);
       if (!box) return;
+      /* 与可研专业版一致：填了项目总投资后即时显示差额（未填项按 0 计），一致绿色、不一致红色 */
+      if (d.total == null) { box.className = 'fc-check'; box.textContent = ''; return; }
       var keys = cfg[1].map(function (f) { return f[0]; });
       var sum = keys.reduce(function (a, k) { return a + (num(d[k]) || 0); }, 0);
-      var all = keys.every(function (k) { return d[k] != null; });
-      var diff = sum - (num(d.total) || 0);
+      var diff = sum - num(d.total);
       var ok = Math.abs(diff) < 0.005;
-      box.className = 'fc-check' + (d.total == null || !all ? '' : ok ? ' ok' : ' warn');
-      box.textContent = d.total == null ? '填写项目总投资后核对' + cfg[2]
-        : !all ? cfg[2] + '已填写 ' + fmt(sum) + ' 万元；请补齐各项，无此项填 0。'
-        : ok ? '✓ ' + cfg[2] + '合计 ' + fmt(sum) + ' 万元，与项目总投资一致。'
-        : cfg[2] + '合计 ' + fmt(sum) + ' 万元，与项目总投资相差 ' + fmt(diff) + ' 万元，请核对。';
+      box.className = 'fc-check ' + (ok ? 'ok' : 'bad');
+      box.innerHTML = ok
+        ? '✓ ' + cfg[2] + '各项之和 ' + fmt(sum) + ' 万元，与项目总投资一致。'
+        : '<b>差额</b> ' + fmt(diff) + ' 万元（' + cfg[2] + '各项之和与总投资不一致，请核对；未填项按 0 计）';
     });
   }
 
@@ -517,10 +532,8 @@
   function validate() {
     var d = state.data;
     var bad = [];
+    /* 必填项仅限带 * 星号的字段：项目总投资、建设周期、运营期与产品/服务各项 */
     ['total', 'construction', 'operation'].forEach(function (k) { if (!(num(d[k]) > 0)) bad.push(k); });
-    ['discount'].forEach(function (k) { if (d[k] == null) bad.push(k); });
-    ['equity', 'loan', 'subsidy'].forEach(function (k) { if (d[k] == null) bad.push(k); });
-    INVEST_FIELDS.forEach(function (f) { if (d[f[0]] == null) bad.push(f[0]); });
     document.querySelectorAll('#' + formRoot().id + ' .fc-field').forEach(function (el) { el.classList.remove('invalid'); });
     d.products.forEach(function (p, i) {
       PRODUCT_FIELDS.forEach(function (f) {
@@ -533,7 +546,7 @@
         if (el) { var f = el.closest('.fc-field'); if (f) f.classList.add('invalid'); }
       });
       var err = $('fcFormError');
-      err.textContent = '请补齐红色标注的字段；项目总投资、建设周期、运营期须大于 0。比例字段请按百分比填写（如 10%）。';
+      err.textContent = '请补齐带 * 号的必填字段；项目总投资、建设周期、运营期须大于 0。比例字段请按百分比填写（如 10%）。';
       err.classList.add('show');
       var first = $(bad[0]);
       if (first) { first.scrollIntoView({ block: 'center', behavior: 'smooth' }); first.focus({ preventScroll: true }); }
@@ -544,9 +557,9 @@
       return Math.abs(sum - num(d.total)) < 0.005;
     });
     if (!sumOk) {
-      var err = $('fcFormError');
-      err.textContent = '投资构成与资金来源合计须与项目总投资一致，请核对后重新测算（无此项填 0）。';
-      err.classList.add('show');
+      /* 配平失败只弹页面顶部 toast，不再在表单底部显示红色行内提示 */
+      $('fcFormError').classList.remove('show');
+      toast('总投资构成或资金来源尚未配平（差额不为 0），请调整金额配平后再进入下一步');
       return false;
     }
     $('fcFormError').classList.remove('show');
@@ -573,6 +586,8 @@
     });
     var dep = (invest - num(d.working)) / opYears;
     var loan = num(d.loan), rate = num(d.interest);
+    /* 高新技术企业：所得税按 15% 计，否则按 25% 计 */
+    var taxRate = d.hightech === '是，所得税按照15%计算' ? 0.15 : 0.25;
     var repayYears = Math.min(5, opYears);
     var rows = [];
     for (var t = 1; t <= cols; t++) {
@@ -582,7 +597,7 @@
       var depY = rev > 0 ? dep : 0;
       var intY = (t > buildYears && (t - buildYears) <= repayYears) ? loan * rate * (repayYears - (t - buildYears) + 1) / repayYears : 0;
       var profit = rev - cost - depY - intY;
-      var tax = Math.max(0, profit) * 0.25;
+      var tax = Math.max(0, profit) * taxRate;
       var capex = t <= buildYears ? invest / buildYears : 0;
       rows.push({ rev: rev, cost: cost, dep: depY, int: intY, profit: profit, tax: tax, net: profit - tax, netCash: rev - cost - tax - capex });
     }
@@ -682,6 +697,7 @@
       + roRow('项目总投资（万元）', fmt(d.total))
       + roRow('建设周期（月）', fmt(d.construction, 0))
       + roRow('运营期（年）', fmt(d.operation, 0))
+      + roRow('高新技术企业', d.hightech || '')
       + '</div>';
     /* 二、收入与成本（与数据录入页面板分类一致：产品/服务 + 爬坡计划） */
     html += '<div class="fc-ro-group-title">二、收入与成本</div>';
@@ -701,7 +717,7 @@
     html += '<div class="fc-ro-group-title" style="font-size:12px;color:#666;margin-top:10px;">财务评价参数</div><div class="fc-ro-grid">'
       + roRow('基准收益率', pct(d.discount))
       + roRow('行业基准', d.industryBenchmark || '')
-      + roRow('期望投资回收期（年）', d.target == null ? '' : fmt(d.target, 0))
+      + roRow('期望投资回收期（不含建设期，年）', d.target == null ? '' : fmt(d.target, 0))
       + '</div>';
     /* 三、投资与资金 */
     html += '<div class="fc-ro-group-title">三、投资与资金</div><div class="fc-ro-group-title" style="font-size:12px;color:#666;margin-top:10px;">总投资构成</div><div class="fc-ro-grid">'
@@ -839,6 +855,7 @@
       ['项目总投资', fmt(d.total), '万元'], ['建设周期', fmt(d.construction, 0), '月'],
       ['运营期', fmt(d.operation, 0), '年'], ['基准收益率', pct(d.discount), '比例'],
       ['行业基准', d.industryBenchmark || '未填写', '选项'], ['期望投资回收期', d.target == null ? '未设置' : fmt(d.target) + ' 年', '年'],
+      ['高新技术企业', d.hightech || '未选择', '选项'],
       ['贷款利率', pct(d.interest), '比例']
     ];
     INVEST_FIELDS.forEach(function (f) { paramRows.push(['投资构成 - ' + f[1], fmt(d[f[0]]), '万元']); });
