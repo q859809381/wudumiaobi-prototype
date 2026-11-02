@@ -587,7 +587,17 @@ body.sidebar-collapsed .agent-shell-expand-fab { display: inline-flex; }
     }
 
 .agent-shell-sidebar .sidebar-task-text { color: #222; font-weight: 500; }
-.agent-shell-sidebar .sidebar-task-item.draft .sidebar-task-text { color: #999; }
+/* 草稿任务：名称保持黑色，名称前用“草稿”标签标识状态 */
+.agent-shell-sidebar .task-draft-badge {
+  flex-shrink: 0;
+  font-size: 10px;
+  line-height: 15px;
+  color: #b26a00;
+  background: #fff4e0;
+  border: 1px solid #f0d9ae;
+  border-radius: 3px;
+  padding: 0 5px;
+}
 
 .agent-shell-sidebar .sidebar-quick-soon {
       flex-shrink: 0;

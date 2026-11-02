@@ -2920,8 +2920,17 @@
       white-space: nowrap;
     }
     .sidebar-task-text { color: #222; font-weight: 500; }
-    /* 草稿任务标题用灰色区分 */
-    .sidebar-task-item.draft .sidebar-task-text { color: #999; }
+    /* 草稿任务：名称保持黑色，名称前用“草稿”标签标识状态 */
+    .task-draft-badge {
+      flex-shrink: 0;
+      font-size: 10px;
+      line-height: 15px;
+      color: #b26a00;
+      background: #fff4e0;
+      border: 1px solid #f0d9ae;
+      border-radius: 3px;
+      padding: 0 5px;
+    }
     .sidebar-quick-soon {
       flex-shrink: 0;
       font-size: 10px;
@@ -4083,6 +4092,7 @@
         <select class="sidebar-task-filter" id="taskFilter" onchange="filterSidebarTasks(this)">
           <option value="all">全部智能体</option>
           <option value="可研专业版">可研专业版</option>
+          <option value="可研财务测算">可研财务测算</option>
           <option value="项目立项报告">项目立项报告</option>
         </select>
       </div>
@@ -5437,6 +5447,7 @@
     };
     const REPORT_AGENTS = [
       { name: '可行性研究报告（专业版）', icon: '📊', desc: '完整财务测算、自定义大纲、知识库引用和在线编辑工作台。', cat: '可研与资金申请', tag: '专业编制·推荐', chips: ['财务测算', '自定义大纲', '在线编辑'], available: true, pro: true, featured: true },
+      { name: '可研财务测算', icon: '🧮', desc: '独立测算财务指标，支持预览并下载Excel财务附表。', cat: '可研与资金申请', tag: '财务测算', chips: ['独立测算', 'Excel附表', '历史留档'], available: true, page: '可研财务测算.html' },
       { name: '可行性研究报告（快速版）', icon: '📊', desc: '轻量流程，少量填写，快速生成结构完整的基础可研初稿。', cat: '可研与资金申请', chips: ['快速交付', '企业自用'], available: true, page: '可行性研究报告.html' },
       { name: '企业全景分析报告', icon: '🏢', desc: '多维数据透视企业全貌，支持供应商考察和竞争分析。', cat: '企业分析', tag: '企业分析', chips: ['工商穿透', '风险扫描'], available: true, page: '企业全景分析报告.html' },
       { name: '投前咨询分析报告', icon: '💼', desc: '目标企业穿透分析与投资风险扫描，辅助投前决策。', cat: '企业分析', tag: '企业分析', chips: ['投资评估', '财税核查'], available: true, page: '投前咨询分析报告.html' },
@@ -6304,6 +6315,7 @@
       const viewDot = '<span class="task-view-dot' + (unviewed ? '' : ' hide') + '" title="未查看"></span>';
       const ring = t.exec === 'running' ? '<span class="task-load-ring" title="报告生成中"></span>' : '';
       el.innerHTML = viewDot
+        + (t.exec === 'draft' ? '<span class="task-draft-badge">草稿</span>' : '')
         + '<span class="sidebar-task-text">' + t.name + '</span>'
         + ring
         + '<span class="sidebar-task-meta">' + t.agent + '</span>'

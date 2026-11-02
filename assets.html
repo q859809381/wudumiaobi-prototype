@@ -168,7 +168,17 @@
       flex-shrink: 0;
     }
     .sidebar-task-item:hover .task-load-ring { display: none; }
-    .sidebar-task-item.draft .sidebar-task-text { color: #999; }
+    /* 草稿任务：名称保持黑色，名称前用“草稿”标签标识状态 */
+    .task-draft-badge {
+      flex-shrink: 0;
+      font-size: 10px;
+      line-height: 15px;
+      color: #b26a00;
+      background: #fff4e0;
+      border: 1px solid #f0d9ae;
+      border-radius: 3px;
+      padding: 0 5px;
+    }
     .task-toast {
       display: none;
       position: fixed;
@@ -455,6 +465,7 @@
       const viewDot = '<span class="task-view-dot' + (unviewed ? '' : ' hide') + '" title="未查看"></span>';
       const ring = t.exec === 'running' ? '<span class="task-load-ring" title="报告生成中"></span>' : '';
       el.innerHTML = viewDot
+        + (t.exec === 'draft' ? '<span class="task-draft-badge">草稿</span>' : '')
         + '<span class="sidebar-task-text">' + t.name + '</span>'
         + ring
         + '<span class="sidebar-task-meta">' + t.agent + '</span>'

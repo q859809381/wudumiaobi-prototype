@@ -265,6 +265,7 @@
   /* 各智能体步骤（与页面内流程一致，参照专业版展示） */
   var STEPS_MAP = {
     '可行性研究报告': ['编辑基本信息', '上传项目信息', '生成中', '完整报告输出'],
+    '可研财务测算': ['数据录入', '测算结果'],
     '企业全景分析报告': ['编辑基本信息', '生成中', '完整报告输出'],
     '投前咨询分析报告': ['编辑基本信息', '生成中', '完整报告输出'],
     '招商策略分析报告': ['编辑基本信息', '生成中', '完整报告输出'],
@@ -351,6 +352,7 @@
     var viewDot = '<span class="task-view-dot' + (unviewed ? '' : ' hide') + '" title="未查看"></span>';
     var ring = t.exec === 'running' ? '<span class="task-load-ring" title="报告生成中"></span>' : '';
     el.innerHTML = viewDot
+      + (t.exec === 'draft' ? '<span class="task-draft-badge">草稿</span>' : '')
       + '<span class="sidebar-task-text">' + t.name + '</span>'
       + ring
       + '<span class="sidebar-task-meta">' + t.agent + '</span>'
@@ -426,6 +428,7 @@
       +     '<select class="sidebar-task-filter" id="shellTaskFilter" onchange="window.filterShellTasks&&filterShellTasks(this)">'
       +       '<option value="all">全部智能体</option>'
       +       '<option value="可研专业版">可研专业版</option>'
+      +       '<option value="可研财务测算">可研财务测算</option>'
       +       '<option value="项目立项报告">项目立项报告</option>'
       +       '<option value="企业全景分析">企业全景分析</option>'
       +       '<option value="投前咨询分析">投前咨询分析</option>'

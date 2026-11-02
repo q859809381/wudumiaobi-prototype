@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>可研财务测算</title>
+  <link rel="stylesheet" href="agent-shell.css">
+  <link rel="stylesheet" href="agent-flow.css">
+  <style>
+    /* ==================== 可研财务测算 专属样式 ==================== */
+    /* agent-flow.css 的 border-box 只作用于 #agentFlowRoot，本页表单挂在别处，需自行声明，否则输入框按 content-box 溢出压到相邻控件 */
+    .fc-formpage *, .fc-drawer *, .fc-rampmodal-mask * { box-sizing: border-box; }
+    .fc-card { max-width: 1080px; }
+    /* 数据录入页大宽版面：卡片撑满内容区，字段按宽度自适应多列（对齐可研专业版信息确认页的宽版式） */
+    .fc-formpage .fc-card { max-width: none; }
+    .fc-formpage .fc-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+    .fc-formpage .fc-grid-4 { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+    .fc-panel { border: 1px solid #e8e8e8; border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+    .fc-panel-head {
+      width: 100%; border: 0; background: #f7f9fc; padding: 12px 18px;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 14px; font-weight: 600; color: #333; cursor: pointer; text-align: left;
+    }
+    .fc-panel-head .fc-arrow { color: #999; font-weight: 400; transition: transform .15s; }
+    .fc-panel.closed .fc-arrow { transform: rotate(-90deg); }
+    .fc-panel-body { padding: 18px; }
+    .fc-panel.closed .fc-panel-body { display: none; }
+    .fc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 20px; }
+    .fc-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px 18px; }
+    .fc-grid .af-form-field, .fc-grid-4 .af-form-field { margin-bottom: 4px; }
+    .fc-field-help { font-size: 12px; color: #b3b9c4; margin-top: 3px; }
+    .fc-field.invalid .af-input { border-color: #d24a43; background: #fdf6f5; }
+    .fc-control { position: relative; }
+    .fc-control .fc-unit {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      font-size: 12px; color: #999; pointer-events: none;
+    }
+    .fc-control .af-input { padding-right: 44px; }
+    .fc-section-title {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 15px; font-weight: 650; color: #333; margin: 4px 0 12px;
+    }
+    .fc-section-title::before { content: ""; width: 3px; height: 15px; background: #4a6fa5; border-radius: 2px; }
+    .fc-product { position: relative; border: 1px solid #e4e8ef; border-radius: 8px; padding: 14px 16px; margin-bottom: 14px; background: #fcfdff; }
+    .fc-product-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding-right: 32px; }
+    .fc-product-head span { font-size: 13px; font-weight: 600; color: #444; }
+    /* 删除按钮：卡片右上角 × 小方块（对齐可研专业版产品卡样式） */
+    .fc-product-del {
+      position: absolute; top: 10px; right: 10px;
+      width: 24px; height: 24px; padding: 0; text-align: center; line-height: 22px;
+      border: 1px solid #d7dee8; border-radius: 4px; background: #fff;
+      color: #999; font-size: 14px; cursor: pointer;
+    }
+    .fc-product-del:hover { border-color: #c0392b; color: #c0392b; background: #fff8f7; }
+    /* 产品字段每行固定 4 个（宽版面下也不铺满一行），6 个字段排成 4+2 两行 */
+    .fc-formpage .fc-product .fc-grid-4 { grid-template-columns: repeat(4, 1fr); }
+    .fc-add-product {
+      border: 1px dashed #b9c4d4; background: #fafbfd; color: #4a6fa5;
+      width: 100%; padding: 9px 0; border-radius: 8px; font-size: 13px; cursor: pointer;
+    }
+    .fc-add-product:hover { border-color: #4a6fa5; background: #f3f7fc; }
+    .fc-ramp { margin-top: 16px; padding-top: 14px; border-top: 1px dashed #e4e8ef; }
+    .fc-ramp-title { font-size: 13px; font-weight: 600; color: #444; margin-bottom: 10px; }
+    /* 爬坡计划只读汇总框：点击弹出编辑弹窗（与可研专业版"信息确认与锚定"一致） */
+    .fc-ramp-summary { width: 100%; cursor: pointer; background: #fff; }
+    .fc-ramp-summary[readonly]:focus { outline: none; border-color: #4a6fa5; }
+    /* 爬坡计划编辑弹窗 */
+    .fc-rampmodal-mask {
+      position: fixed; inset: 0; background: rgba(20,28,40,.45); z-index: 5000;
+      display: none; align-items: center; justify-content: center;
+    }
+    .fc-rampmodal-mask.show { display: flex; }
+    .fc-rampmodal {
+      background: #fff; border-radius: 10px; width: min(480px, 92vw); max-height: 82vh;
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .fc-rampmodal-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid #f0f0f0; }
+    .fc-rampmodal-head b { font-size: 15px; color: #333; }
+    .fc-rampmodal-close { border: 0; background: none; font-size: 18px; color: #999; cursor: pointer; }
+    .fc-rampmodal-body { padding: 14px 20px; overflow-y: auto; }
+    .fc-rampmodal-tip { margin: 0 0 12px; color: #777; font-size: 12px; line-height: 1.6; }
+    .fc-rampmodal table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; }
+    .fc-rampmodal th, .fc-rampmodal td { padding: 8px 10px; border: 1px solid #e7ebf0; text-align: left; vertical-align: middle; }
+    .fc-rampmodal th { background: #f7f9fb; color: #555; font-weight: 600; }
+    .fc-rampmodal th:nth-child(1) { width: 40%; }
+    .fc-rampmodal th:nth-child(2) { width: 60%; }
+    .fc-rampmodal td .af-input { width: 100%; }
+    .fc-ramp-year-cell { position: relative; padding-right: 40px !important; }
+    .fc-ramp-year-display { display: block; color: #555; font-size: 13px; }
+    .fc-ramp-del {
+      position: absolute; top: 50%; right: 10px; transform: translateY(-50%);
+      width: 22px; height: 22px; padding: 0; border: 0; background: transparent;
+      color: #9a6a6a; font-size: 16px; line-height: 22px; cursor: pointer;
+    }
+    .fc-ramp-del:hover { color: #c0392b; }
+    .fc-rampmodal-add { margin-top: 10px; }
+    .fc-rampmodal-add:disabled { opacity: .55; cursor: not-allowed; }
+    .fc-rampmodal-error { margin-top: 8px; font-size: 12px; color: #c0392b; min-height: 16px; }
+    .fc-rampmodal-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 12px 20px; border-top: 1px solid #f0f0f0; }
+    .fc-check { font-size: 12px; border-radius: 6px; padding: 8px 12px; margin-top: 12px; display: none; }
+    .fc-check.ok { display: block; background: #eef8f1; color: #2b7a45; border: 1px solid #cdeed8; }
+    .fc-check.warn { display: block; background: #fdf6ec; color: #a86808; border: 1px solid #f2dfc0; }
+    .fc-error {
+      background: #fdf0ef; border: 1px solid #f0c9c6; color: #b03a32;
+      font-size: 13px; border-radius: 8px; padding: 10px 14px; margin-top: 4px; display: none;
+    }
+    .fc-error.show { display: block; }
+    /* 测算结果页（左右结构：主区 + 历史测算记录侧栏），两栏铺满内容区且整页不可滚动（历史列表内部滚动） */
+    .fc-result-grid {
+      display: grid; grid-template-columns: minmax(0, 1fr) 380px; grid-template-rows: minmax(0, 1fr); gap: 16px; align-items: stretch;
+      height: calc(100vh - 211px); min-height: 0;
+    }
+    .fc-result-grid .af-card { margin-top: 0; margin-left: 0; margin-right: 0; }
+    #fcResultMain, .fc-result-side { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+    #fcResultMain { overflow-y: auto; }
+    #fcResultMain .af-card, .fc-result-side .af-card { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+    .fc-result-main-card { justify-content: center; }
+    .fc-result-side .af-form-section-title { flex-shrink: 0; }
+    .fc-result-side #fcHistory { flex: 1; overflow-y: auto; min-height: 0; }
+    @media (max-width: 1200px) { .fc-result-grid { grid-template-columns: 1fr; height: auto; min-height: 0; } }
+    /* 测算中页：卡片铺满内容区，进度内容垂直居中 */
+    .fc-formpage .fc-gen-fill { max-width: none; }
+    .fc-gen-fill { min-height: calc(100vh - 211px); display: flex; flex-direction: column; }
+    .fc-gen-fill .af-gen { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+    .fc-result-head { text-align: center; padding: 8px 0 18px; }
+    .fc-result-icon {
+      width: 56px; height: 56px; border-radius: 50%; background: #e8f6ed; color: #27804a;
+      font-size: 26px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;
+    }
+    .fc-result-title { font-size: 18px; font-weight: 650; color: #333; }
+    .fc-result-sub { font-size: 13px; color: #999; margin-top: 4px; }
+    .fc-result-actions { display: flex; justify-content: center; gap: 12px; margin-bottom: 8px; }
+    .fc-note { font-size: 12px; color: #b3b9c4; text-align: center; line-height: 1.7; }
+    /* Excel 财务附表页面预览（非弹窗，替换主区内容） */
+    .fc-xlsx-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+    .fc-xlsx-head b { font-size: 15px; color: #333; }
+    .fc-xlsx-body h4 { font-size: 13px; color: #444; margin: 16px 0 8px; }
+    .fc-xlsx-body h4:first-child { margin-top: 4px; }
+    .fc-table { width: 100%; border-collapse: collapse; }
+    .fc-table th, .fc-table td { border: 1px solid #dfe6ef; padding: 6px 10px; font-size: 12px; text-align: left; color: #333; }
+    .fc-table th { background: #f2f6fb; font-weight: 600; white-space: nowrap; }
+    .fc-table td.num, .fc-table th.num { text-align: right; }
+    .fc-hist-item {
+      display: flex; flex-direction: column; gap: 10px;
+      border: 1px solid #e8edf4; border-radius: 8px; padding: 12px 16px; margin-bottom: 10px; background: #fff;
+    }
+    .fc-hist-main { min-width: 0; }
+    .fc-hist-name { font-size: 13px; font-weight: 600; color: #333; }
+    .fc-hist-meta { font-size: 12px; color: #999; margin-top: 3px; line-height: 1.6; }
+    .fc-hist-btns { display: flex; justify-content: flex-end; gap: 8px; padding-top: 8px; border-top: 1px dashed #eef1f6; }
+    .fc-hist-empty { font-size: 13px; color: #999; text-align: center; padding: 18px 0; }
+    /* 大窗关闭按钮（复用类名） */
+    .fc-modal-close { border: 0; background: none; font-size: 18px; color: #999; cursor: pointer; }
+    /* 修改参数大窗（不离开测算结果页）：从底部向上滑出，盖住头部以下内容区 */
+    .fc-drawer-mask {
+      position: fixed; inset: 0; background: rgba(20,28,40,.45); z-index: 4000;
+      opacity: 0; pointer-events: none; transition: opacity .2s;
+    }
+    .fc-drawer-mask.show { opacity: 1; pointer-events: auto; }
+    .fc-drawer {
+      position: fixed; left: 12px; right: 12px; top: 86px; bottom: 12px;
+      background: #f6f7f9; z-index: 4001; display: flex; flex-direction: column;
+      border-radius: 10px; overflow: hidden;
+      box-shadow: 0 -8px 32px rgba(0,0,0,.18);
+      transform: translateY(calc(100% + 120px)); transition: transform .28s ease;
+    }
+    .fc-drawer.show { transform: translateY(0); }
+    .fc-drawer-head {
+      display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+      padding: 14px 24px; background: #fff; border-bottom: 1px solid #e8e8e8;
+    }
+    .fc-drawer-head b { font-size: 15px; color: #333; white-space: nowrap; }
+    .fc-drawer-head .fc-drawer-hint { flex: 1; font-size: 12px; color: #b3b9c4; }
+    .fc-drawer-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
+    .fc-drawer-body .fc-formpage .af-card { max-width: none; padding: 18px 24px; }
+    .fc-drawer-foot {
+      display: flex; justify-content: flex-end; gap: 10px; flex-shrink: 0;
+      padding: 12px 24px; background: #fff; border-top: 1px solid #e8e8e8;
+    }
+    @media (max-width: 1100px) {
+      .fc-grid { grid-template-columns: repeat(2, 1fr); }
+      .fc-grid-4 { grid-template-columns: repeat(2, 1fr); }
+      .fc-metrics { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+<div id="agentShellRoot"></div>
+<script src="agent-shell.js"></script>
+<script>
+/* ==================== 可研财务测算 ====================
+   两个页面：① 数据录入（支持反复修改参数、草稿暂存）
+            ② 测算结果（指标展示 + Excel 财务附表下载，历史测算全部保留下载权限）
+   ==================================================== */
+(function () {
+  'use strict';
+  var DRAFT_KEY = 'wudumiaobi.financeCalc.draft.v1';
+  var HISTORY_KEY = 'wudumiaobi.financeCalc.history.v1';
+
+  /* ---------- 字段定义 ---------- */
+  var INVEST_FIELDS = [
+    ['equipment', '设备购置费'], ['software', '软件购置费'], ['research', '研发费用'],
+    ['building', '建筑工程费'], ['installation', '安装工程费'], ['otherConstruction', '工程建设其他费用'],
+    ['land', '土地使用费'], ['reserve', '预备费'], ['buildInterest', '建设期利息'], ['working', '铺底流动资金']
+  ];
+  /* 与可研专业版"信息确认与锚定"资金来源一致：企业自筹及比例 / 贷款及比例 / 政府补助（贷款利率为参数不计入合计） */
+  var FUNDING_FIELDS = [['equity', '企业自筹及比例'], ['loan', '贷款及比例'], ['subsidy', '政府补助']];
+  var INDUSTRY_OPTIONS = ['制造业', '软件业', '建筑业', '批发零售', '交通运输', '服务业', '其他'];
+  var PRODUCT_FIELDS = [
+    ['name', '产品/服务名称', 'text', null, true],
+    ['unit', '计价单位（吨、次、份等，根据实际情况填写）', 'text', null, true],
+    ['price', '单价（万元/计价单位）', 'number', null, true],
+    ['capacity', '达产年产能', 'text', null, true],
+    ['vat', '增值税率', 'select', null, true],
+    ['cost', '直接成本占比（不含人工、折旧、利息）', 'ratio', null, true]
+  ];
+  var DEFAULTS = {
+    total: 500, construction: 37, operation: 10,
+    discount: 0.1, industryBenchmark: '软件业', target: 5,
+    equipment: 51.35, software: 0, research: 0, building: 407.88, installation: 2.57,
+    otherConstruction: 5.7, land: 0, reserve: 10.08, buildInterest: 0, working: 22.42,
+    equity: 500, loan: 0, interest: 0.05, subsidy: 0,
+    products: [
+      { name: '对外数据API服务', unit: '次', price: 0.000005, capacity: '60000000', vat: 0.06, cost: 0.1 },
+      { name: 'AI决策咨询与报告智能体服务', unit: '份', price: 2, capacity: '100', vat: 0.06, cost: 0.1 }
+    ],
+    ramp: [0.4, 1, 1, 1, 1]
+  };
+
+  var state = { page: 'form', data: null, busy: false, saveTimer: null, genTimer: null };
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function num(v) { var n = Number(v); return isFinite(n) ? n : 0; }
+  function fmt(v, d) { return num(v).toLocaleString('zh-CN', { maximumFractionDigits: d == null ? 2 : d }); }
+  function pct(v) { return v == null ? '—' : (num(v) * 100).toFixed(2).replace(/\.?0+$/, '') + '%'; }
+  function nowStr() {
+    var t = new Date(), p = function (x) { return (x < 10 ? '0' : '') + x; };
+    return t.getFullYear() + '-' + p(t.getMonth() + 1) + '-' + p(t.getDate()) + ' ' + p(t.getHours()) + ':' + p(t.getMinutes());
+  }
+  function toast(msg) { if (window.shellToast) window.shellToast(msg); }
+
+  /* ---------- 等待外壳构建完成 ---------- */
+  function shellReady(fn) {
+    if ($('agentShellContent') && $('agentShellSteps') && $('agentShellPrimaryBtn')) fn();
+    else setTimeout(function () { shellReady(fn); }, 100);
+  }
+
+  /* ---------- 字段渲染 ---------- */
+  function fieldHtml(def, prefix) {
+    var key = def[0], label = def[1], type = def[2], unit = def[3], required = def[4];
+    var id = (prefix || '') + key;
+    var input;
+    if (type === 'select') {
+      input = '<select class="af-input" id="' + id + '" data-key="' + key + '"><option value="">请选择</option>'
+        + (def[5] || ['0%', '3%', '6%', '9%', '13%']).map(function (o) { return '<option value="' + o + '">' + o + '</option>'; }).join('')
+        + '</select>';
+    } else if (type === 'select-text') {
+      /* 文本下拉（如行业基准）：选项即值，不做百分比换算 */
+      input = '<select class="af-input" id="' + id + '" data-key="' + key + '" data-text="1"><option value="">请选择</option>'
+        + (def[5] || []).map(function (o) { return '<option value="' + o + '">' + o + '</option>'; }).join('')
+        + '</select>';
+    } else if (type === 'ratio') {
+      input = '<div class="fc-control"><input class="af-input" id="' + id + '" data-key="' + key + '" data-ratio="1" inputmode="decimal" placeholder="例如 10%">'
+        + (unit ? '<span class="fc-unit">' + unit + '</span>' : '') + '</div>';
+    } else if (type === 'percent') {
+      /* 与可研专业版一致：输入数字，% 由后缀展示（填 8.00 表示 8%） */
+      input = '<div class="fc-control"><input class="af-input" id="' + id + '" data-key="' + key + '" data-percent="1" inputmode="decimal" placeholder="例如 8.00"><span class="fc-unit">%</span></div>';
+    } else {
+      input = '<div class="fc-control"><input class="af-input" id="' + id + '" data-key="' + key + '" type="' + (type === 'number' ? 'number' : 'text') + '"'
+        + (type === 'number' ? ' min="0" step="any"' : '') + (required ? ' required' : '')
+        + ' placeholder="' + (type === 'number' ? '请输入数值' : '请填写' + label) + '">'
+        + (unit ? '<span class="fc-unit">' + unit + '</span>' : '') + '</div>';
+    }
+    var req = required ? '<span class="req">*</span>' : '';
+    return '<div class="fc-field" data-field="' + id + '"><div class="af-form-field"><label>' + esc(label) + req + '</label>' + input + '</div></div>';
+  }
+  function setValue(input, v) {
+    if (input.hasAttribute('data-percent')) {
+      input.value = (v == null || v === '') ? '' : (num(v) * 100).toFixed(2);
+    } else if (input.hasAttribute('data-ratio')) {
+      input.dataset.ratio = (v == null || v === '') ? '' : String(v);
+      input.value = (v == null || v === '') ? '' : (num(v) * 100).toFixed(2).replace(/\.?0+$/, '') + '%';
+    } else if (input.tagName === 'SELECT') {
+      if (input.dataset.text) { input.value = (v == null || v === '') ? '' : v; }
+      else input.value = (v == null || v === '') ? '' : (num(v) * 100) + '%';
+    } else {
+      input.value = v == null ? '' : v;
+    }
+  }
+  function getValue(input) {
+    if (input.hasAttribute('data-percent')) {
+      if (input.value.trim() === '') return null;
+      var pn = Number(input.value);
+      return isFinite(pn) ? pn / 100 : null;
+    }
+    if (input.hasAttribute('data-ratio')) {
+      if (input.dataset.ratio === '') return null;
+      var n = Number(input.dataset.ratio);
+      return isFinite(n) ? n : null;
+    }
+    if (input.tagName === 'SELECT') {
+      if (input.dataset.text) return input.value === '' ? null : input.value;
+      return input.value === '' ? null : Number(input.value.replace('%', '')) / 100;
+    }
+    return input.type === 'number' ? (input.value === '' ? null : Number(input.value)) : input.value.trim();
+  }
+
+  /* ---------- 表单页 ---------- */
+  /* 表单结构独立成函数，供数据录入页与"修改参数"滑窗共用 */
+  function formHtml() {
+    var html = '';
+    /* 一、项目概况 */
+    html += '<div class="af-card fc-card"><div class="fc-section-title">一、项目概况</div>'
+      + '<div class="fc-panel"><button type="button" class="fc-panel-head"><span>项目基础信息</span><span class="fc-arrow">⌄</span></button>'
+      + '<div class="fc-panel-body"><div class="fc-grid">'
+      + fieldHtml(['total', '项目总投资', 'number', '万元', true])
+      + fieldHtml(['construction', '建设周期（手动填写）', 'number', '月', true])
+      + fieldHtml(['operation', '运营期（一般为10年）', 'number', '年', true])
+      + '</div></div></div></div>';
+    /* 二、财务测算 */
+    html += '<div class="af-card fc-card"><div class="fc-section-title">二、财务测算</div>'
+      + '<div class="fc-panel"><button type="button" class="fc-panel-head"><span>收入与成本</span><span class="fc-arrow">⌄</span></button>'
+      + '<div class="fc-panel-body"><div id="fcProductList"></div>'
+      + '<button type="button" class="fc-add-product" id="fcAddProduct">＋ 添加产品/服务</button>'
+      + '<div class="fc-ramp"><div class="fc-ramp-title">爬坡计划（如：第一年50%，第二年70%，第三年达产100%）</div>'
+      + '<input class="af-input fc-ramp-summary" id="fcRampSummary" readonly title="点击编辑达产计划" placeholder="点击编辑达产计划（留空按各年100%计）">'
+      + '</div></div></div>'
+      + '<div class="fc-panel"><button type="button" class="fc-panel-head"><span>财务评价参数</span><span class="fc-arrow">⌄</span></button>'
+      + '<div class="fc-panel-body"><div class="fc-grid">'
+      + fieldHtml(['discount', '基准收益率', 'percent', null, false])
+      + fieldHtml(['industryBenchmark', '行业基准', 'select-text', null, false, INDUSTRY_OPTIONS])
+      + fieldHtml(['target', '期望投资回收期（年）', 'number', null, false])
+      + '</div></div></div></div>';
+    /* 三、投资与资金 */
+    html += '<div class="af-card fc-card"><div class="fc-section-title">三、投资与资金</div>'
+      + '<div class="fc-panel"><button type="button" class="fc-panel-head"><span>总投资构成</span><span class="fc-arrow">⌄</span></button>'
+      + '<div class="fc-panel-body"><div class="fc-grid">'
+      + INVEST_FIELDS.map(function (f) { return fieldHtml([f[0], f[1], 'number', '万元', false]); }).join('')
+      + '</div><div class="fc-check" id="fcInvestCheck"></div></div></div>'
+      + '<div class="fc-panel"><button type="button" class="fc-panel-head"><span>资金来源构成</span><span class="fc-arrow">⌄</span></button>'
+      + '<div class="fc-panel-body"><div class="fc-grid">'
+      + fieldHtml([FUNDING_FIELDS[0][0], FUNDING_FIELDS[0][1], 'number', '万元', false])
+      + fieldHtml([FUNDING_FIELDS[1][0], FUNDING_FIELDS[1][1], 'number', '万元', false])
+      + fieldHtml(['interest', '贷款利率', 'percent', null, false])
+      + fieldHtml([FUNDING_FIELDS[2][0], FUNDING_FIELDS[2][1], 'number', '万元', false])
+      + '</div><div class="fc-check" id="fcFundingCheck"></div></div></div>'
+      + '<div class="fc-error" id="fcFormError"></div></div>';
+    return html;
+  }
+
+  /* 表单根元素：数据录入页在内容区，修改参数滑窗打开时在抽屉内（两者不会同时存在） */
+  function formRoot() {
+    return $('fcDrawer') || $('agentShellContent');
+  }
+
+  /* 绑定折叠面板、添加产品按钮与表单输入事件（每个根元素只绑一次） */
+  function activateFormRoot(root) {
+    root.querySelectorAll('.fc-panel-head').forEach(function (btn) {
+      btn.onclick = function () {
+        var closed = btn.closest('.fc-panel').classList.toggle('closed');
+        btn.setAttribute('aria-expanded', String(!closed));
+      };
+    });
+    var addBtn = root.querySelector('#fcAddProduct');
+    if (addBtn) addBtn.onclick = function () {
+      collectForm();
+      if (state.data.products.length >= 10) return toast('原型最多展示 10 项产品／服务');
+      state.data.products.push({});
+      renderProducts();
+      edited();
+    };
+    if (root.dataset.fcBound) return;
+    root.dataset.fcBound = '1';
+    root.addEventListener('input', function (e) {
+      var input = e.target;
+      if (!input.dataset || !input.dataset.key) return;
+      if (input.hasAttribute('data-ratio') && input.value.trim() !== '') {
+        /* 聚焦状态下输入框显示原始小数（如 0.1），直接按小数记录 */
+        var rn = Number(input.value);
+        input.dataset.ratio = input.value.trim() === '' ? '' : (isFinite(rn) ? String(rn) : input.dataset.ratio);
+      }
+      var field = input.closest('.fc-field');
+      if (field) field.classList.remove('invalid');
+      edited();
+    });
+    root.addEventListener('focusin', function (e) {
+      var input = e.target;
+      if (input.hasAttribute && input.hasAttribute('data-ratio')) { input.value = input.dataset.ratio || ''; input.select(); }
+    });
+    root.addEventListener('focusout', function (e) {
+      var input = e.target;
+      if (!input.dataset || !input.dataset.key) return; /* 仅表单字段失焦时收集，避免结果页误覆盖参数 */
+      if (input.hasAttribute('data-percent')) {
+        var pv = Number(input.value);
+        input.value = input.value.trim() === '' ? '' : (isFinite(pv) ? pv.toFixed(2) : input.value);
+      } else if (input.hasAttribute('data-ratio')) {
+        var n = Number(input.dataset.ratio);
+        input.value = input.dataset.ratio === '' ? '' : (isFinite(n) ? (n * 100).toFixed(2).replace(/\.?0+$/, '') + '%' : input.value);
+      }
+      collectForm(); refreshChecks();
+    });
+  }
+
+  function renderForm() {
+    state.page = 'form';
+    window.setAgentStep(1);
+    var content = $('agentShellContent');
+    content.innerHTML = '<div class="fc-formpage">' + formHtml() + '</div>';
+    activateFormRoot(content);
+    renderProducts();
+    fillForm(state.data || DEFAULTS);
+    window.setAgentFoot({
+      secondaryText: '保存草稿',
+      secondary: function () { saveDraft(true); },
+      primaryText: '开始测算',
+      primary: startCalc
+    });
+  }
+
+  function renderProducts() {
+    var list = $('fcProductList');
+    if (!list) return;
+    list.innerHTML = state.data.products.map(function (p, i) {
+      return '<div class="fc-product" data-product="' + i + '">'
+        + '<div class="fc-product-head"><span>产品/服务 ' + (i + 1) + '</span>'
+        + (state.data.products.length > 1 ? '<button type="button" class="fc-product-del" data-remove="' + i + '" title="删除">✕</button>' : '')
+        + '</div>'
+        + '<div class="fc-grid-4">' + PRODUCT_FIELDS.map(function (f) { return fieldHtml(f, 'fc-p' + i + '-'); }).join('') + '</div>'
+        + '</div>';
+    }).join('');
+    list.querySelectorAll('[data-remove]').forEach(function (btn) {
+      btn.onclick = function () {
+        collectForm();
+        state.data.products.splice(Number(btn.dataset.remove), 1);
+        renderProducts();
+        edited();
+      };
+    });
+    /* 回填产品值 */
+    state.data.products.forEach(function (p, i) {
+      PRODUCT_FIELDS.forEach(function (f) {
+        var el = $('fc-p' + i + '-' + f[0]);
+        if (el) setValue(el, p[f[0]]);
+      });
+    });
+  }
+
+  function fillForm(d) {
+    ['total', 'construction', 'operation', 'discount', 'industryBenchmark', 'target',
+     'equipment', 'software', 'research', 'building', 'installation', 'otherConstruction',
+     'land', 'reserve', 'buildInterest', 'working', 'equity', 'loan', 'interest', 'subsidy'].forEach(function (k) {
+      var el = $(k);
+      if (el) setValue(el, d[k]);
+    });
+    var rs = $('fcRampSummary');
+    if (rs) rs.value = rampSummaryText(d.ramp);
+    refreshChecks();
+  }
+
+  function collectForm() {
+    var d = { products: [] };
+    d.ramp = (state.data && state.data.ramp ? state.data.ramp : []).slice(); /* 爬坡计划由编辑弹窗维护 */
+    ['total', 'construction', 'operation', 'discount', 'industryBenchmark', 'target',
+     'equipment', 'software', 'research', 'building', 'installation', 'otherConstruction',
+     'land', 'reserve', 'buildInterest', 'working', 'equity', 'loan', 'interest', 'subsidy'].forEach(function (k) {
+      var el = $(k);
+      d[k] = el ? getValue(el) : null;
+    });
+    var pEls = document.querySelectorAll('[data-product]');
+    pEls.forEach(function (card) {
+      var idx = Number(card.dataset.product);
+      d.products[idx] = {};
+      PRODUCT_FIELDS.forEach(function (f) {
+        var el = $('fc-p' + idx + '-' + f[0]);
+        d.products[idx][f[0]] = el ? getValue(el) : null;
+      });
+    });
+    state.data = d;
+    return d;
+  }
+
+  function readChecked() { return state.data; }
+
+  function refreshChecks() {
+    var d = state.data;
+    if (!d) return;
+    [['fcInvestCheck', INVEST_FIELDS, '投资构成'], ['fcFundingCheck', FUNDING_FIELDS, '资金来源']].forEach(function (cfg) {
+      var box = $(cfg[0]);
+      if (!box) return;
+      var keys = cfg[1].map(function (f) { return f[0]; });
+      var sum = keys.reduce(function (a, k) { return a + (num(d[k]) || 0); }, 0);
+      var all = keys.every(function (k) { return d[k] != null; });
+      var diff = sum - (num(d.total) || 0);
+      var ok = Math.abs(diff) < 0.005;
+      box.className = 'fc-check' + (d.total == null || !all ? '' : ok ? ' ok' : ' warn');
+      box.textContent = d.total == null ? '填写项目总投资后核对' + cfg[2]
+        : !all ? cfg[2] + '已填写 ' + fmt(sum) + ' 万元；请补齐各项，无此项填 0。'
+        : ok ? '✓ ' + cfg[2] + '合计 ' + fmt(sum) + ' 万元，与项目总投资一致。'
+        : cfg[2] + '合计 ' + fmt(sum) + ' 万元，与项目总投资相差 ' + fmt(diff) + ' 万元，请核对。';
+    });
+  }
+
+  function edited() {
+    collectForm();
+    refreshChecks();
+    clearTimeout(state.saveTimer);
+    state.saveTimer = setTimeout(function () { saveDraft(false); }, 600);
+  }
+
+  function saveDraft(manual) {
+    var ok = false;
+    try { localStorage.setItem(DRAFT_KEY, JSON.stringify(state.data)); ok = true; } catch (e) {}
+    if (manual) toast(ok ? '草稿已保存，可随时返回继续修改' : '当前浏览器不允许保存到本机');
+  }
+
+  /* ---------- 校验 ---------- */
+  function validate() {
+    var d = state.data;
+    var bad = [];
+    ['total', 'construction', 'operation'].forEach(function (k) { if (!(num(d[k]) > 0)) bad.push(k); });
+    ['discount'].forEach(function (k) { if (d[k] == null) bad.push(k); });
+    ['equity', 'loan', 'subsidy'].forEach(function (k) { if (d[k] == null) bad.push(k); });
+    INVEST_FIELDS.forEach(function (f) { if (d[f[0]] == null) bad.push(f[0]); });
+    document.querySelectorAll('#' + formRoot().id + ' .fc-field').forEach(function (el) { el.classList.remove('invalid'); });
+    d.products.forEach(function (p, i) {
+      PRODUCT_FIELDS.forEach(function (f) {
+        if (p[f[0]] == null || p[f[0]] === '') bad.push('fc-p' + i + '-' + f[0]);
+      });
+    });
+    if (bad.length) {
+      bad.forEach(function (k) {
+        var el = $(k) || document.querySelector('[data-field="' + k + '"]');
+        if (el) { var f = el.closest('.fc-field'); if (f) f.classList.add('invalid'); }
+      });
+      var err = $('fcFormError');
+      err.textContent = '请补齐红色标注的字段；项目总投资、建设周期、运营期须大于 0。比例字段请按百分比填写（如 10%）。';
+      err.classList.add('show');
+      var first = $(bad[0]);
+      if (first) { first.scrollIntoView({ block: 'center', behavior: 'smooth' }); first.focus({ preventScroll: true }); }
+      return false;
+    }
+    var sumOk = [INVEST_FIELDS, FUNDING_FIELDS].every(function (fields) {
+      var sum = fields.reduce(function (a, f) { return a + (num(d[f[0]]) || 0); }, 0);
+      return Math.abs(sum - num(d.total)) < 0.005;
+    });
+    if (!sumOk) {
+      var err = $('fcFormError');
+      err.textContent = '投资构成与资金来源合计须与项目总投资一致，请核对后重新测算（无此项填 0）。';
+      err.classList.add('show');
+      return false;
+    }
+    $('fcFormError').classList.remove('show');
+    return true;
+  }
+
+  /* ---------- 测算（原型演示口径：按填写参数确定性计算） ---------- */
+  function computeAll(d) {
+    var invest = num(d.total);
+    var buildYears = Math.max(1, Math.ceil(num(d.construction) / 12));
+    var opYears = Math.max(1, Math.round(num(d.operation)));
+    var cols = 12;
+    var revFull = 0, costW = 0;
+    (d.products || []).forEach(function (p) {
+      var cap = parseFloat(String(p.capacity == null ? '' : p.capacity).replace(/[^\d.eE+-]/g, '')) || 0;
+      var r = num(p.price) * cap;
+      revFull += r;
+      costW += r * (num(p.cost) || 0);
+    });
+    var costRatio = revFull > 0 ? costW / revFull : 0.3;
+    var ramp = [0, 1, 2, 3, 4].map(function (i) {
+      var v = (d.ramp || [])[i];
+      return (v == null || v === '') ? 1 : num(v);
+    });
+    var dep = (invest - num(d.working)) / opYears;
+    var loan = num(d.loan), rate = num(d.interest);
+    var repayYears = Math.min(5, opYears);
+    var rows = [];
+    for (var t = 1; t <= cols; t++) {
+      var rev = 0, y = t - buildYears;
+      if (t > buildYears && y <= opYears) { var rv = ramp[y - 1]; rev = revFull * (rv == null || !isFinite(rv) ? 1 : rv); }
+      var cost = rev * costRatio;
+      var depY = rev > 0 ? dep : 0;
+      var intY = (t > buildYears && (t - buildYears) <= repayYears) ? loan * rate * (repayYears - (t - buildYears) + 1) / repayYears : 0;
+      var profit = rev - cost - depY - intY;
+      var tax = Math.max(0, profit) * 0.25;
+      var capex = t <= buildYears ? invest / buildYears : 0;
+      rows.push({ rev: rev, cost: cost, dep: depY, int: intY, profit: profit, tax: tax, net: profit - tax, netCash: rev - cost - tax - capex });
+    }
+    function npvAt(r) { var s = 0; rows.forEach(function (row, i) { s += row.netCash / Math.pow(1 + r, i + 1); }); return s; }
+    var irr = null, lo = -0.9, hi = 2, flo = npvAt(lo), fhi = npvAt(hi);
+    if (isFinite(flo) && isFinite(fhi) && flo * fhi < 0) {
+      for (var k = 0; k < 80; k++) {
+        var mid = (lo + hi) / 2, fm = npvAt(mid);
+        if (Math.abs(fm) < 1e-8) { lo = mid; break; }
+        if (flo * fm < 0) { hi = mid; fhi = fm; } else { lo = mid; flo = fm; }
+      }
+      irr = (lo + hi) / 2;
+    }
+    function payback(disc) {
+      var rateY = num(d.discount), cum = 0;
+      for (var i = 0; i < rows.length; i++) {
+        var cf = rows[i].netCash / (disc ? Math.pow(1 + rateY, i + 1) : 1);
+        var prev = cum; cum += cf;
+        if (prev < 0 && cum >= 0) return i + (-prev) / cf;
+      }
+      return null;
+    }
+    return {
+      invest: invest, cols: cols, buildYears: buildYears, opYears: opYears, rows: rows,
+      revFull: revFull, costRatio: costRatio, dep: dep,
+      irr: revFull > 0 ? irr : null,
+      npv: revFull > 0 ? npvAt(num(d.discount)) : null,
+      paybackDyn: revFull > 0 ? payback(true) : null,
+      paybackStatic: revFull > 0 ? payback(false) : null
+    };
+  }
+
+  /* ---------- 测算中过渡页 ---------- */
+  function renderGenerating() {
+    state.page = 'generating';
+    window.setAgentStep(1);
+    window.setAgentFoot({});
+    $('agentShellContent').innerHTML = '<div class="fc-formpage"><div class="af-card fc-gen-fill"><div class="af-gen">'
+      + '<div class="af-gen-spinner"></div>'
+      + '<div class="af-gen-title">正在进行财务测算</div>'
+      + '<div class="af-gen-desc">正在按本次填写的参数测算财务指标并生成 Excel 财务附表，请稍候。</div>'
+      + '<div class="af-gen-progress"><div class="af-gen-progress-bar" id="fcGenBar"></div></div>'
+      + '<div class="af-gen-status" id="fcGenStatus">测算进度 0%</div>'
+      + '</div></div></div>';
+    var p = 0;
+    state.genTimer = setInterval(function () {
+      p = Math.min(100, p + Math.random() * 16 + 7);
+      $('fcGenBar').style.width = p + '%';
+      $('fcGenStatus').textContent = '测算进度 ' + Math.round(p) + '%';
+      if (p >= 100) {
+        clearInterval(state.genTimer);
+        setTimeout(finishCalc, 500);
+      }
+    }, 380);
+  }
+
+  function startCalc() {
+    if (state.busy) return;
+    collectForm();
+    saveDraft(false);
+    if (!validate()) return;
+    state.pending = JSON.parse(JSON.stringify(state.data));
+    renderGenerating();
+  }
+
+  /* ---------- 修改参数滑窗：在测算结果页上直接改参数，关闭后仍留在结果页 ---------- */
+  function openEditDrawer() {
+    if (state.busy) return;
+    closeEditDrawer(true);
+    var mask = document.createElement('div');
+    mask.className = 'fc-drawer-mask';
+    mask.id = 'fcDrawerMask';
+    var drawer = document.createElement('div');
+    drawer.className = 'fc-drawer';
+    drawer.id = 'fcDrawer';
+    drawer.innerHTML = '<div class="fc-drawer-head"><b>修改测算参数</b>'
+      + '<span class="fc-drawer-hint">修改后点击“开始测算”生成新的测算结果，历史记录均保留</span>'
+      + '<button class="fc-modal-close" id="fcDrawerClose" title="关闭">✕</button></div>'
+      + '<div class="fc-drawer-body"><div class="fc-formpage">' + formHtml() + '</div></div>'
+      + '<div class="fc-drawer-foot">'
+      + '<button class="af-btn af-btn-outline" id="fcDrawerCancel">取消</button>'
+      + '<button class="af-btn af-btn-primary" id="fcDrawerCalc">开始测算</button>'
+      + '</div>';
+    document.body.appendChild(mask);
+    document.body.appendChild(drawer);
+    activateFormRoot(drawer);
+    renderProducts();
+    fillForm(state.data || DEFAULTS);
+    mask.onclick = function () { closeEditDrawer(); };
+    $('fcDrawerClose').onclick = function () { closeEditDrawer(); };
+    $('fcDrawerCancel').onclick = function () { closeEditDrawer(); };
+    $('fcDrawerCalc').onclick = startCalcFromDrawer;
+    requestAnimationFrame(function () {
+      mask.classList.add('show');
+      drawer.classList.add('show');
+    });
+  }
+
+  function closeEditDrawer(instant) {
+    var mask = $('fcDrawerMask'), drawer = $('fcDrawer');
+    if (!drawer) return;
+    if (instant) { mask.remove(); drawer.remove(); return; }
+    /* 关闭前暂存已修改的参数，下次打开可继续编辑 */
+    collectForm(); saveDraft(false);
+    mask.classList.remove('show');
+    drawer.classList.remove('show');
+    setTimeout(function () { mask.remove(); drawer.remove(); }, 260);
+  }
+
+  function startCalcFromDrawer() {
+    if (state.busy) return;
+    collectForm();
+    saveDraft(false);
+    if (!validate()) return; /* 校验不通过时留在滑窗内提示 */
+    closeEditDrawer(true);
+    state.pending = JSON.parse(JSON.stringify(state.data));
+    renderGenerating();
+  }
+
+  function finishCalc() {
+    var d = state.pending;
+    var m = computeAll(d);
+    var entry = {
+      id: 'FC-' + Date.now().toString(36).toUpperCase(),
+      time: nowStr(),
+      data: d,
+      metrics: { irr: m.irr, npv: m.npv, paybackDyn: m.paybackDyn, paybackStatic: m.paybackStatic },
+      fileName: '可研财务测算附表_' + nowStr().replace(/[- :]/g, '') + '.xls'
+    };
+    var list = loadHistory();
+    list.unshift(entry);
+    try { localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(0, 30))); } catch (e) {}
+    renderResult(entry);
+  }
+
+  /* ---------- 测算结果页 ---------- */
+  function loadHistory() {
+    try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch (e) { return []; }
+  }
+  /* 结果主区（测算完成卡片），供结果页与预览返回时重建 */
+  function resultMainHtml(entry) {
+    return '<div class="af-card fc-card fc-result-main-card"><div class="fc-result-head">'
+      + '<div class="fc-result-icon">✓</div>'
+      + '<div class="fc-result-title">测算完成</div>'
+      + '<div class="fc-result-sub">' + esc(entry.id) + ' · ' + esc(entry.time) + ' · 全部财务附表已生成</div>'
+      + '</div>'
+      + '<div class="fc-result-actions">'
+      + '<button class="af-btn af-btn-primary" id="fcDownload">下载 Excel 财务附表</button>'
+      + '<button class="af-btn af-btn-outline" id="fcPreview">预览财务附表</button>'
+      + '<button class="af-btn af-btn-outline" id="fcEdit">修改参数</button>'
+      + '</div>'
+      + '<div class="fc-note">财务指标与附表为原型演示口径，按本次填写参数在浏览器内模拟计算，不作为正式项目评价依据。<br>回收期均为含建设期口径；每次测算结果均保留在历史记录中，可随时预览与下载。</div></div>';
+  }
+  function bindResultMain(entry) {
+    $('fcDownload').onclick = function () { downloadEntry(entry); };
+    $('fcPreview').onclick = function () { showPreviewPage(entry); };
+    $('fcEdit').onclick = openEditDrawer;
+  }
+  function renderResult(entry) {
+    state.page = 'result';
+    window.setAgentStep(2);
+    state.resultEntry = entry;
+    var html = '<div class="fc-result-grid">'
+      + '<div id="fcResultMain">' + resultMainHtml(entry) + '</div>'
+      + '<div class="fc-result-side"><div class="af-card fc-card"><div class="af-form-section-title">历史测算记录</div><div id="fcHistory"></div></div></div>'
+      + '</div>';
+    $('agentShellContent').innerHTML = '<div class="fc-formpage">' + html + '</div>';
+    bindResultMain(entry);
+    renderHistory();
+    window.setAgentFoot({
+      secondary: true, secondaryText: '下载 Excel 附表',
+      secondary: function () { downloadEntry(entry); },
+      primaryText: '修改参数',
+      primary: openEditDrawer
+    });
+  }
+
+  function renderHistory() {
+    var box = $('fcHistory');
+    if (!box) return;
+    var list = loadHistory();
+    if (!list.length) { box.innerHTML = '<div class="fc-hist-empty">暂无历史测算记录</div>'; return; }
+    box.innerHTML = list.map(function (e, i) {
+      var d = e.data || {};
+      var summary = '总投资 ' + fmt(d.total) + ' 万元 · 建设期 ' + fmt(d.construction, 0) + ' 个月 · 运营期 ' + fmt(d.operation, 0) + ' 年 · ' + (d.products || []).length + ' 项产品／服务';
+      return '<div class="fc-hist-item">'
+        + '<div class="fc-hist-main"><div class="fc-hist-name">' + esc(e.id) + '</div>'
+        + '<div class="fc-hist-meta">' + esc(e.time) + ' · ' + esc(summary) + '</div></div>'
+        + '<div class="fc-hist-btns">'
+        + '<button class="af-btn af-btn-outline af-btn-sm" data-preview="' + i + '">预览</button>'
+        + '<button class="af-btn af-btn-outline af-btn-sm" data-download="' + i + '">下载 Excel</button>'
+        + '</div></div>';
+    }).join('');
+    box.querySelectorAll('[data-preview]').forEach(function (b) {
+      b.onclick = function () { showPreviewPage(loadHistory()[Number(b.dataset.preview)]); };
+    });
+    box.querySelectorAll('[data-download]').forEach(function (b) {
+      b.onclick = function () { downloadEntry(loadHistory()[Number(b.dataset.download)]); };
+    });
+  }
+
+  /* ---------- Excel 附表（.xls / HTML 表格格式，Excel 可直接打开） ---------- */
+  /* 附表表格主体：下载文件与页面预览共用同一份内容 */
+  function buildExcelTables(e) {
+    var d = e.data, m = computeAll(d), mm = e.metrics || {};
+    var years = []; for (var i = 1; i <= m.cols; i++) years.push('第' + i + '年');
+    function table(title, head, rows) {
+      var h = '<h4>' + esc(title) + '</h4><table class="fc-table"><tr>';
+      head.forEach(function (c) { h += '<th>' + esc(c) + '</th>'; });
+      h += '</tr>';
+      rows.forEach(function (r) {
+        h += '<tr>';
+        r.forEach(function (c, ci) { h += '<td' + (ci > 0 ? ' class="num"' : '') + '>' + esc(c == null ? '' : c) + '</td>'; });
+        h += '</tr>';
+      });
+      return h + '</table>';
+    }
+    var html = '';
+    html += table('一、指标汇总', ['指标', '结果', '口径'], [
+      ['项目总投资', fmt(d.total) + ' 万元', '本次填写'],
+      ['项目税后内部收益率', mm.irr == null ? '—' : pct(mm.irr), '演示口径'],
+      ['项目税后财务净现值', mm.npv == null ? '—' : fmt(mm.npv) + ' 万元', '基准收益率 ' + pct(d.discount) + '，演示口径'],
+      ['项目税后动态投资回收期', mm.paybackDyn == null ? '计算期内未回收' : fmt(mm.paybackDyn, 1) + ' 年', '含建设期，演示口径'],
+      ['项目税后静态投资回收期', mm.paybackStatic == null ? '计算期内未回收' : fmt(mm.paybackStatic, 1) + ' 年', '含建设期，演示口径'],
+      ['建设周期 / 运营期', fmt(d.construction, 0) + ' 个月 / ' + fmt(d.operation, 0) + ' 年', '本次填写']
+    ]);
+    html += table('二、投资与资金筹措（万元）', ['投资构成', '金额', '资金来源', '金额'], (function () {
+      var rows = INVEST_FIELDS.map(function (f, i) {
+        var g = FUNDING_FIELDS[i];
+        return [f[1], fmt(d[f[0]]), g ? g[1] : '', g ? fmt(d[g[0]]) : ''];
+      });
+      var sumI = INVEST_FIELDS.reduce(function (a, f) { return a + num(d[f[0]]); }, 0);
+      var sumF = FUNDING_FIELDS.reduce(function (a, f) { return a + num(d[f[0]]); }, 0);
+      rows.push(['投资构成合计', fmt(sumI), '资金来源合计', fmt(sumF)]);
+      rows.push(['项目总投资', fmt(d.total), '项目总投资', fmt(d.total)]);
+      rows.push(['与总投资差额', fmt(sumI - num(d.total)), '与总投资差额', fmt(sumF - num(d.total))]);
+      return rows;
+    })());
+    var yearHead = ['项目', '单位'].concat(years);
+    function yearRow(label, fn, digits) {
+      return [label, '万元'].concat(m.rows.map(function (r) { return fmt(fn(r), digits == null ? 2 : digits); }));
+    }
+    html += table('三、收入与成本费用', yearHead, [
+      yearRow('营业收入', function (r) { return r.rev; }),
+      yearRow('经营成本', function (r) { return r.cost; }),
+      yearRow('折旧与摊销', function (r) { return r.dep; }),
+      yearRow('支付利息', function (r) { return r.int; }),
+      yearRow('总成本费用', function (r) { return r.cost + r.dep + r.int; })
+    ]);
+    html += table('四、利润及利润分配', yearHead, [
+      yearRow('营业收入', function (r) { return r.rev; }),
+      yearRow('利润总额', function (r) { return r.profit; }),
+      yearRow('所得税', function (r) { return r.tax; }),
+      yearRow('净利润', function (r) { return r.net; })
+    ]);
+    html += table('五、项目投资现金流量', yearHead, (function () {
+      var cum = 0;
+      return [
+        yearRow('税后净现金流量', function (r) { return r.netCash; }),
+        ['累计净现金流量', '万元'].concat(m.rows.map(function (r) { cum += r.netCash; return fmt(cum); }))
+      ];
+    })());
+    var paramRows = [
+      ['项目总投资', fmt(d.total), '万元'], ['建设周期', fmt(d.construction, 0), '月'],
+      ['运营期', fmt(d.operation, 0), '年'], ['基准收益率', pct(d.discount), '比例'],
+      ['行业基准', d.industryBenchmark || '未填写', '选项'], ['期望投资回收期', d.target == null ? '未设置' : fmt(d.target) + ' 年', '年'],
+      ['贷款利率', pct(d.interest), '比例']
+    ];
+    INVEST_FIELDS.forEach(function (f) { paramRows.push(['投资构成 - ' + f[1], fmt(d[f[0]]), '万元']); });
+    FUNDING_FIELDS.forEach(function (f) { paramRows.push(['资金来源 - ' + f[1], fmt(d[f[0]]), '万元']); });
+    paramRows.push(['爬坡计划', rampSummaryText(d.ramp) || '未填写（各年按100%达产）', '达产目标']);
+    (d.products || []).forEach(function (p, i) {
+      paramRows.push(['产品／服务' + (i + 1), p.name || '', '']);
+      paramRows.push(['　计价单位 / 单价', (p.unit || '') + ' / ' + fmt(p.price, 8) + ' 万元', '']);
+      paramRows.push(['　达产年产能 / 增值税率 / 直接成本占比', (p.capacity || '') + ' / ' + pct(p.vat) + ' / ' + pct(p.cost), '']);
+    });
+    html += table('六、参数与假设', ['参数', '数值', '单位或说明'], paramRows);
+    html += '<p style="font-size:12px;color:#888;">说明：本附表为原型演示口径，指标由浏览器按本次填写参数模拟计算，不作为正式项目评价依据。</p>';
+    return html;
+  }
+
+  function buildExcelHtml(e) {
+    return '<html><head><meta charset="utf-8"><title>可研财务测算附表</title></head><body>'
+      + '<h3>可研财务测算附表 · ' + esc(e.id) + ' · ' + esc(e.time) + '</h3>'
+      + buildExcelTables(e)
+      + '</body></html>';
+  }
+
+  /* ---------- 附表页面预览：在结果主区内嵌展示 Excel 附表内容（非弹窗） ---------- */
+  function showPreviewPage(e) {
+    var main = $('fcResultMain');
+    if (!main) return;
+    main.innerHTML = '<div class="af-card fc-card"><div class="fc-xlsx-head">'
+      + '<b>财务附表预览 · ' + esc(e.id) + '（' + esc(e.time) + '）</b>'
+      + '<button class="af-btn af-btn-outline af-btn-sm" id="fcPreviewBack">返回测算结果</button></div>'
+      + '<div class="fc-xlsx-body">' + buildExcelTables(e) + '</div></div>';
+    $('fcPreviewBack').onclick = function () {
+      main.innerHTML = resultMainHtml(state.resultEntry);
+      bindResultMain(state.resultEntry);
+    };
+    var scroller = $('agentShellContent');
+    if (scroller) scroller.scrollTop = 0;
+  }
+
+  function downloadEntry(e) {
+    var blob = new Blob(['\ufeff' + buildExcelHtml(e)], { type: 'application/vnd.ms-excel' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = (e.fileName || '可研财务测算附表.xls').replace(/[\\/:*?"<>|]/g, '_');
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+    toast('已下载 Excel 财务附表（' + e.id + '）');
+  }
+
+  /* ---------- 爬坡计划编辑弹窗（与可研专业版"信息确认与锚定"一致） ---------- */
+  function fmtRampPct(v) { var n = num(v) * 100; return n.toFixed(2).replace(/\.?0+$/, ''); }
+  /* 与专业版口径一致：展示到最后一个非100%年份的下一个年度收尾 */
+  function rampPlanList(ramp) {
+    var list = [], lastLt1 = -1;
+    (ramp || []).forEach(function (v, i) {
+      if (v == null || !isFinite(v)) return;
+      list.push({ y: i + 1, p: v });
+      if (v < 1) lastLt1 = list.length - 1;
+    });
+    if (!list.length) return [];
+    var end = lastLt1 >= 0 ? Math.min(lastLt1 + 1, list.length - 1) : 0;
+    return list.slice(0, end + 1);
+  }
+  function rampSummaryText(ramp) {
+    return rampPlanList(ramp).map(function (o) { return '第' + o.y + '年达产目标' + fmtRampPct(o.p) + '%'; }).join('、');
+  }
+  function rampModalMaxYears() {
+    var el = document.getElementById('operation');
+    var n = el ? parseInt(el.value, 10) : NaN;
+    return (isFinite(n) && n > 0) ? Math.min(n, 10) : 10;
+  }
+  function renderRampRows(plans) {
+    var tbody = $('fcRampRows');
+    tbody.innerHTML = '';
+    plans.slice(0, rampModalMaxYears()).forEach(function (p, i) {
+      var tr = document.createElement('tr');
+      var yearTd = document.createElement('td');
+      yearTd.className = 'fc-ramp-year-cell';
+      yearTd.innerHTML = '<span class="fc-ramp-year-display">第' + (i + 1) + '年</span>'
+        + (i > 0 ? '<button type="button" class="fc-ramp-del" title="删除该运营期" aria-label="删除第' + (i + 1) + '年">×</button>' : '');
+      var inputTd = document.createElement('td');
+      inputTd.innerHTML = '<input class="af-input fc-ramp-target" inputmode="decimal" autocomplete="off" value="' + (p.t == null ? '' : p.t) + '">';
+      tr.appendChild(yearTd);
+      tr.appendChild(inputTd);
+      tbody.appendChild(tr);
+    });
+    updateRampRows();
+  }
+  function updateRampRows() {
+    var tbody = $('fcRampRows');
+    var rows = tbody.querySelectorAll('tr');
+    rows.forEach(function (row, i) {
+      var yd = row.querySelector('.fc-ramp-year-display');
+      var del = row.querySelector('.fc-ramp-del');
+      if (yd) yd.textContent = '第' + (i + 1) + '年';
+      if (del) del.style.display = rows.length > 1 ? '' : 'none';
+    });
+    var addBtn = $('fcRampAdd'), err = $('fcRampError');
+    var max = rampModalMaxYears();
+    var reached = rows.length >= max;
+    addBtn.disabled = reached;
+    addBtn.title = reached ? '已达到项目运营期上限（第' + max + '年）' : '增加下一运营期';
+    if (err && reached) err.textContent = '已达到项目运营期上限（第' + max + '年），不能继续增加。';
+    else if (err) err.textContent = '';
+  }
+  function openRampModal() {
+    var list = rampPlanList(state.data.ramp);
+    var plans = list.map(function (o) { return { t: Number((num(o.p) * 100).toFixed(10)) }; });
+    if (!plans.length) plans = [{ t: 30 }, { t: 70 }, { t: 100 }];
+    renderRampRows(plans);
+    $('fcRampModal').classList.add('show');
+    var first = $('fcRampRows').querySelector('.fc-ramp-target');
+    if (first) first.focus();
+  }
+  function closeRampModal() { $('fcRampModal').classList.remove('show'); }
+  function confirmRampModal() {
+    var err = $('fcRampError'), plans = [], message = '';
+    $('fcRampRows').querySelectorAll('tr').forEach(function (row) {
+      if (message) return;
+      var input = row.querySelector('.fc-ramp-target');
+      var text = input ? input.value.trim() : '';
+      if (!/^(?:\d+(?:\.\d+)?|\.\d+)$/.test(text)) { message = '请填写达产目标。'; return; }
+      var t = parseFloat(text);
+      if (t < 0 || t > 100) { message = '达产目标应在0%至100%之间。'; return; }
+      plans.push(t);
+    });
+    if (!message && !plans.length) message = '请至少保留一行计划年。';
+    if (message) { err.textContent = message; return; }
+    var ramp = [];
+    plans.forEach(function (t, i) { ramp[i] = t / 100; });
+    state.data.ramp = ramp;
+    var rs = $('fcRampSummary');
+    if (rs) rs.value = rampSummaryText(ramp);
+    closeRampModal();
+    edited();
+    collectForm();
+    saveDraft(false);
+  }
+  function bindRampModal() {
+    document.addEventListener('click', function (e) {
+      if (e.target && e.target.id === 'fcRampSummary') openRampModal();
+      if (e.target && e.target.classList && e.target.classList.contains('fc-ramp-del')) {
+        var tr = e.target.closest('tr');
+        if (tr && $('fcRampRows').querySelectorAll('tr').length > 1) { tr.remove(); updateRampRows(); }
+      }
+    });
+    document.addEventListener('input', function (e) {
+      if (e.target && e.target.classList && e.target.classList.contains('fc-ramp-target')) {
+        e.target.value = e.target.value.replace(/[^\d.]/g, '').replace(/^(\..*)/, '0$1');
+      }
+    });
+    document.addEventListener('focusout', function (e) {
+      if (e.target && e.target.classList && e.target.classList.contains('fc-ramp-target') && e.target.value.trim() !== '') {
+        var n = Number(e.target.value);
+        if (isFinite(n)) e.target.value = n.toFixed(2).replace(/\.?0+$/, '');
+      }
+    });
+    $('fcRampModalClose').onclick = closeRampModal;
+    $('fcRampCancel').onclick = closeRampModal;
+    $('fcRampConfirm').onclick = confirmRampModal;
+    $('fcRampAdd').onclick = function () {
+      var tbody = $('fcRampRows');
+      if (tbody.querySelectorAll('tr').length >= rampModalMaxYears()) { updateRampRows(); return; }
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td class="fc-ramp-year-cell"><span class="fc-ramp-year-display"></span><button type="button" class="fc-ramp-del" title="删除该运营期">×</button></td>'
+        + '<td><input class="af-input fc-ramp-target" inputmode="decimal" autocomplete="off"></td>';
+      tbody.appendChild(tr);
+      updateRampRows();
+      tr.querySelector('.fc-ramp-target').focus();
+    };
+    $('fcRampModal').addEventListener('click', function (e) { if (e.target === $('fcRampModal')) closeRampModal(); });
+  }
+
+  /* ---------- 初始化 ---------- */
+  shellReady(function () {
+    var draft = null;
+    try { draft = JSON.parse(localStorage.getItem(DRAFT_KEY)); } catch (e) {}
+    state.data = draft && draft.products && draft.products.length ? draft : JSON.parse(JSON.stringify(DEFAULTS));
+    bindRampModal();
+    renderForm();
+    if (draft) toast('已恢复上次填写的参数，可继续修改');
+  });
+})();
+</script>
+
+<!-- 爬坡计划编辑弹窗（与可研专业版"信息确认与锚定"一致） -->
+<div class="fc-rampmodal-mask" id="fcRampModal">
+  <div class="fc-rampmodal">
+    <div class="fc-rampmodal-head"><b>编辑爬坡计划</b><button type="button" class="fc-rampmodal-close" id="fcRampModalClose">✕</button></div>
+    <div class="fc-rampmodal-body">
+      <p class="fc-rampmodal-tip">维护运营期各年的达产目标，确认后将按运营期顺序展示。最后一个已填写年度之后，后续年度均按100%计算，无需继续填写。</p>
+      <table>
+        <thead><tr><th>运营期</th><th>达产目标（%）</th></tr></thead>
+        <tbody id="fcRampRows"></tbody>
+      </table>
+      <button type="button" class="af-btn af-btn-outline af-btn-sm fc-rampmodal-add" id="fcRampAdd">＋ 增加计划年</button>
+      <div class="fc-rampmodal-error" id="fcRampError" aria-live="polite"></div>
+    </div>
+    <div class="fc-rampmodal-foot">
+      <button type="button" class="af-btn af-btn-outline" id="fcRampCancel">取消</button>
+      <button type="button" class="af-btn af-btn-primary" id="fcRampConfirm">确认</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
