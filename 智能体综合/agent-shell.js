@@ -312,6 +312,7 @@
     { name: '企查查科技_商业大数据可研', exec: 'running', viewed: true, agent: '可研专业版' },
     { name: '某某集团_企业全景尽调分析', exec: 'running', viewed: true, agent: '企业全景分析' },
     { name: '北京笃威尔_智能仓储立项报告', exec: 'done', viewed: false, agent: '项目立项报告' },
+    { name: '恒润制造_可研财务测算报告', exec: 'done', viewed: false, agent: '可研财务测算' },
     { name: '星云半导体_投前尽调报告', exec: 'done', viewed: false, agent: '投前咨询分析' },
     { name: '园区管委会_招商策略初稿', exec: 'done', viewed: true, agent: '招商策略分析' },
     { name: '华能集团_冷链项目立项报告', exec: 'done', viewed: true, agent: '项目立项报告' },
@@ -345,6 +346,10 @@
     el.onclick = function () {
       var dot = el.querySelector('.task-view-dot');
       if (dot) dot.classList.add('hide');
+      if (t.agent === '可研财务测算') {
+        window.location.href = '可研财务测算.html' + (t.exec === 'done' ? '?phase=done' : '');
+        return;
+      }
       window.location.href = '../report.html?taskId=' + TASKS.indexOf(t);
     };
     // 未查看蓝点：仅当报告已生成（已完成）且尚未点击查看时展示

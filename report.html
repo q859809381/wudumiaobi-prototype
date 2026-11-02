@@ -944,6 +944,10 @@
       height: 26px;
       padding: 0 8px;
     }
+    /* 数值输入框隐藏浏览器自带的上下增减小箭头 */
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
     .chapter-settings-panel {
       flex: 1;
       background: #fff;
@@ -6274,6 +6278,7 @@
       { name: '企查查科技_商业大数据可研', exec: 'running', viewed: true, agent: '可研专业版' },
       { name: '某某集团_企业全景尽调分析', exec: 'running', viewed: true, agent: '企业全景分析' },
       { name: '北京笃威尔_智能仓储立项报告', exec: 'done', viewed: false, agent: '项目立项报告' },
+      { name: '恒润制造_可研财务测算报告', exec: 'done', viewed: false, agent: '可研财务测算' },
       { name: '星云半导体_投前尽调报告', exec: 'done', viewed: false, agent: '投前咨询分析' },
       { name: '园区管委会_招商策略初稿', exec: 'done', viewed: true, agent: '招商策略分析' },
       { name: '华能集团_冷链项目立项报告', exec: 'done', viewed: true, agent: '项目立项报告' },
@@ -6332,7 +6337,8 @@
         '项目立项报告': '项目立项报告.html',
         '企业全景分析': '企业全景分析报告.html',
         '投前咨询分析': '投前咨询分析报告.html',
-        '招商策略分析': '招商策略分析报告.html'
+        '招商策略分析': '招商策略分析报告.html',
+        '可研财务测算': '可研财务测算.html'
       };
       const page = pageMap[t.agent];
       if (t.agent !== '可研专业版' && page) {
