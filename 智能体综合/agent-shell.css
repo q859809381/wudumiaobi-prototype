@@ -106,6 +106,15 @@ body.agent-shelled #base .agent-shell-card {
   font-weight: 400;
   color: #bbb;
   letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* 品牌名与「工作台」标签同行 */
+.agent-shell-sidebar .brand-name-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
 }
 
 /* 品牌区「工作台」标签（提示当前处于五度易链工作台） */
@@ -113,7 +122,6 @@ body.agent-shelled #base .agent-shell-card {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  margin-left: 2px;
   padding: 2px 7px;
   border: 1px solid #dde3ea;
   border-radius: 4px;
