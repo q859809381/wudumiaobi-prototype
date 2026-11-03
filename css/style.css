@@ -299,6 +299,28 @@ ul, ol { list-style: none; }
   color: #bbb;
   letter-spacing: 0.5px;
 }
+/* 品牌区「工作台」标签（提示当前处于五度易链工作台） */
+.brand-ws-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 2px;
+  padding: 2px 7px;
+  border: 1px solid #dde3ea;
+  border-radius: 4px;
+  background: #fff;
+  color: #555;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 15px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.brand-ws-tag svg {
+  width: 11px;
+  height: 11px;
+  display: block;
+}
 
 /* ----- 侧栏展开/收起 ----- */
 .sidebar-collapse-btn {

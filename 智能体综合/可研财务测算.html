@@ -191,6 +191,8 @@
   /* 与可研专业版"信息确认与锚定"资金来源一致：企业自筹及比例 / 贷款及比例 / 政府补助（贷款利率为参数不计入合计） */
   var FUNDING_FIELDS = [['equity', '企业自筹及比例'], ['loan', '贷款及比例'], ['subsidy', '政府补助']];
   var INDUSTRY_OPTIONS = ['制造业', '软件业', '建筑业', '批发零售', '交通运输', '服务业', '其他'];
+  /* 行业基准 → 基准收益率默认值（%），选择行业后自动赋值，用户可手动调整 */
+  var INDUSTRY_BENCHMARK_RATE = { '制造业': 12, '软件业': 14, '建筑业': 10, '批发零售': 10, '交通运输': 8, '服务业': 10, '其他': 10 };
   var HIGHTech_OPTIONS = ['是，所得税按照15%计算', '否，所得税按照25%计算'];
   var PRODUCT_FIELDS = [
     ['name', '产品/服务名称', 'text', null, true],
@@ -318,9 +320,9 @@
       + '</div></div></div>'
       + '<div class="fc-panel"><div class="fc-panel-head"><span>财务评价参数</span></div>'
       + '<div class="fc-panel-body"><div class="fc-grid">'
-      + fieldHtml(['discount', '基准收益率', 'percent', null, false])
       + fieldHtml(['industryBenchmark', '行业基准', 'select-text', null, false, INDUSTRY_OPTIONS])
-      + fieldHtml(['target', '期望投资回收期（不含建设期，年）', 'number', null, false])
+      + fieldHtml(['discount', '基准收益率', 'percent', null, false])
+      + fieldHtml(['target', '期望投资回收期（不含建设期，年，若不填则默认为建设期的50%）', 'number', null, false])
       + '</div></div></div></div>';
     /* 三、投资与资金 */
     html += '<div class="af-card fc-card"><div class="fc-section-title">三、投资与资金</div>'
@@ -380,6 +382,15 @@
       }
       var field = input.closest('.fc-field');
       if (field) field.classList.remove('invalid');
+      /* 行业基准变更时，基准收益率自动跟随行业默认值（用户仍可手动调整） */
+      if (input.dataset.key === 'industryBenchmark' && input.value && INDUSTRY_BENCHMARK_RATE[input.value] != null) {
+        var dRate = INDUSTRY_BENCHMARK_RATE[input.value];
+        var dInput = root.querySelector('#discount');
+        if (dInput) {
+          dInput.value = dRate.toFixed(2);
+          if (state.data) state.data.discount = dRate / 100;
+        }
+      }
       edited();
     });
     root.addEventListener('focusin', function (e) {

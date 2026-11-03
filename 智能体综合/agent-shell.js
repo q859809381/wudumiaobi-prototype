@@ -418,6 +418,7 @@
       + '<div class="sidebar-brand" title="返回首页" onclick="window.location.href=\'../home.html\'">'
       +   '<div class="sidebar-brand-logo">5</div>'
       +   '<div class="sidebar-brand-name">5度易链<small>5 DEGREE EASY CHAIN</small></div>'
+      +   '<span class="brand-ws-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 9.5V21h14V9.5"/></svg>工作台</span>'
       + '</div>'
       + '<div class="sidebar-section sidebar-new-sec">'
       +   '<div class="sidebar-item sidebar-new-report" title="新建报告" onclick="window.location.href=\'../report.html\'">'
