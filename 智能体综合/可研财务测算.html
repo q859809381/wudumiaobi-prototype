@@ -204,12 +204,12 @@
   var DEFAULTS = {
     total: '', construction: '', operation: '',
     hightech: '',
-    discount: '', industryBenchmark: '', target: '',
+    discount: 0.12, industryBenchmark: '制造业', target: 5,
     equipment: '', software: '', research: '', building: '', installation: '',
     otherConstruction: '', land: '', reserve: '', buildInterest: '', working: '',
     equity: '', loan: '', interest: '', subsidy: '',
     products: [ { name: '', unit: '', price: '', capacity: '', vat: '', cost: '' } ],
-    ramp: []
+    ramp: [0.7, 0.9, 1]
   };
 
   var state = { page: 'form', data: null, busy: false, saveTimer: null, genTimer: null };
@@ -313,7 +313,7 @@
       + '<div class="fc-panel"><div class="fc-panel-head"><span>收入与成本</span></div>'
       + '<div class="fc-panel-body"><div id="fcProductList"></div>'
       + '<button type="button" class="fc-add-product" id="fcAddProduct">＋ 添加产品/服务</button>'
-      + '<div class="fc-ramp"><div class="fc-ramp-title">爬坡计划（如：第一年50%，第二年70%，第三年达产100%）</div>'
+      + '<div class="fc-ramp"><div class="fc-ramp-title">爬坡计划（默认第一年70%，第二年90%，第三年100%）</div>'
       + '<input class="af-input fc-ramp-summary" id="fcRampSummary" readonly title="点击编辑达产计划" placeholder="点击编辑达产计划（留空按各年100%计）">'
       + '</div></div></div>'
       + '<div class="fc-panel"><div class="fc-panel-head"><span>财务评价参数</span></div>'
@@ -950,7 +950,7 @@
   function openRampModal() {
     var list = rampPlanList(state.data.ramp);
     var plans = list.map(function (o) { return { t: Number((num(o.p) * 100).toFixed(10)) }; });
-    if (!plans.length) plans = [{ t: 30 }, { t: 70 }, { t: 100 }];
+    if (!plans.length) plans = [{ t: 70 }, { t: 90 }, { t: 100 }];
     renderRampRows(plans);
     $('fcRampModal').classList.add('show');
     var first = $('fcRampRows').querySelector('.fc-ramp-target');
