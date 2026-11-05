@@ -265,7 +265,7 @@
   /* 各智能体步骤（与页面内流程一致，参照专业版展示） */
   var STEPS_MAP = {
     '快速版·可行性研究报告': ['编辑基本信息', '上传项目信息', '生成中', '完整报告输出'],
-    '可研财务测算': ['数据录入', '测算结果'],
+    '可研财务测算': ['信息录入与测算'],
     '企业全景分析报告': ['编辑基本信息', '生成中', '完整报告输出'],
     '投前咨询分析报告': ['编辑基本信息', '生成中', '完整报告输出'],
     '招商策略分析报告': ['编辑基本信息', '生成中', '完整报告输出'],
@@ -329,14 +329,48 @@
   var taskFilter = 'all';
   var taskLoading = false;
 
+  /* 动态任务：由智能体页面（如可研财务测算）运行时写入，与演示任务合并展示，跨页面记忆 */
+  var DYN_TASKS_KEY = 'wudumiaobi.shell.dynamicTasks.v1';
+  function loadDynTasks() {
+    try { return JSON.parse(localStorage.getItem(DYN_TASKS_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveDynTasks(list) {
+    try { localStorage.setItem(DYN_TASKS_KEY, JSON.stringify(list.slice(0, 50))); } catch (e) {}
+  }
+  /* 供页面调用：新增或更新一条动态任务（按 id 匹配），并刷新任务列表 */
+  window.shellUpsertTask = function (task) {
+    if (!task || !task.id) return;
+    task.dyn = true;
+    var list = loadDynTasks();
+    var idx = -1;
+    for (var i = 0; i < list.length; i++) { if (list[i].id === task.id) { idx = i; break; } }
+    if (idx >= 0) list[idx] = task; else list.unshift(task);
+    saveDynTasks(list);
+    initTasks();
+  };
+  /* 供页面调用：按 id 读取一条动态任务（不存在返回 null） */
+  window.shellGetTask = function (id) {
+    var list = loadDynTasks();
+    for (var i = 0; i < list.length; i++) { if (list[i].id === id) return list[i]; }
+    return null;
+  };
+  /* 供页面调用：删除一条动态任务 */
+  window.shellRemoveTask = function (id) {
+    saveDynTasks(loadDynTasks().filter(function (t) { return t.id !== id; }));
+    initTasks();
+  };
+
   function taskPriority(t) {
     if (t.exec === 'draft') return 0;
     if (t.exec === 'running') return 1;
+    /* 动态任务（本次真实生成）排在演示任务之前，便于用户刚生成的任务立即可见 */
+    if (t.dyn) return t.exec === 'done' ? 2 : 1;
     if (t.exec === 'done' && !t.viewed) return 2;
     return 3;
   }
   function taskList() {
-    var list = taskFilter === 'all' ? TASKS : TASKS.filter(function (t) { return t.agent === taskFilter; });
+    var all = loadDynTasks().concat(TASKS);
+    var list = taskFilter === 'all' ? all : all.filter(function (t) { return t.agent === taskFilter; });
     return list.slice().sort(function (a, b) { return taskPriority(a) - taskPriority(b); });
   }
 
@@ -346,6 +380,13 @@
     el.onclick = function () {
       var dot = el.querySelector('.task-view-dot');
       if (dot) dot.classList.add('hide');
+      if (t.dyn) {
+        /* 动态任务：点击标记已查看（本地记忆）并跳转到对应智能体页面 */
+        t.viewed = true;
+        saveDynTasks(loadDynTasks().map(function (x) { return x.id === t.id ? t : x; }));
+        window.location.href = t.href || '可研财务测算.html?phase=done';
+        return;
+      }
       if (t.agent === '可研财务测算') {
         window.location.href = '可研财务测算.html' + (t.exec === 'done' ? '?phase=done' : '');
         return;
@@ -356,6 +397,9 @@
     var unviewed = t.exec === 'done' && !t.viewed;
     var viewDot = '<span class="task-view-dot' + (unviewed ? '' : ' hide') + '" title="未查看"></span>';
     var ring = t.exec === 'running' ? '<span class="task-load-ring" title="报告生成中"></span>' : '';
+    var delCall = t.dyn
+      ? 'window.shellRemoveTask&&shellRemoveTask(\'' + t.id + '\')'
+      : 'window.shellToast&&shellToast(\'原型演示\')';
     el.innerHTML = viewDot
       + (t.exec === 'draft' ? '<span class="task-draft-badge">草稿</span>' : '')
       + '<span class="sidebar-task-text">' + t.name + '</span>'
@@ -363,7 +407,7 @@
       + '<span class="sidebar-task-meta">' + t.agent + '</span>'
       + '<span class="task-actions">'
       + '<button class="task-act" title="编辑任务名称" onclick="event.stopPropagation();window.shellToast&&shellToast(\'原型演示\')">✎</button>'
-      + '<button class="task-act danger" title="删除任务" onclick="event.stopPropagation();window.shellToast&&shellToast(\'原型演示\')">✕</button>'
+      + '<button class="task-act danger" title="删除任务" onclick="event.stopPropagation();' + delCall + '">✕</button>'
       + '</span>';
     return el;
   }
@@ -467,12 +511,14 @@
       +     '<button class="agent-shell-expand-fab" id="shellExpandFab" title="展开导航" onclick="window.openShellDrawer()">☰</button>'
       +     '<div class="agent-shell-title">' + reportName + '</div>'
       +   '</div>'
-      +   '<div class="agent-shell-steps" id="agentShellSteps">'
-      +   stepLabels().map(function (s, i) {
-            return '<span class="agent-shell-step' + (s === '生成中' ? ' generating' : '') + (i === 0 ? ' active' : '') + '" data-step="' + (i + 1) + '">'
-              + '<span class="agent-shell-step-num">' + (i + 1) + '</span>' + s + '</span>';
-          }).join('')
-      +   '</div>'
+      +   (stepLabels().length > 1
+      ?     '<div class="agent-shell-steps" id="agentShellSteps">'
+      +       stepLabels().map(function (s, i) {
+                  return '<span class="agent-shell-step' + (s === '生成中' ? ' generating' : '') + (i === 0 ? ' active' : '') + '" data-step="' + (i + 1) + '">'
+                    + '<span class="agent-shell-step-num">' + (i + 1) + '</span>' + s + '</span>';
+                }).join('')
+      +     '</div>'
+      :     '')
       + '</header>'
       + '<footer class="agent-shell-foot">'
       +   '<button class="agent-shell-secondary-btn" id="agentShellSecondaryBtn" style="display:none;">保存内容</button>'

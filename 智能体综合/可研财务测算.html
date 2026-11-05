@@ -10,8 +10,8 @@
     /* ==================== 可研财务测算 专属样式 ==================== */
     /* agent-flow.css 的 border-box 只作用于 #agentFlowRoot，本页表单挂在别处，需自行声明，否则输入框按 content-box 溢出压到相邻控件 */
     .fc-formpage *, .fc-rampmodal-mask * { box-sizing: border-box; }
-    /* 本页 toast 移到页面顶部（头部与步骤条下方），默认在底部 */
-    .agent-shell-toast { bottom: auto; top: 90px; }
+    /* 本页 toast 移到页面顶部（头部下方），默认在底部 */
+    .agent-shell-toast { bottom: auto; top: 64px; }
     .fc-card { max-width: 1080px; }
     /* 数据录入页大宽版面：卡片撑满内容区，字段按宽度自适应多列（对齐可研专业版信息确认页的宽版式） */
     .fc-formpage .fc-card { max-width: none; }
@@ -29,6 +29,10 @@
     .fc-grid .af-form-field, .fc-grid-4 .af-form-field { margin-bottom: 4px; }
     .fc-field-help { font-size: 12px; color: #b3b9c4; margin-top: 3px; }
     .fc-field.invalid .af-input { border-color: #d24a43; background: #fdf6f5; }
+    /* 项目名称：整行展示，标签行右侧显示字数 0/80 */
+    .fc-field-name { margin-bottom: 14px; }
+    .fc-field-name .af-form-field { margin-bottom: 0; }
+    .fc-name-count { margin-left: auto; font-size: 12px; font-weight: 400; color: #999; }
     .fc-control { position: relative; }
     .fc-control .fc-unit {
       position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
@@ -106,61 +110,33 @@
     .fc-check.bad { display: block; background: #fdf0ef; color: #c0392b; border: 1px solid #f5d0cc; }
     .fc-error {
       background: #fdf0ef; border: 1px solid #f0c9c6; color: #b03a32;
-      font-size: 13px; border-radius: 8px; padding: 10px 14px; margin-top: 4px; display: none;
+      font-size: 13px; border-radius: 8px; padding: 10px 14px; margin: 0 0 14px; display: none;
     }
     .fc-error.show { display: block; }
-    /* 测算结果页（左右结构：左侧测算结果状态 + 右侧用户录入数据只读展示），两栏铺满内容区且整页不可滚动 */
-    .fc-result-grid {
-      display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); grid-template-rows: minmax(0, 1fr); gap: 16px; align-items: stretch;
-      height: calc(100vh - 211px); min-height: 0;
-    }
-    .fc-result-grid .af-card { margin-top: 0; margin-left: 0; margin-right: 0; }
-    #fcResultData, #fcResultMain { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
-    #fcResultData .af-card, #fcResultMain .af-card { flex: 1; display: flex; flex-direction: column; min-height: 0; }
-    #fcResultMain { overflow-y: auto; }
-    .fc-result-main-card { justify-content: center; }
-    .fc-input-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-shrink: 0; }
-    /* 标题撑满整行使底部分隔线贯穿，按钮与标题文字行对齐 */
-    .fc-input-head .fc-input-title { flex: 1; }
-    .fc-input-head .af-btn-sm { margin-top: -3px; margin-bottom: 12px; }
-    #fcInputBody { flex: 1; overflow-y: auto; min-height: 0; }
-    @media (max-width: 1200px) { .fc-result-grid { grid-template-columns: 1fr; height: auto; min-height: 0; } }
-    /* 结果页左侧只读数据展示（不可编辑） */
-    .fc-ro-group-title { font-size: 13px; font-weight: 650; color: #333; margin: 16px 0 8px; }
-    .fc-ro-group-title:first-child { margin-top: 2px; }
-    .fc-ro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; }
-    .fc-ro-row {
-      display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
-      padding: 8px 12px; background: #f7f9fc; border: 1px solid #eef1f6; border-radius: 6px; font-size: 13px;
-    }
-    .fc-ro-k { color: #888; flex-shrink: 0; }
-    .fc-ro-v { color: #333; font-weight: 500; text-align: right; word-break: break-all; }
-    .fc-ro-product { border: 1px solid #eef1f6; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; }
-    .fc-ro-product-head { font-size: 13px; font-weight: 600; color: #333; margin-bottom: 8px; }
-    /* 测算结果页隐藏底部空操作栏：底栏 display:none，内容区延伸到页面底部 */
-    .agent-shell-foot.fc-foot-empty { display: none !important; }
-    body.fc-result-nofoot .agent-shell-content { bottom: 0; }
-    body.fc-result-nofoot .fc-result-grid { height: calc(100vh - 147px); }
-    body.fc-result-nofoot .fc-gen-fill { min-height: calc(100vh - 147px); }
-    /* 测算中页：卡片铺满内容区，进度内容垂直居中 */
-    .fc-formpage .fc-gen-fill { max-width: none; }
-    .fc-gen-fill { min-height: calc(100vh - 211px); display: flex; flex-direction: column; }
-    .fc-gen-fill .af-gen { flex: 1; display: flex; flex-direction: column; justify-content: center; }
-    .fc-result-head { text-align: center; padding: 8px 0 18px; }
-    .fc-result-icon {
-      width: 56px; height: 56px; border-radius: 50%; background: #e8f6ed; color: #27804a;
-      font-size: 26px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;
-    }
-    .fc-result-title { font-size: 18px; font-weight: 650; color: #333; }
-    .fc-result-sub { font-size: 13px; color: #999; margin-top: 4px; }
-    .fc-result-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 8px; }
-    .fc-note { font-size: 12px; color: #b3b9c4; text-align: center; line-height: 1.7; }
+    /* ---------- 单页模式底部状态操作栏（复用外壳底栏定位：左状态 + 右操作） ---------- */
+    body .agent-shell-foot { justify-content: space-between; gap: 24px; }
+    .fc-bar-status { flex: 1; min-width: 0; max-width: 460px; display: flex; flex-direction: column; justify-content: center; gap: 4px; }
+    .fc-bar-title { font-size: 13px; font-weight: 600; color: #333; line-height: 1.4; }
+    .fc-bar-title.blue { color: #1677ff; }
+    .fc-bar-sub { font-size: 12px; color: #999; line-height: 1.4; }
+    .fc-bar-progress-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+    .fc-bar-progress-head b { font-size: 14px; color: #1677ff; }
+    .fc-bar-progress-track { width: 100%; height: 6px; border-radius: 3px; background: #e8edf3; overflow: hidden; }
+    .fc-bar-progress-bar { height: 100%; width: 0; background: #1677ff; border-radius: 3px; transition: width .25s ease; }
+    .fc-bar-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .fc-bar-saved { font-size: 12px; color: #999; }
+    /* 测算进行中：表单整体锁定置灰 */
+    .fc-formpage.fc-locked .fc-panel, .fc-formpage.fc-locked .fc-ramp { opacity: .62; pointer-events: none; }
     .fc-table { width: 100%; border-collapse: collapse; }
     .fc-table th, .fc-table td { border: 1px solid #dfe6ef; padding: 6px 10px; font-size: 12px; text-align: left; color: #333; }
     .fc-table th { background: #f2f6fb; font-weight: 600; white-space: nowrap; }
     .fc-table td.num, .fc-table th.num { text-align: right; }
     /* 大窗关闭按钮（复用类名） */
     .fc-modal-close { border: 0; background: none; font-size: 18px; color: #999; cursor: pointer; }
+    /* 底部操作栏按钮禁用态（如参数修改后「下载本次 Excel」置灰） */
+    .agent-shell-foot .af-btn:disabled { opacity: .45; cursor: not-allowed; }
+    /* 状态栏内可点击跳转文字（如「报告资产」）：链接蓝 + 下划线 */
+    .fc-bar-link { color: #1677ff; text-decoration: underline; cursor: pointer; }
     @media (max-width: 1100px) {
       .fc-grid { grid-template-columns: repeat(2, 1fr); }
       .fc-grid-4 { grid-template-columns: repeat(2, 1fr); }
@@ -173,9 +149,13 @@
 <script src="agent-shell.js"></script>
 <script>
 /* ==================== 可研财务测算 ====================
-   两个页面：① 数据录入（支持反复修改参数、草稿暂存）
-            ② 测算结果（左侧展示测算完成状态，右侧展示第一步录入数据只读汇总，
-               支持：下载全部Excel财务附表 / 前往报告资产 / 使用信息并创建新任务——以当前数据为默认输入回到数据录入页开启新任务）
+   单页模式：信息录入与测算在同一页面完成，无分步流程。
+   底部状态操作栏承载全部状态流转：
+   ① 未测算：保存草稿 / 开始测算
+   ② 测算中：进度条展示（表单锁定，完成后可继续修改参数）
+   ③ 测算完成：测算完成 · 时间，可下载本次 Excel，修改参数后可直接重新测算
+   ④ 参数已修改：提示重新测算；旧结果可在报告资产中查看
+   草稿随时可保存（含出报告后再编辑），任务列表保持完成状态、不挂草稿标签。
    ==================================================== */
 (function () {
   'use strict';
@@ -204,6 +184,7 @@
   ];
   /* 新建任务默认数据：全部为空，由用户自行填写 */
   var DEFAULTS = {
+    projectName: '',
     total: '', construction: '', operation: '',
     hightech: '',
     discount: 0.12, industryBenchmark: '制造业', target: 5,
@@ -214,7 +195,7 @@
     ramp: [0.7, 0.9, 1]
   };
 
-  var state = { page: 'form', data: null, busy: false, saveTimer: null, genTimer: null };
+  var state = { page: 'form', data: null, busy: false, saveTimer: null, genTimer: null, lastEntry: null, taskId: null };
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function num(v) { var n = Number(v); return isFinite(n) ? n : 0; }
@@ -228,7 +209,7 @@
 
   /* ---------- 等待外壳构建完成 ---------- */
   function shellReady(fn) {
-    if ($('agentShellContent') && $('agentShellSteps') && $('agentShellPrimaryBtn')) fn();
+    if ($('agentShellContent') && document.querySelector('.agent-shell-foot')) fn();
     else setTimeout(function () { shellReady(fn); }, 100);
   }
 
@@ -300,11 +281,15 @@
   /* ---------- 表单页 ---------- */
   /* 表单结构独立成函数，供数据录入页与"修改参数"滑窗共用 */
   function formHtml() {
-    var html = '';
+    /* 校验错误提示放在表单最顶部：点击测算后提示先于错误区域出现，用户定位错误前即可看到原因 */
+    var html = '<div class="fc-error" id="fcFormError"></div>';
     /* 一、项目概况 */
     html += '<div class="af-card fc-card"><div class="fc-section-title">一、项目概况</div>'
       + '<div class="fc-panel"><div class="fc-panel-head"><span>项目基础信息</span></div>'
-      + '<div class="fc-panel-body"><div class="fc-grid">'
+      + '<div class="fc-panel-body">'
+      + '<div class="fc-field fc-field-name" data-field="projectName"><div class="af-form-field"><label>项目名称<span class="req">*</span><span class="fc-name-count">0/80</span></label>'
+      + '<div class="fc-control"><input class="af-input" id="projectName" data-key="projectName" type="text" maxlength="80" placeholder="示例：笃威尔商业大数据人工智能研发建设项目"></div></div></div>'
+      + '<div class="fc-grid">'
       + fieldHtml(['total', '项目总投资', 'number', '万元', true])
       + fieldHtml(['construction', '建设周期（手动填写）', 'number', '月', true])
       + fieldHtml(['operation', '运营期（一般为10年）', 'number', '年', true])
@@ -336,14 +321,13 @@
       + '<div class="fc-with-ratio">' + fieldHtml([FUNDING_FIELDS[1][0], FUNDING_FIELDS[1][1], 'number', '万元', false]) + '<span class="fc-ratio-badge" id="fcRatioLoan"></span></div>'
       + fieldHtml(['interest', '贷款利率', 'percent', null, false])
       + '<div class="fc-with-ratio">' + fieldHtml([FUNDING_FIELDS[2][0], FUNDING_FIELDS[2][1], 'number', '万元', false]) + '<span class="fc-ratio-badge" id="fcRatioSubsidy"></span></div>'
-      + '</div><div class="fc-check" id="fcFundingCheck"></div></div></div>'
-      + '<div class="fc-error" id="fcFormError"></div></div>';
+      + '</div><div class="fc-check" id="fcFundingCheck"></div></div></div></div>';
     return html;
   }
 
-  /* 表单根元素：数据录入页在内容区，修改参数滑窗打开时在抽屉内（两者不会同时存在） */
+  /* 表单根元素：单页模式固定为外壳内容区 */
   function formRoot() {
-    return $('fcDrawer') || $('agentShellContent');
+    return $('agentShellContent');
   }
 
   /* 绑定添加产品按钮与表单输入事件（每个根元素只绑一次） */
@@ -382,6 +366,14 @@
       }
       var field = input.closest('.fc-field');
       if (field) field.classList.remove('invalid');
+      /* 顶部错误提示：所有必填项补齐后自动消失 */
+      var errBox = $('fcFormError');
+      if (errBox && errBox.classList.contains('show') && !root.querySelector('.fc-field.invalid')) errBox.classList.remove('show');
+      /* 项目名称字数计数（0/80） */
+      if (input.dataset.key === 'projectName') {
+        var cnt = root.querySelector('.fc-name-count');
+        if (cnt) cnt.textContent = input.value.length + '/80';
+      }
       /* 行业基准变更时，基准收益率自动跟随行业默认值（用户仍可手动调整） */
       if (input.dataset.key === 'industryBenchmark' && input.value && INDUSTRY_BENCHMARK_RATE[input.value] != null) {
         var dRate = INDUSTRY_BENCHMARK_RATE[input.value];
@@ -413,20 +405,13 @@
 
   function renderForm() {
     state.page = 'form';
-    window.setAgentStep(1);
-    restoreFoot();
-    removeFootActions();
     var content = $('agentShellContent');
     content.innerHTML = '<div class="fc-formpage">' + formHtml() + '</div>';
     activateFormRoot(content);
     renderProducts();
     fillForm(state.data || DEFAULTS);
-    window.setAgentFoot({
-      secondaryText: '保存草稿',
-      secondary: function () { saveDraft(true); },
-      primaryText: '开始测算',
-      primary: startCalc
-    });
+    buildBar();
+    setBarStatus(state.lastEntry ? 'done' : 'idle');
   }
 
   function renderProducts() {
@@ -460,12 +445,16 @@
   function fillForm(d) {
     ['total', 'construction', 'operation', 'discount', 'industryBenchmark', 'target',
      'equipment', 'software', 'research', 'building', 'installation', 'otherConstruction',
-     'land', 'reserve', 'buildInterest', 'working', 'equity', 'loan', 'interest', 'subsidy'].forEach(function (k) {
+     'land', 'reserve', 'buildInterest', 'working', 'equity', 'loan', 'interest', 'subsidy',
+     'projectName', 'hightech'].forEach(function (k) {
       var el = $(k);
       if (el) setValue(el, d[k]);
     });
     var rs = $('fcRampSummary');
     if (rs) rs.value = rampSummaryText(d.ramp);
+    /* 项目名称字数计数与反显值同步 */
+    var pn = $('projectName'), cnt = document.querySelector('.fc-name-count');
+    if (pn && cnt) cnt.textContent = (pn.value || '').length + '/80';
     refreshChecks();
   }
 
@@ -474,7 +463,8 @@
     d.ramp = (state.data && state.data.ramp ? state.data.ramp : []).slice(); /* 爬坡计划由编辑弹窗维护 */
     ['total', 'construction', 'operation', 'discount', 'industryBenchmark', 'target',
      'equipment', 'software', 'research', 'building', 'installation', 'otherConstruction',
-     'land', 'reserve', 'buildInterest', 'working', 'equity', 'loan', 'interest', 'subsidy'].forEach(function (k) {
+     'land', 'reserve', 'buildInterest', 'working', 'equity', 'loan', 'interest', 'subsidy',
+     'projectName', 'hightech'].forEach(function (k) {
       var el = $(k);
       d[k] = el ? getValue(el) : null;
     });
@@ -529,6 +519,8 @@
   function edited() {
     collectForm();
     refreshChecks();
+    /* 出过报告后再编辑：底部状态栏提示参数已修改，可重新测算（任务仍为完成状态） */
+    if (!state.busy && state.lastEntry) setBarStatus('dirty');
     clearTimeout(state.saveTimer);
     state.saveTimer = setTimeout(function () { saveDraft(false); }, 600);
   }
@@ -543,7 +535,8 @@
   function validate() {
     var d = state.data;
     var bad = [];
-    /* 必填项仅限带 * 星号的字段：项目总投资、建设周期、运营期与产品/服务各项 */
+    /* 必填项仅限带 * 星号的字段：项目名称、项目总投资、建设周期、运营期与产品/服务各项 */
+    if (!d.projectName || !String(d.projectName).trim()) bad.push('projectName');
     ['total', 'construction', 'operation'].forEach(function (k) { if (!(num(d[k]) > 0)) bad.push(k); });
     document.querySelectorAll('#' + formRoot().id + ' .fc-field').forEach(function (el) { el.classList.remove('invalid'); });
     d.products.forEach(function (p, i) {
@@ -557,7 +550,7 @@
         if (el) { var f = el.closest('.fc-field'); if (f) f.classList.add('invalid'); }
       });
       var err = $('fcFormError');
-      err.textContent = '请补齐带 * 号的必填字段；项目总投资、建设周期、运营期须大于 0。比例字段请按百分比填写（如 10%）。';
+      err.textContent = '请补齐带 * 号的必填字段（含项目名称）；项目总投资、建设周期、运营期须大于 0。比例字段请按百分比填写（如 10%）。';
       err.classList.add('show');
       var first = $(bad[0]);
       if (first) { first.scrollIntoView({ block: 'center', behavior: 'smooth' }); first.focus({ preventScroll: true }); }
@@ -570,7 +563,7 @@
     if (!sumOk) {
       /* 配平失败只弹页面顶部 toast，不再在表单底部显示红色行内提示 */
       $('fcFormError').classList.remove('show');
-      toast('总投资构成或资金来源尚未配平（差额不为 0），请调整金额配平后再进入下一步');
+      toast('总投资构成或资金来源尚未配平（差额不为 0），请调整金额配平后再测算');
       return false;
     }
     $('fcFormError').classList.remove('show');
@@ -641,47 +634,108 @@
     };
   }
 
-  /* ---------- 测算中过渡页 ---------- */
-  function renderGenerating() {
-    state.page = 'generating';
-    window.setAgentStep(1);
-    hideFoot();
-    removeFootActions();
-    window.setAgentFoot({});
-    $('agentShellContent').innerHTML = '<div class="fc-formpage"><div class="af-card fc-gen-fill"><div class="af-gen">'
-      + '<div class="af-gen-spinner"></div>'
-      + '<div class="af-gen-title">正在进行财务测算</div>'
-      + '<div class="af-gen-desc">正在按本次填写的参数测算财务指标并生成 Excel 财务附表，请稍候。</div>'
-      + '<div class="af-gen-progress"><div class="af-gen-progress-bar" id="fcGenBar"></div></div>'
-      + '<div class="af-gen-status" id="fcGenStatus">测算进度 0%</div>'
-      + '</div></div></div>';
-    var p = 0;
-    state.genTimer = setInterval(function () {
-      p = Math.min(100, p + Math.random() * 16 + 7);
-      $('fcGenBar').style.width = p + '%';
-      $('fcGenStatus').textContent = '测算进度 ' + Math.round(p) + '%';
-      if (p >= 100) {
-        clearInterval(state.genTimer);
-        setTimeout(finishCalc, 500);
-      }
-    }, 380);
+  /* ---------- 底部状态操作栏（左状态 + 右操作，复用外壳底栏定位） ---------- */
+  function buildBar() {
+    var foot = document.querySelector('.agent-shell-foot');
+    if (!foot || foot.dataset.fcBar) return;
+    foot.dataset.fcBar = '1';
+    foot.innerHTML = '<div class="fc-bar-status" id="fcBarStatus"></div>'
+      + '<div class="fc-bar-actions">'
+      + '<span class="fc-bar-saved" id="fcBarSaved">已自动保存</span>'
+      + '<button type="button" class="af-btn af-btn-outline" id="fcBarSave">保存草稿</button>'
+      + '<button type="button" class="af-btn af-btn-outline" id="fcBarDownload" style="display:none;">下载本次 Excel</button>'
+      + '<button type="button" class="af-btn af-btn-primary" id="fcBarCalc">开始测算</button>'
+      + '</div>';
+    $('fcBarSave').onclick = function () { saveDraft(true); };
+    $('fcBarDownload').onclick = function () { if (state.lastEntry) downloadEntry(state.lastEntry); };
+    $('fcBarCalc').onclick = startCalc;
+  }
+
+  function setBarStatus(mode) {
+    var box = $('fcBarStatus'), calc = $('fcBarCalc'), dl = $('fcBarDownload');
+    if (!box || !calc) return;
+    if (mode === 'running') {
+      box.innerHTML = '<div class="fc-bar-progress-head"><span class="fc-bar-title blue">正在测算，请稍候</span><b id="fcBarPct">0%</b></div>'
+        + '<div class="fc-bar-progress-track"><div class="fc-bar-progress-bar" id="fcBarBar"></div></div>'
+        + '<div class="fc-bar-sub">本次输入已锁定，完成后可继续修改参数。</div>';
+      calc.disabled = true; calc.textContent = '正在测算…';
+      dl.style.display = 'none'; dl.disabled = false; dl.title = '';
+    } else if (mode === 'done') {
+      box.innerHTML = '<div class="fc-bar-title">测算完成 · ' + esc(state.lastEntry ? state.lastEntry.doneAt : '') + '</div>'
+        + '<div class="fc-bar-sub">可下载本次 Excel，修改参数后可直接重新测算。</div>';
+      calc.disabled = false; calc.textContent = '重新测算';
+      dl.style.display = ''; dl.disabled = false; dl.title = '';
+    } else if (mode === 'dirty') {
+      box.innerHTML = '<div class="fc-bar-title blue">参数已修改，请重新测算</div>'
+        + '<div class="fc-bar-sub">新一轮测算完成后可下载；旧结果可在<span class="fc-bar-link" onclick="window.location.href=\'../assets.html\'">报告资产</span>中查看。</div>';
+      calc.disabled = false; calc.textContent = '重新测算';
+      /* 下载的是上一次测算的文件，参数修改期间置灰，重新测算完成后恢复 */
+      dl.style.display = ''; dl.disabled = true; dl.title = '参数已修改，请重新测算后下载最新文件';
+    } else { /* idle：尚未测算 */
+      box.innerHTML = '<div class="fc-bar-sub">填写完成后点击「开始测算」，将按当前参数生成财务附表。</div>';
+      calc.disabled = false; calc.textContent = '开始测算';
+      dl.style.display = 'none'; dl.disabled = false; dl.title = '';
+    }
+  }
+
+  /* 测算进行中锁定表单输入，完成后解锁继续编辑 */
+  function lockForm(locked) {
+    var root = formRoot();
+    if (!root) return;
+    root.classList.toggle('fc-locked', locked);
+    root.querySelectorAll('input, select, button').forEach(function (el) { el.disabled = locked; });
+  }
+
+  /* 侧边栏任务列表联动：测算任务在任务列表中实时呈现（生成中 → 已完成）。
+     任务名称取首次生成时的项目名称；重新测算即使改了项目名称参数，原任务名称保持不变 */
+  function syncTask(exec, name, viewed) {
+    if (!window.shellUpsertTask || !state.taskId) return;
+    var prev = window.shellGetTask ? window.shellGetTask(state.taskId) : null;
+    if (prev && prev.name) name = prev.name;
+    window.shellUpsertTask({
+      id: state.taskId,
+      name: name,
+      agent: '可研财务测算',
+      exec: exec,
+      viewed: !!viewed,
+      ts: Date.now(),
+      href: '可研财务测算.html?phase=done&id=' + encodeURIComponent(state.taskId)
+    });
   }
 
   function startCalc() {
     if (state.busy) return;
     collectForm();
-    saveDraft(false);
     if (!validate()) return;
+    saveDraft(false);
+    state.busy = true;
+    /* 重新测算沿用当前任务 id（更新原任务），只有新建场景（首次测算）才生成新任务 */
+    if (!state.taskId) state.taskId = 'FC-' + Date.now().toString(36).toUpperCase();
+    syncTask('running', state.data.projectName || '未命名任务', true);
     state.pending = JSON.parse(JSON.stringify(state.data));
-    renderGenerating();
+    lockForm(true);
+    setBarStatus('running');
+    var p = 0;
+    state.genTimer = setInterval(function () {
+      p = Math.min(100, p + Math.random() * 16 + 7);
+      var bar = $('fcBarBar'), pct = $('fcBarPct');
+      if (bar) bar.style.width = p + '%';
+      if (pct) pct.textContent = Math.round(p) + '%';
+      if (p >= 100) {
+        clearInterval(state.genTimer);
+        setTimeout(finishCalc, 400);
+      }
+    }, 380);
   }
 
   function finishCalc() {
     var d = state.pending;
     var m = computeAll(d);
+    var t = new Date(), pad = function (x) { return (x < 10 ? '0' : '') + x; };
     var entry = {
-      id: 'FC-' + Date.now().toString(36).toUpperCase(),
+      id: state.taskId || ('FC-' + Date.now().toString(36).toUpperCase()),
       time: nowStr(),
+      doneAt: pad(t.getHours()) + ':' + pad(t.getMinutes()) + ':' + pad(t.getSeconds()),
       data: d,
       metrics: { irr: m.irr, npv: m.npv, paybackDyn: m.paybackDyn, paybackStatic: m.paybackStatic },
       fileName: '可研财务测算附表_' + nowStr().replace(/[- :]/g, '') + '.xls'
@@ -689,116 +743,18 @@
     var list = loadHistory();
     list.unshift(entry);
     try { localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(0, 30))); } catch (e) {}
-    renderResult(entry);
+    state.lastEntry = entry;
+    state.busy = false;
+    lockForm(false);
+    setBarStatus('done');
+    /* 任务列表同步为已完成（用户正在本页查看结果，不挂未查看蓝点） */
+    syncTask('done', d.projectName || '未命名任务', true);
+    toast('财务测算完成，Excel 附表已生成');
   }
 
-  /* ---------- 测算结果页 ---------- */
+  /* ---------- 测算历史（供「下载本次 Excel」与任务进入反显） ---------- */
   function loadHistory() {
     try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch (e) { return []; }
-  }
-  /* 只读数据行 */
-  function roRow(k, v) {
-    return '<div class="fc-ro-row"><span class="fc-ro-k">' + esc(k) + '</span><span class="fc-ro-v">' + esc(v) + '</span></div>';
-  }
-  /* 左侧：第一步录入数据只读汇总（与数据录入页字段一一对应，仅展示不可修改） */
-  function inputSummaryHtml(d) {
-    var html = '';
-    /* 一、项目概况 */
-    html += '<div class="fc-ro-group-title">一、项目概况</div><div class="fc-ro-grid">'
-      + roRow('项目总投资（万元）', fmt(d.total))
-      + roRow('建设周期（月）', fmt(d.construction, 0))
-      + roRow('运营期（年）', fmt(d.operation, 0))
-      + roRow('高新技术企业', d.hightech || '')
-      + '</div>';
-    /* 二、收入与成本（与数据录入页面板分类一致：产品/服务 + 爬坡计划） */
-    html += '<div class="fc-ro-group-title">二、收入与成本</div>';
-    (d.products || []).forEach(function (p, i) {
-      html += '<div class="fc-ro-product"><div class="fc-ro-product-head">产品/服务 ' + (i + 1) + '：' + esc(p.name || '') + '</div><div class="fc-ro-grid">'
-        + roRow('计价单位', p.unit || '')
-        + roRow('单价（万元/计价单位）', fmt(p.price, 8))
-        + roRow('达产年产能', p.capacity || '')
-        + roRow('增值税率', pct(p.vat))
-        + roRow('直接成本占比（不含人工、折旧、利息）', pct(p.cost))
-        + '</div></div>';
-    });
-    html += '<div class="fc-ro-grid">'
-      + roRow('爬坡计划', rampSummaryText(d.ramp) || '未填写（各年按100%达产）')
-      + '</div>';
-    /* 财务评价参数（与数据录入页的分类面板一致） */
-    html += '<div class="fc-ro-group-title" style="font-size:12px;color:#666;margin-top:10px;">财务评价参数</div><div class="fc-ro-grid">'
-      + roRow('基准收益率', pct(d.discount))
-      + roRow('行业基准', d.industryBenchmark || '')
-      + roRow('期望投资回收期（不含建设期，年）', d.target == null ? '' : fmt(d.target, 0))
-      + '</div>';
-    /* 三、投资与资金 */
-    html += '<div class="fc-ro-group-title">三、投资与资金</div><div class="fc-ro-group-title" style="font-size:12px;color:#666;margin-top:10px;">总投资构成</div><div class="fc-ro-grid">'
-      + INVEST_FIELDS.map(function (f) { return roRow(f[1] + '（万元）', fmt(d[f[0]])); }).join('')
-      + '</div>';
-    html += '<div class="fc-ro-group-title" style="font-size:12px;color:#666;margin-top:10px;">资金来源构成</div><div class="fc-ro-grid">'
-      + roRow('企业自筹及比例（万元）', fmt(d.equity))
-      + roRow('贷款及比例（万元）', fmt(d.loan))
-      + roRow('贷款利率', pct(d.interest))
-      + roRow('政府补助（万元）', fmt(d.subsidy))
-      + '</div>';
-    return html;
-  }
-  /* 左侧：测算结果状态（测算完成卡片，含操作按钮） */
-  function resultMainHtml(entry) {
-    return '<div class="af-card fc-card fc-result-main-card"><div class="fc-result-head">'
-      + '<div class="fc-result-icon">✓</div>'
-      + '<div class="fc-result-title">测算完成</div>'
-      + '<div class="fc-result-sub">' + esc(entry.id) + ' · ' + esc(entry.time) + ' · 全部财务附表已生成</div>'
-      + '</div>'
-      + '<div class="fc-result-actions">'
-      + '<button class="af-btn af-btn-primary" id="fcDownload">下载全部Excel财务附表</button>'
-      + '<button class="af-btn af-btn-outline" id="fcAssets">前往报告资产</button>'
-      + '</div>'
-      + '<div class="fc-note">财务指标与附表为原型演示口径，按本次填写参数在浏览器内模拟计算，不作为正式项目评价依据。<br>回收期均为含建设期口径。</div></div>';
-  }
-  function bindResultMain(entry) {
-    $('fcDownload').onclick = function () { downloadEntry(entry); };
-    $('fcAssets').onclick = function () { window.location.href = '../assets.html'; };
-    /* 以本次录入数据为默认输入，创建一个新的可研财务测算任务（回到数据录入页并带入数据） */
-    $('fcNewTask').onclick = function () {
-      state.data = JSON.parse(JSON.stringify(entry.data || {}));
-      saveDraft(false);
-      renderForm();
-      toast('已创建新的财务测算任务，参数已带入');
-    };
-  }
-  /* 隐藏底部空操作栏（白条）：结果页与测算中页使用，内容区延伸到底 */
-  function hideFoot() {
-    document.body.classList.add('fc-result-nofoot');
-    var foot = document.querySelector('.agent-shell-foot');
-    if (foot) foot.classList.add('fc-foot-empty');
-  }
-  /* 恢复底部操作栏显示（离开无底栏页面时） */
-  function restoreFoot() {
-    document.body.classList.remove('fc-result-nofoot');
-    var foot = document.querySelector('.agent-shell-foot');
-    if (foot) foot.classList.remove('fc-foot-empty');
-  }
-  /* 底部操作栏残留清理（历史逻辑兜底，正常不再注入） */
-  function removeFootActions() {
-    var el = $('fcFootActions');
-    if (el) el.remove();
-  }
-  function renderResult(entry) {
-    state.page = 'result';
-    window.setAgentStep(2);
-    state.resultEntry = entry;
-    /* 隐藏底部空操作栏（白条），内容区延伸到底 */
-    hideFoot();
-    var html = '<div class="fc-result-grid">'
-      + '<div id="fcResultMain">' + resultMainHtml(entry) + '</div>'
-      + '<div id="fcResultData"><div class="af-card fc-card"><div class="fc-input-head">'
-      + '<div class="af-form-section-title fc-input-title">数据录入信息</div>'
-      + '<button class="af-btn af-btn-outline af-btn-sm" id="fcNewTask">使用信息并创建新任务</button>'
-      + '</div><div id="fcInputBody">' + inputSummaryHtml(entry.data || {}) + '</div></div></div>'
-      + '</div>';
-    $('agentShellContent').innerHTML = '<div class="fc-formpage">' + html + '</div>';
-    bindResultMain(entry);
-    window.setAgentFoot({});
   }
 
   /* ---------- Excel 附表（.xls / HTML 表格格式，Excel 可直接打开） ---------- */
@@ -863,7 +819,7 @@
       ];
     })());
     var paramRows = [
-      ['项目总投资', fmt(d.total), '万元'], ['建设周期', fmt(d.construction, 0), '月'],
+      ['项目名称', d.projectName || '未填写', '文字'], ['项目总投资', fmt(d.total), '万元'], ['建设周期', fmt(d.construction, 0), '月'],
       ['运营期', fmt(d.operation, 0), '年'], ['基准收益率', pct(d.discount), '比例'],
       ['行业基准', d.industryBenchmark || '未填写', '选项'], ['期望投资回收期', d.target == null ? '未设置' : fmt(d.target) + ' 年', '年'],
       ['高新技术企业', d.hightech || '未选择', '选项'],
@@ -1029,10 +985,24 @@
   /* ---------- 初始化 ---------- */
   shellReady(function () {
     bindRampModal();
-    /* 从任务列表点已完成任务进入：直接展示测算结果页 */
+    /* 从任务列表点已完成任务进入：反显该任务对应测算数据，底部状态栏显示测算完成 */
     if (/[?&]phase=done/.test(location.search)) {
       var list = loadHistory();
-      if (list.length) { renderResult(list[0]); return; }
+      var idMatch = /[?&]id=([^&]+)/.exec(location.search);
+      var entry = null;
+      if (idMatch) {
+        var wantId = decodeURIComponent(idMatch[1]);
+        for (var i = 0; i < list.length; i++) { if (list[i].id === wantId) { entry = list[i]; break; } }
+      }
+      if (!entry && list.length) entry = list[0];
+      if (entry) {
+        state.lastEntry = entry;
+        /* 继承该任务 id：重新测算时更新原任务，而不是新建任务 */
+        state.taskId = entry.id || null;
+        state.data = JSON.parse(JSON.stringify(entry.data || {}));
+        renderForm();
+        return;
+      }
     }
     /* 新建任务：表单默认全空，不恢复草稿 */
     state.data = JSON.parse(JSON.stringify(DEFAULTS));
