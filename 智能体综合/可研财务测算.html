@@ -105,6 +105,13 @@
     .fc-rampmodal-add:disabled { opacity: .55; cursor: not-allowed; }
     .fc-rampmodal-error { margin-top: 8px; font-size: 12px; color: #c0392b; min-height: 16px; }
     .fc-rampmodal-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 12px 20px; border-top: 1px solid #f0f0f0; }
+    /* 回本测算提示弹窗（复用爬坡弹窗骨架） */
+    .fc-payback-intro { margin: 0; font-size: 13px; color: #555; line-height: 1.8; }
+    .fc-payback-rule {
+      margin: 10px 0 0; padding: 12px 14px; border: 1px solid #e8eef6; border-radius: 8px;
+      background: #f8fafd; font-size: 14px; color: #1f2d3d; line-height: 1.9; font-weight: 600;
+    }
+    .fc-payback-note { margin: 10px 0 0; font-size: 12px; color: #98a6b8; line-height: 1.7; }
     .fc-check { font-size: 12px; border-radius: 6px; padding: 8px 12px; margin-top: 12px; display: none; }
     .fc-check.ok { display: block; background: #eef8f1; color: #2b7a45; border: 1px solid #cdeed8; }
     .fc-check.bad { display: block; background: #fdf0ef; color: #c0392b; border: 1px solid #f5d0cc; }
@@ -703,10 +710,52 @@
     });
   }
 
+  /* ---------- 回本测算提示（与可研专业版"信息确认与锚定"同一规则） ---------- */
+  /* 5 年回本阈值：单价≥T/(5×年产能×(1-成本率))，或年产能≥T/(5×单价×(1-成本率))，或成本率≤1-T/(5×达产年营收) */
+  function calcPaybackRule() {
+    /* 兜底演示值（参数缺失时使用，与专业版一致） */
+    var T = 68259.35, P = 0.5, Qwan = 100000, c = 0.65, unit = '次';
+    var d = state.data || {};
+    if (num(d.total) > 0) T = num(d.total);
+    var p = (d.products && d.products[0]) || {};
+    if (num(p.price) > 0) P = num(p.price);
+    if (p.unit && String(p.unit).trim()) unit = String(p.unit).trim();
+    /* 达产年产能：支持"10亿次 / 50000万次 / 纯数字（按万计价单位）"，统一换算为万计价单位 */
+    var m = String(p.capacity == null ? '' : p.capacity).match(/([\d.,]+)\s*(万|亿)?/);
+    if (m) {
+      var v = parseFloat(m[1].replace(/,/g, ''));
+      if (v > 0) Qwan = v * (m[2] === '亿' ? 10000 : 1);
+    }
+    if (num(p.cost) > 0) c = Math.min(Math.max(num(p.cost), 0), 0.99);
+    var rev = P * Qwan; /* 达产年营收（万元/年） */
+    var x = T / (5 * Qwan * (1 - c));
+    var yWan = T / (5 * P * (1 - c));
+    var yText = yWan >= 10000 ? (yWan / 10000).toFixed(2) + '亿' + unit : yWan.toFixed(2) + '万' + unit;
+    var z = Math.min(Math.max((1 - T / (5 * rev)) * 100, 0), 100);
+    return { x: x >= 0.01 ? x.toFixed(2) : x.toFixed(4), y: yText, z: z.toFixed(2) };
+  }
+  function openPaybackCheck() {
+    var r = calcPaybackRule();
+    $('fcPaybackRuleText').textContent =
+      '要在 5 年内回本，单价需≥' + r.x + ' 万元，或年产能需≥' + r.y + '，或直接成本率≤' + r.z + '%';
+    $('fcPaybackModal').classList.add('show');
+  }
+  function closePaybackCheck() { $('fcPaybackModal').classList.remove('show'); }
+
   function startCalc() {
     if (state.busy) return;
     collectForm();
     if (!validate()) return;
+    /* 回本测算提示：与可研专业版一致，按当前投资与收益参数给出 5 年回本阈值，确认后才开始测算 */
+    openPaybackCheck();
+  }
+
+  function continuePaybackCheck() {
+    closePaybackCheck();
+    doStartCalc();
+  }
+
+  function doStartCalc() {
     saveDraft(false);
     state.busy = true;
     /* 重新测算沿用当前任务 id（更新原任务），只有新建场景（首次测算）才生成新任务 */
@@ -980,6 +1029,11 @@
       tr.querySelector('.fc-ramp-target').focus();
     };
     $('fcRampModal').addEventListener('click', function (e) { if (e.target === $('fcRampModal')) closeRampModal(); });
+    /* 回本测算提示弹窗：返回修改仅关闭弹窗，确认后才开始测算 */
+    $('fcPaybackClose').onclick = closePaybackCheck;
+    $('fcPaybackBack').onclick = closePaybackCheck;
+    $('fcPaybackContinue').onclick = continuePaybackCheck;
+    $('fcPaybackModal').addEventListener('click', function (e) { if (e.target === $('fcPaybackModal')) closePaybackCheck(); });
   }
 
   /* ---------- 初始化 ---------- */
@@ -1027,6 +1081,21 @@
     <div class="fc-rampmodal-foot">
       <button type="button" class="af-btn af-btn-outline" id="fcRampCancel">取消</button>
       <button type="button" class="af-btn af-btn-primary" id="fcRampConfirm">确认</button>
+    </div>
+  </div>
+</div>
+<!-- 回本测算提示弹窗（校验通过后、开始测算前，规则与可研专业版一致） -->
+<div class="fc-rampmodal-mask" id="fcPaybackModal">
+  <div class="fc-rampmodal">
+    <div class="fc-rampmodal-head"><b>回本测算提示</b><button type="button" class="fc-rampmodal-close" id="fcPaybackClose">✕</button></div>
+    <div class="fc-rampmodal-body">
+      <p class="fc-payback-intro">根据当前填写的投资与收益参数，系统完成回本测算：</p>
+      <p class="fc-payback-rule" id="fcPaybackRuleText"></p>
+      <p class="fc-payback-note">如需调整，可返回修改单价、年产能或直接成本率等参数后再进行测算。</p>
+    </div>
+    <div class="fc-rampmodal-foot">
+      <button type="button" class="af-btn af-btn-outline" id="fcPaybackBack">返回修改</button>
+      <button type="button" class="af-btn af-btn-primary" id="fcPaybackContinue">我已知晓，继续</button>
     </div>
   </div>
 </div>
