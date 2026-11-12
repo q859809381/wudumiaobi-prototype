@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>可研财务测算</title>
+  <title>工程咨询财务测算</title>
   <link rel="stylesheet" href="agent-shell.css">
   <link rel="stylesheet" href="agent-flow.css">
   <style>
-    /* ==================== 可研财务测算 专属样式 ==================== */
+    /* ==================== 工程咨询财务测算 专属样式 ==================== */
     /* agent-flow.css 的 border-box 只作用于 #agentFlowRoot，本页表单挂在别处，需自行声明，否则输入框按 content-box 溢出压到相邻控件 */
     .fc-formpage *, .fc-rampmodal-mask * { box-sizing: border-box; }
     /* 本页 toast 移到页面顶部（头部下方），默认在底部 */
@@ -155,7 +155,7 @@
 <div id="agentShellRoot"></div>
 <script src="agent-shell.js"></script>
 <script>
-/* ==================== 可研财务测算 ====================
+/* ==================== 工程咨询财务测算 ====================
    单页模式：信息录入与测算在同一页面完成，无分步流程。
    底部状态操作栏承载全部状态流转：
    ① 未测算：保存草稿 / 开始测算
@@ -702,7 +702,7 @@
     window.shellUpsertTask({
       id: state.taskId,
       name: name,
-      agent: '可研财务测算',
+      agent: '工程咨询财务测算',
       exec: exec,
       viewed: !!viewed,
       ts: Date.now(),
@@ -787,7 +787,7 @@
       doneAt: pad(t.getHours()) + ':' + pad(t.getMinutes()) + ':' + pad(t.getSeconds()),
       data: d,
       metrics: { irr: m.irr, npv: m.npv, paybackDyn: m.paybackDyn, paybackStatic: m.paybackStatic },
-      fileName: '可研财务测算附表_' + nowStr().replace(/[- :]/g, '') + '.xls'
+      fileName: '工程咨询财务测算附表_' + nowStr().replace(/[- :]/g, '') + '.xls'
     };
     var list = loadHistory();
     list.unshift(entry);
@@ -888,8 +888,8 @@
   }
 
   function buildExcelHtml(e) {
-    return '<html><head><meta charset="utf-8"><title>可研财务测算附表</title></head><body>'
-      + '<h3>可研财务测算附表 · ' + esc(e.id) + ' · ' + esc(e.time) + '</h3>'
+    return '<html><head><meta charset="utf-8"><title>工程咨询财务测算附表</title></head><body>'
+      + '<h3>工程咨询财务测算附表 · ' + esc(e.id) + ' · ' + esc(e.time) + '</h3>'
       + buildExcelTables(e)
       + '</body></html>';
   }
@@ -899,7 +899,7 @@
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
-    a.download = (e.fileName || '可研财务测算附表.xls').replace(/[\\/:*?"<>|]/g, '_');
+    a.download = (e.fileName || '工程咨询财务测算附表.xls').replace(/[\\/:*?"<>|]/g, '_');
     document.body.appendChild(a);
     a.click();
     a.remove();

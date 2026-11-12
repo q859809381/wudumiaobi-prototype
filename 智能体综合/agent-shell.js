@@ -265,7 +265,7 @@
   /* 各智能体步骤（与页面内流程一致，参照专业版展示） */
   var STEPS_MAP = {
     '快速版·可行性研究报告': ['编辑基本信息', '上传项目信息', '生成中', '完整报告输出'],
-    '可研财务测算': ['信息录入与测算'],
+    '工程咨询财务测算': ['信息录入与测算'],
     '企业全景分析报告': ['编辑基本信息', '生成中', '完整报告输出'],
     '投前咨询分析报告': ['编辑基本信息', '生成中', '完整报告输出'],
     '招商策略分析报告': ['编辑基本信息', '生成中', '完整报告输出'],
@@ -312,7 +312,7 @@
     { name: '企查查科技_商业大数据可研', exec: 'running', viewed: true, agent: '可研专业版' },
     { name: '某某集团_企业全景尽调分析', exec: 'running', viewed: true, agent: '企业全景分析' },
     { name: '北京笃威尔_智能仓储立项报告', exec: 'done', viewed: false, agent: '项目立项报告' },
-    { name: '恒润制造_可研财务测算报告', exec: 'done', viewed: false, agent: '可研财务测算' },
+    { name: '恒润制造_工程咨询财务测算报告', exec: 'done', viewed: false, agent: '工程咨询财务测算' },
     { name: '星云半导体_投前尽调报告', exec: 'done', viewed: false, agent: '投前咨询分析' },
     { name: '园区管委会_招商策略初稿', exec: 'done', viewed: true, agent: '招商策略分析' },
     { name: '华能集团_冷链项目立项报告', exec: 'done', viewed: true, agent: '项目立项报告' },
@@ -329,7 +329,7 @@
   var taskFilter = 'all';
   var taskLoading = false;
 
-  /* 动态任务：由智能体页面（如可研财务测算）运行时写入，与演示任务合并展示，跨页面记忆 */
+  /* 动态任务：由智能体页面（如工程咨询财务测算）运行时写入，与演示任务合并展示，跨页面记忆 */
   var DYN_TASKS_KEY = 'wudumiaobi.shell.dynamicTasks.v1';
   function loadDynTasks() {
     try { return JSON.parse(localStorage.getItem(DYN_TASKS_KEY)) || []; } catch (e) { return []; }
@@ -387,7 +387,8 @@
         window.location.href = t.href || '可研财务测算.html?phase=done';
         return;
       }
-      if (t.agent === '可研财务测算') {
+      /* 兼容改名前遗留的演示/动态任务（agent 仍为旧名「可研财务测算」） */
+      if (t.agent === '工程咨询财务测算' || t.agent === '可研财务测算') {
         window.location.href = '可研财务测算.html' + (t.exec === 'done' ? '?phase=done' : '');
         return;
       }
@@ -477,7 +478,7 @@
       +     '<select class="sidebar-task-filter" id="shellTaskFilter" onchange="window.filterShellTasks&&filterShellTasks(this)">'
       +       '<option value="all">全部智能体</option>'
       +       '<option value="可研专业版">可研专业版</option>'
-      +       '<option value="可研财务测算">可研财务测算</option>'
+      +       '<option value="工程咨询财务测算">工程咨询财务测算</option>'
       +       '<option value="项目立项报告">项目立项报告</option>'
       +       '<option value="企业全景分析">企业全景分析</option>'
       +       '<option value="投前咨询分析">投前咨询分析</option>'
