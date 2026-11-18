@@ -5487,6 +5487,7 @@
     };
     const REPORT_AGENTS = [
       { name: '专业版·可行性研究报告', icon: '📊', desc: '完整财务测算、自定义大纲、知识库引用和在线编辑工作台。', cat: '可研与资金申请', tag: '专业编制·推荐', chips: ['财务测算', '自定义大纲', '在线编辑'], available: true, pro: true, featured: true },
+      { name: '专业版·项目资金申请报告', icon: '💰', desc: '复刻专业版可研全流程，新增项目建设进度录入，匹配政策依据生成专项资金申报材料。', cat: '可研与资金申请', tag: '专业编制', chips: ['政策匹配', '建设进度', '在线编辑'], available: true, url: 'report-fund.html?type=' + encodeURIComponent('专业版·项目资金申请报告') + '&start=1' },
       { name: '工程咨询财务测算', icon: '🧮', desc: '面向工程咨询项目的投资测算与财务评价，支持下载Excel财务附表', cat: '可研与资金申请', tag: '财务测算', chips: ['独立测算', 'Excel附表', '历史留档'], available: true, page: '可研财务测算.html' },
       { name: '快速版·可行性研究报告', icon: '📊', desc: '轻量流程，少量填写，快速生成结构完整的基础可研初稿。', cat: '可研与资金申请', chips: ['快速交付', '企业自用'], available: true, page: '可行性研究报告.html' },
       { name: '企业全景分析报告', icon: '🏢', desc: '多维数据透视企业全貌，支持供应商考察和竞争分析。', cat: '企业分析', tag: '企业分析', chips: ['工商穿透', '风险扫描'], available: true, page: '企业全景分析报告.html' },
@@ -5506,6 +5507,10 @@
     let currentAgentCat = '全部';
     function openAgentLink(name) {
       const a = REPORT_AGENTS.find(x => x.name === name);
+      if (a && a.url) {
+        window.open(a.url, '_blank');
+        return;
+      }
       if (a && a.page) {
         window.location.href = '智能体综合/' + a.page;
         return;
@@ -5515,6 +5520,7 @@
     function agentOpenHandler(a) {
       if (!a.available) return;
       if (a.service) { showTaskToast(); return; }
+      if (a.url) { openAgentLink(a.name); return; }
       if (a.pro) selectAgent(a.name);
       else openAgentLink(a.name);
     }
